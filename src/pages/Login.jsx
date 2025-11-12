@@ -7,11 +7,10 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState(() => localStorage.getItem('savedEmail') || '');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(() => !!localStorage.getItem('savedEmail'));
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null); // { type: 'success' | 'error' | 'info', text }
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -80,142 +79,89 @@ export default function Login() {
 
         const role = extractRole(data);
         if (role) localStorage.setItem('userRole', typeof role === 'string' ? role : JSON.stringify(role));
-        setMessage({ type: 'success', text: data?.Message ?? 'Đăng nhập thành công. Chuyển hướng...' });
+        setMessage({ type: 'success', text: data?.Message ?? 'Đăng nhập thành công!' });
 
-        const r = (typeof role === 'string' ? role : (Array.isArray(role) && role[0]) ? role[0] : '')?.toLowerCase() ?? '';
-        if (r.includes('admin')) navigate('/admin');
-        else if (r.includes('le') || r.includes('lễ') || r.includes('reception') || r.includes('receptionist')) navigate('/reception');
-        else navigate('/customer');
+        setTimeout(() => {
+          const r = (typeof role === 'string' ? role : (Array.isArray(role) && role[0]) ? role[0] : '')?.toLowerCase() ?? '';
+          if (r.includes('admin')) navigate('/admin');
+          else if (r.includes('le') || r.includes('lễ') || r.includes('reception') || r.includes('receptionist')) navigate('/reception');
+          else navigate('/customer');
+        }, 1000);
       } else {
-        const srvMsg = (data?.Message ?? data?.message ?? '').toString().toLowerCase();
-        const credKeywords = ['mật khẩu', 'mat khau', 'email', 'không đúng', 'sai', 'không tồn tại', 'invalid', 'incorrect', 'not found'];
-        const looksLikeCredError = credKeywords.some(k => srvMsg.includes(k));
-        setMessage({
-          type: 'error',
-          text: looksLikeCredError ? 'Email hoặc mật khẩu không chính xác.' : (data?.Message ?? 'Đăng nhập thất bại.')
-        });
+        setMessage({ type: 'error', text: data?.Message ?? 'Email hoặc mật khẩu không chính xác.' });
       }
     } catch (err) {
-      console.error('Login error full:', err);
+      console.error('Login error:', err);
       const resp = err?.response;
-      if (resp?.data) console.error('Server response data:', resp.data);
       if (resp?.status === 401 || resp?.status === 400) {
         setMessage({ type: 'error', text: 'Email hoặc mật khẩu không chính xác.' });
-        setLoading(false);
-        return;
-      }
-      let serverMessage;
-      if (resp?.data?.errors && typeof resp.data.errors === 'object') {
-        serverMessage = Object.entries(resp.data.errors)
-          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-          .join(' | ');
       } else {
-        serverMessage = resp?.data?.Message ?? resp?.data?.message;
+        setMessage({ type: 'error', text: 'Đã xảy ra lỗi. Vui lòng thử lại!' });
       }
-      const status = resp?.status;
-      const msg = serverMessage || err?.message || `Lỗi khi gọi API (status ${status})`;
-      setMessage({ type: 'error', text: msg });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSocial = (provider) => {
-    setMessage({ type: 'info', text: `Đăng nhập bằng ${provider} (demo).` });
-  };
-
   return (
-    <div className="auth-wrap">
-      <div className="auth-inner">
-        <aside className="auth-brand">
-          <div className="brand-logo" aria-hidden>
-            <svg width="54" height="54" viewBox="0 0 24 24" fill="none">
-              <rect width="24" height="24" rx="6" fill="rgba(255,255,255,0.06)"/>
-              <path d="M6 14c1.5-3 4.5-5 8-5" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <h1>Da Nang Bay</h1>
-            <p className="tag">Quản lý đặt phòng — Năng suất & Thẩm mỹ</p>
+    <div className="login-container">
+      <div className="login-box">
+        <h1 className="login-title">Đăng Nhập</h1>
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="lehoangdung@gmail.com"
+              autoComplete="username"
+            />
+            {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
 
-          <div className="visual-deco" aria-hidden>
-            <div className="floating-circle c1"></div>
-            <div className="floating-circle c2"></div>
-            <div className="floating-ill"></div>
+          <div className="form-group">
+            <label className="form-label">Mật khẩu</label>
+            <input
+              type="password"
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••"
+              autoComplete="current-password"
+            />
+            {errors.password && <span className="error-text">{errors.password}</span>}
           </div>
 
-          <div className="brand-features">
-            <div>🔒 Bảo mật</div>
-            <div>⚡ Nhanh & nhẹ</div>
-            <div>📱 Responsive</div>
-          </div>
-        </aside>
-
-        <main className="auth-card" role="main" aria-labelledby="login-title">
-          <form onSubmit={handleSubmit} noValidate className="form">
-            <h2 id="login-title">Chào mừng trở lại</h2>
-            <p className="form-sub">Đăng nhập để quản lý hoặc đặt phòng</p>
-
-            <div className={`field ${errors.email ? 'has-error' : ''}`}>
-              <label className="label">Email</label>
+          <div className="form-options">
+            <label className="checkbox-label">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                aria-invalid={!!errors.email}
-                autoComplete="username"
+                type="checkbox"
+                checked={remember}
+                onChange={e => setRemember(e.target.checked)}
               />
-              {errors.email && <div className="field-error">{errors.email}</div>}
-            </div>
+              <span>Ghi nhớ đăng nhập</span>
+            </label>
 
-            <div className={`field ${errors.password ? 'has-error' : ''}`}>
-              <label className="label">Mật khẩu</label>
-              <div className="pw-row">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                />
-                <button type="button" className="btn-eye" onClick={() => setShowPassword(s => !s)} aria-label="Hiện/ẩn mật khẩu">
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
-                </button>
-              </div>
-              {errors.password && <div className="field-error">{errors.password}</div>}
-            </div>
+            <Link to="/quen-mat-khau" className="forgot-link">
+              Quên mật khẩu?
+            </Link>
+          </div>
 
-            <div className="form-row">
-              <label className="checkbox">
-                <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
-                <span>Ghi nhớ</span>
-              </label>
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? 'Đang xử lý...' : 'Đăng Nhập'}
+          </button>
+        </form>
 
-              <Link to="/quen-mat-khau" state={{ email }} className="link-forgot" onClick={() => setMessage(null)}>
-                Quên mật khẩu?
-              </Link>
-            </div>
-
-            <button className="btn primary lg" type="submit" disabled={loading}>
-              {loading ? 'Đang xử lý...' : 'Đăng nhập'}
-            </button>
-
-            <div className="divider"><span>hoặc</span></div>
-
-            <div className="socials">
-              <button type="button" className="btn social google" onClick={() => handleSocial('Google')}>Google</button>
-              <button type="button" className="btn social fb" onClick={() => handleSocial('Facebook')}>Facebook</button>
-            </div>
-
-            <p className="signup">
-              Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
-            </p>
-          </form>
-        </main>
+        <p className="signup-text">
+          Chưa có tài khoản? <Link to="/register" className="signup-link-inline">Đăng ký ngay</Link>
+        </p>
       </div>
 
       {message && (
-        <div className={`toast ${message.type}`}>
+        <div className={`toast-message ${message.type}`}>
           {message.text}
         </div>
       )}

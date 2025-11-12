@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api';
-import '../styles/forgot.css';
+import '../styles/login.css';
 
 export default function TrangXacThucOTPQuenMK() {
   const navigate = useNavigate();
@@ -20,8 +20,14 @@ export default function TrangXacThucOTPQuenMK() {
   }, [message]);
 
   const validate = () => {
-    if (!email) { setMessage({ type: 'error', text: 'Vui lòng nhập email.' }); return false; }
-    if (!otp) { setMessage({ type: 'error', text: 'Vui lòng nhập mã OTP.' }); return false; }
+    if (!email) { 
+      setMessage({ type: 'error', text: 'Vui lòng nhập email.' }); 
+      return false; 
+    }
+    if (!otp) { 
+      setMessage({ type: 'error', text: 'Vui lòng nhập mã OTP.' }); 
+      return false; 
+    }
     return true;
   };
 
@@ -33,8 +39,15 @@ export default function TrangXacThucOTPQuenMK() {
       const resp = await api.post('/api/QuenMatKhau/xac-thuc-otp', { Email: email, MaOTP: otp });
       const data = resp.data;
       const success = data?.Success ?? data?.success ?? false;
-      setMessage({ type: success ? 'success' : 'error', text: data?.Message ?? (success ? 'OTP hợp lệ.' : 'OTP không hợp lệ.') });
-      if (success) navigate('/quen-mat-khau/dat-lai', { state: { email, maOtp: otp } });
+      setMessage({ 
+        type: success ? 'success' : 'error', 
+        text: data?.Message ?? (success ? 'OTP hợp lệ.' : 'OTP không hợp lệ.') 
+      });
+      if (success) {
+        setTimeout(() => {
+          navigate('/quen-mat-khau/dat-lai', { state: { email, maOtp: otp } });
+        }, 1000);
+      }
     } catch (err) {
       console.error('Xac thuc OTP error:', err);
       const resp = err?.response;
@@ -46,12 +59,18 @@ export default function TrangXacThucOTPQuenMK() {
   };
 
   const handleResend = async () => {
-    if (!email) { setMessage({ type: 'error', text: 'Cần email để gửi lại OTP.' }); return; }
+    if (!email) { 
+      setMessage({ type: 'error', text: 'Cần email để gửi lại OTP.' }); 
+      return; 
+    }
     setLoading(true);
     try {
       const resp = await api.post('/api/QuenMatKhau/gui-otp', { Email: email });
       const data = resp.data;
-      setMessage({ type: data?.Success ? 'success' : 'error', text: data?.Message ?? 'Đã gửi lại OTP.' });
+      setMessage({ 
+        type: data?.Success ? 'success' : 'error', 
+        text: data?.Message ?? 'Đã gửi lại OTP.' 
+      });
     } catch (err) {
       console.error('Resend OTP error:', err);
       setMessage({ type: 'error', text: 'Lỗi khi gửi lại OTP.' });
@@ -61,38 +80,61 @@ export default function TrangXacThucOTPQuenMK() {
   };
 
   return (
-    <div className="fm-wrap">
-      <div className="fm-card narrow">
-        <header className="fm-header">
-          <h1>Xác thực OTP</h1>
-          <p className="muted">Nhập mã OTP đã gửi đến email để tiếp tục.</p>
-        </header>
+    <div className="login-container">
+      <div className="login-box">
+        <h1 className="login-title">Xác thực OTP</h1>
+        <p className="login-subtitle">Nhập mã OTP đã gửi đến email của bạn.</p>
 
-        <form className="fm-form" onSubmit={handleSubmit} noValidate>
-          <label className="fm-field">
-            <span className="fm-label">Email</span>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
-          </label>
-
-          <label className="fm-field">
-            <span className="fm-label">Mã OTP</span>
-            <input value={otp} onChange={e => setOtp(e.target.value)} placeholder="123456" />
-          </label>
-
-          <div className="fm-actions">
-            <button type="submit" className="btn primary lg" disabled={loading}>
-              {loading ? 'Đang xác thực...' : 'Xác thực OTP'}
-            </button>
-            <button type="button" className="btn ghost" onClick={handleResend} disabled={loading}>Gửi lại OTP</button>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Mã OTP</label>
+            <input
+              type="text"
+              className="form-input otp-input"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+              placeholder="123456"
+              maxLength="6"
+            />
+          </div>
+
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? 'Đang xác thực...' : 'Xác thực OTP'}
+          </button>
+
+          <button 
+            type="button" 
+            className="btn-secondary" 
+            onClick={handleResend} 
+            disabled={loading}
+          >
+            Gửi lại mã OTP
+          </button>
         </form>
 
-        <footer className="fm-footer">
-          <small className="muted">Mã OTP có hiệu lực trong thời gian ngắn. Nếu hết hạn, hãy gửi lại.</small>
-        </footer>
+        <div className="form-footer">
+          <small className="footer-text">
+            Mã OTP có hiệu lực trong 5 phút. Nếu hết hạn, hãy gửi lại.
+          </small>
+        </div>
       </div>
 
-      {message && <div className={`toast ${message.type}`}>{message.text}</div>}
+      {message && (
+        <div className={`toast-message ${message.type}`}>
+          {message.text}
+        </div>
+      )}
     </div>
   );
 }

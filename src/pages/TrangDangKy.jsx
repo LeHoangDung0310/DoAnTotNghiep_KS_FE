@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/login.css';
-import '../styles/register.css';
 import api from '../utils/api';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -53,13 +52,12 @@ export default function TrangDangKy() {
 
       if (success) {
         setMessage({ type: 'success', text: data?.Message ?? 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.' });
-        // chuyển sang trang xác thực OTP kèm email
         navigate('/xac-thuc-otp', { state: { email } });
       } else {
         setMessage({ type: 'error', text: data?.Message ?? 'Đăng ký không thành công.' });
       }
     } catch (err) {
-      console.error('Register error full:', err);
+      console.error('Register error:', err);
       const resp = err?.response;
       const serverMsg = resp?.data?.Message ?? resp?.data?.message ?? (resp?.data ? JSON.stringify(resp.data) : null);
       if (resp?.status === 400) {
@@ -73,79 +71,87 @@ export default function TrangDangKy() {
   };
 
   return (
-    <div className="auth-wrap register-wrap">
-      <div className="auth-inner register-inner">
-        <aside className="auth-brand">
-          <div className="brand-logo">
-            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <rect width="24" height="24" rx="6" fill="rgba(255,255,255,0.04)"/>
-              <path d="M6 14c1.5-3 4.5-5 8-5" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <h1>Da Nang Bay</h1>
-            <p className="tag">Tạo tài khoản — Bắt đầu trải nghiệm</p>
+    <div className="login-container">
+      <div className="login-box register-box">
+        <h1 className="login-title">Đăng Ký</h1>
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label className="form-label">Họ và tên</label>
+            <input
+              type="text"
+              className={`form-input ${errors.hoTen ? 'error' : ''}`}
+              value={hoTen}
+              onChange={(e) => setHoTen(e.target.value)}
+              placeholder="Nguyễn Văn A"
+              autoComplete="name"
+            />
+            {errors.hoTen && <span className="error-text">{errors.hoTen}</span>}
           </div>
 
-          <div className="brand-features">
-            <div>🔐 Bảo mật</div>
-            <div>⏱️ Nhanh chóng</div>
-            <div>📱 Tương thích</div>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
+            {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
-        </aside>
 
-        <main className="auth-card register-card" role="main" aria-labelledby="register-title">
-          <form onSubmit={handleSubmit} className="register-form" noValidate>
-            <h2 id="register-title">Đăng ký tài khoản</h2>
-            <p className="form-sub">Nhập thông tin để tạo tài khoản mới</p>
+          <div className="form-group">
+            <label className="form-label">Số điện thoại (tùy chọn)</label>
+            <input
+              type="tel"
+              className="form-input"
+              value={soDienThoai}
+              onChange={(e) => setSoDienThoai(e.target.value)}
+              placeholder="0909123456"
+              autoComplete="tel"
+            />
+          </div>
 
-            <div className={`field ${errors.hoTen ? 'has-error' : ''}`}>
-              <label className="label">Họ và tên</label>
-              <input value={hoTen} onChange={e => setHoTen(e.target.value)} placeholder="Nguyễn Văn A" />
-              {errors.hoTen && <div className="field-error">{errors.hoTen}</div>}
-            </div>
+          <div className="form-group">
+            <label className="form-label">Mật khẩu</label>
+            <input
+              type="password"
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Ít nhất 6 ký tự"
+              autoComplete="new-password"
+            />
+            {errors.password && <span className="error-text">{errors.password}</span>}
+          </div>
 
-            <div className={`field ${errors.email ? 'has-error' : ''}`}>
-              <label className="label">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
-              {errors.email && <div className="field-error">{errors.email}</div>}
-            </div>
+          <div className="form-group">
+            <label className="form-label">Xác nhận mật khẩu</label>
+            <input
+              type="password"
+              className={`form-input ${errors.confirm ? 'error' : ''}`}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder="Nhập lại mật khẩu"
+              autoComplete="new-password"
+            />
+            {errors.confirm && <span className="error-text">{errors.confirm}</span>}
+          </div>
 
-            <div className="field">
-              <label className="label">Số điện thoại (tùy chọn)</label>
-              <input value={soDienThoai} onChange={e => setSoDienThoai(e.target.value)} placeholder="0909123456" />
-            </div>
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? 'Đang xử lý...' : 'Đăng Ký'}
+          </button>
+        </form>
 
-            <div className={`field ${errors.password ? 'has-error' : ''}`}>
-              <label className="label">Mật khẩu</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Ít nhất 6 ký tự" autoComplete="new-password" />
-              {errors.password && <div className="field-error">{errors.password}</div>}
-            </div>
-
-            <div className={`field ${errors.confirm ? 'has-error' : ''}`}>
-              <label className="label">Xác nhận mật khẩu</label>
-              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Nhập lại mật khẩu" />
-              {errors.confirm && <div className="field-error">{errors.confirm}</div>}
-            </div>
-
-            <button className="btn primary lg" type="submit" disabled={loading}>
-              {loading ? 'Đang xử lý...' : 'Tạo tài khoản'}
-            </button>
-
-            <div className="divider"><span>hoặc</span></div>
-
-            <div className="socials">
-              <button type="button" className="btn social google" onClick={() => setMessage({ type: 'info', text: 'Đăng ký bằng Google (demo).' })}>Google</button>
-              <button type="button" className="btn social fb" onClick={() => setMessage({ type: 'info', text: 'Đăng ký bằng Facebook (demo).' })}>Facebook</button>
-            </div>
-
-            <p className="signup">
-              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-            </p>
-          </form>
-        </main>
+        <div className="signup-link">
+          Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
+        </div>
       </div>
 
       {message && (
-        <div className={`toast ${message.type}`}>
+        <div className={`toast-message ${message.type}`}>
           {message.text}
         </div>
       )}
