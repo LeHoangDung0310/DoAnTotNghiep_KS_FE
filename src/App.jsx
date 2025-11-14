@@ -10,6 +10,7 @@ import TrangXacThucOTP from './pages/TrangXacThucOTP';
 import TrangXacThucOTPQuenMK from './pages/TrangXacThucOTPQuenMK';
 import TrangDatLaiMatKhau from './pages/TrangDatLaiMatKhau';
 import './styles/main.css';
+import './styles/admin.css';
 
 function App() {
   return (

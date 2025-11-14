@@ -1,0 +1,429 @@
+/* Layout tổng */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f7fb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 240px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 700;
+  font-size: 18px;
+  color: #2563eb;
+}
+
+.admin-sidebar-menu {
+  flex: 1;
+  padding: 12px 8px;
+}
+
+.admin-menu-section-title {
+  padding: 8px 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.admin-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 4px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-menu-item:hover {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.admin-menu-item.active {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.admin-sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Khu vực nội dung */
+.admin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.admin-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.admin-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.admin-user-email-role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.admin-user-email {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.admin-user-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.admin-user-menu {
+  position: relative;
+}
+
+.admin-user-menu-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-user-menu-toggle span {
+  font-size: 14px;
+}
+
+.admin-user-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  min-width: 180px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  padding: 8px 0;
+  z-index: 20;
+}
+
+.admin-user-menu-item {
+  padding: 8px 14px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.admin-user-menu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.admin-user-menu-item.danger {
+  color: #b91c1c;
+}
+
+/* Nội dung chính bên trong */
+.admin-content-body {
+  padding: 20px 24px;
+  overflow: auto;
+}
+
+/* Card */
+.admin-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  padding: 16px 20px;
+}
+
+/* Header của module quản lý phòng */
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.room-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.room-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Form tìm kiếm */
+.room-search-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.room-search-input,
+.room-search-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.room-search-input input,
+.room-search-select select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.room-search-input input:focus,
+.room-search-select select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+}
+
+.btn-outline {
+  background-color: #ffffff;
+  color: #4b5563;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-outline:hover {
+  background-color: #f3f4f6;
+}
+
+/* Bảng */
+.admin-table-wrapper {
+  margin-top: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: #111827; /* <-- thêm, cho chữ trong bảng màu gần đen */
+}
+
+.admin-table thead {
+  background-color: #eff6ff;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table tbody td {
+  color: #111827; /* đảm bảo body cũng màu đen */
+}
+
+.admin-table th {
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #e0f2fe;
+}
+
+.admin-table-name {
+  font-weight: 700;
+  color: #1d4ed8; /* xanh đậm */
+}
+
+/* Tag trạng thái */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tag-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.tag-warning {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.tag-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.tag-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px 0;
+  font-size: 12px;
+}
+
+.pagination button {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.pagination button.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Icon nút hành động */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.action-icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.action-icon-btn.edit {
+  background-color: #e0f2fe;
+  color: #1d4ed8;
+}
+
+.action-icon-btn.delete {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.action-icon-btn:hover {
+  transform: translateY(-1px);
+}
