@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ChinhSuaNguoiDung from './ChinhSuaNguoiDung';
 
 const API_BASE = 'http://localhost:5114/api'; // dùng port 5114 theo launchSettings
 
@@ -35,6 +36,8 @@ export default function QuanLyNguoiDung() {
     totalPages: 1,
   });
   const [loading, setLoading] = useState(false);
+
+  const [editingUserId, setEditingUserId] = useState(null);
 
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -279,7 +282,7 @@ export default function QuanLyNguoiDung() {
                         >
                           {u.hoTen || '—'}
                         </div>
-                        <div style={{ fontSize: 11, color: '#6b7280' }}>ID: {u.maNguoiDung}</div>
+                        <div style={{ fontSize: 11, color: '#6b7280' }}>#{u.maNguoiDung}</div>
                       </div>
                     </div>
                   </td>
@@ -307,6 +310,13 @@ export default function QuanLyNguoiDung() {
                   <td>{u.diaChi || '-'}</td>
                   <td>
                     <div className="action-buttons">
+                      <button
+                        className="action-icon-btn edit"
+                        title="Chỉnh sửa thông tin"
+                        onClick={() => setEditingUserId(u.maNguoiDung)}   // <-- mở modal
+                      >
+                        ✏️
+                      </button>
                       <button
                         className="action-icon-btn edit"
                         title="Đổi trạng thái"
@@ -357,6 +367,14 @@ export default function QuanLyNguoiDung() {
           ›
         </button>
       </div>
+
+      {editingUserId && (
+        <ChinhSuaNguoiDung
+          userId={editingUserId}
+          onClose={() => setEditingUserId(null)}      // đóng modal
+          onUpdated={() => fetchUsers(pagination.currentPage, pagination.pageSize)} // reload list
+        />
+      )}
     </div>
   );
 }
