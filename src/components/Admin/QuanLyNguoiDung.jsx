@@ -45,6 +45,10 @@ export default function QuanLyNguoiDung() {
     trangThai: '',
   });
 
+  const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
+  const [confirmState, setConfirmState] = useState(null);
+  // { type: 'delete' | 'status', user: object, newStatus?: string }
+
   const accessToken = localStorage.getItem('accessToken');
 
   const fetchUsers = async (page = 1, pageSize = pagination.pageSize) => {
@@ -113,12 +117,22 @@ export default function QuanLyNguoiDung() {
     fetchUsers(page, pagination.pageSize);
   };
 
-  const handleToggleStatus = async (user) => {
+  const handleToggleStatus = (user) => {
     const newStatus = user.trangThai === 'Hoạt động' ? 'Tạm khóa' : 'Hoạt động';
-    if (!window.confirm(`Bạn có chắc muốn đổi trạng thái người dùng này thành "${newStatus}"?`)) {
-      return;
-    }
+    setConfirmState({ type: 'status', user, newStatus });
+  };
 
+  const handleDelete = (user) => {
+    setConfirmState({ type: 'delete', user });
+  };
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    // auto close sau 2.5s
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const doToggleStatus = async ({ user, newStatus }) => {
     try {
       const res = await fetch(`${API_BASE}/NguoiDung/${user.maNguoiDung}`, {
         method: 'PUT',
@@ -126,27 +140,21 @@ export default function QuanLyNguoiDung() {
           'Content-Type': 'application/json',
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
-        body: JSON.stringify({
-          trangThai: newStatus,
-        }),
+        body: JSON.stringify({ trangThai: newStatus }),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || 'Không thể cập nhật trạng thái');
-      }
+      if (!res.ok) throw new Error(data.message || 'Không thể cập nhật trạng thái');
 
-      alert(data.message || 'Cập nhật trạng thái thành công');
+      showToast('success', data.message || 'Cập nhật trạng thái thành công');
       fetchUsers(pagination.currentPage, pagination.pageSize);
     } catch (e) {
       console.error(e);
-      alert(e.message);
+      showToast('error', e.message);
     }
   };
 
-  const handleDelete = async (user) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
-
+  const doDeleteUser = async ({ user }) => {
     try {
       const res = await fetch(`${API_BASE}/NguoiDung/${user.maNguoiDung}`, {
         method: 'DELETE',
@@ -156,15 +164,13 @@ export default function QuanLyNguoiDung() {
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || 'Không thể xóa người dùng');
-      }
+      if (!res.ok) throw new Error(data.message || 'Không thể xóa người dùng');
 
-      alert(data.message || 'Xóa người dùng thành công');
+      showToast('success', data.message || 'Xóa người dùng thành công');
       fetchUsers(pagination.currentPage, pagination.pageSize);
     } catch (e) {
       console.error(e);
-      alert(e.message);
+      showToast('error', e.message);
     }
   };
 
@@ -371,9 +377,75 @@ export default function QuanLyNguoiDung() {
       {editingUserId && (
         <ChinhSuaNguoiDung
           userId={editingUserId}
-          onClose={() => setEditingUserId(null)}      // đóng modal
-          onUpdated={() => fetchUsers(pagination.currentPage, pagination.pageSize)} // reload list
+          onClose={() => setEditingUserId(null)}
+          onUpdated={() => fetchUsers(pagination.currentPage, pagination.pageSize)}
+          onShowToast={showToast}   // tất cả toast đi qua đây
         />
+      )}
+
+      {toast && (
+        <div className="toast-container">
+          <div
+            className={
+              'toast ' +
+              (toast.type === 'error' ? 'toast-error' : 'toast-success')
+            }
+          >
+            <div className="toast-icon">
+              {toast.type === 'error' ? '!' : '✓'}
+            </div>
+
+            {/* chỉ 1 text, không chia 2 dòng nữa */}
+            <div className="toast-single-text">
+              {toast.message}
+            </div>
+
+            <button className="toast-close" onClick={() => setToast(null)}>
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {confirmState && (
+        <div className="modal-backdrop">
+          <div className="modal confirm-modal">
+            <div className="modal-header">
+              <h3>
+                {confirmState.type === 'delete'
+                  ? 'Xóa người dùng'
+                  : 'Đổi trạng thái người dùng'}
+              </h3>
+              <button className="modal-close-btn" onClick={() => setConfirmState(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>
+                {confirmState.type === 'delete'
+                  ? `Bạn có chắc chắn muốn xóa người dùng "${confirmState.user.hoTen || confirmState.user.email}"?`
+                  : `Bạn có chắc muốn đổi trạng thái người dùng này thành "${confirmState.newStatus}"?`}
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary-ghost" onClick={() => setConfirmState(null)}>
+                Hủy
+              </button>
+              <button
+                className="btn-primary-rounded btn-danger"
+                onClick={async () => {
+                  const state = confirmState;
+                  setConfirmState(null);
+                  if (state.type === 'delete') {
+                    await doDeleteUser(state);
+                  } else {
+                    await doToggleStatus(state);
+                  }
+                }}
+              >
+                Đồng ý
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

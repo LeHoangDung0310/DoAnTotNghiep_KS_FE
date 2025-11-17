@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/login.css';
 import api from '../utils/api';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState(() => localStorage.getItem('savedEmail') || '');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(() => !!localStorage.getItem('savedEmail'));
@@ -16,6 +17,18 @@ export default function Login() {
     const token = localStorage.getItem('accessToken');
     if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('expired') === '1') {
+      setMessage({
+        type: 'error',
+        text: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.',
+      });
+      const clean = location.pathname;
+      window.history.replaceState(null, '', clean);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (message) {
