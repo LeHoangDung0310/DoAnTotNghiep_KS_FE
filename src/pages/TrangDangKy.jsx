@@ -10,6 +10,8 @@ export default function TrangDangKy() {
   const [soDienThoai, setSoDienThoai] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -103,7 +105,7 @@ export default function TrangDangKy() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Số điện thoại (tùy chọn)</label>
+            <label className="form-label">Số điện thoại</label>
             <input
               type="tel"
               className="form-input"
@@ -116,27 +118,67 @@ export default function TrangDangKy() {
 
           <div className="form-group">
             <label className="form-label">Mật khẩu</label>
-            <input
-              type="password"
-              className={`form-input ${errors.password ? 'error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ít nhất 6 ký tự"
-              autoComplete="new-password"
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className={`form-input ${errors.password ? 'error' : ''}`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ít nhất 6 ký tự"
+                autoComplete="new-password"
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: '#666'
+                }}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {errors.password && <span className="error-text">{errors.password}</span>}
           </div>
 
           <div className="form-group">
             <label className="form-label">Xác nhận mật khẩu</label>
-            <input
-              type="password"
-              className={`form-input ${errors.confirm ? 'error' : ''}`}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Nhập lại mật khẩu"
-              autoComplete="new-password"
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                className={`form-input ${errors.confirm ? 'error' : ''}`}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Nhập lại mật khẩu"
+                autoComplete="new-password"
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: '#666'
+                }}
+              >
+                {showConfirm ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {errors.confirm && <span className="error-text">{errors.confirm}</span>}
           </div>
 

@@ -174,6 +174,38 @@ export default function QuanLyNguoiDung() {
     }
   };
 
+  // Helper function - hiển thị địa chỉ RẤT NGẮN GỌN
+  const getDiaChiRutGon = (user) => {
+    // Chỉ lấy 2 phần: Xã + Huyện, mỗi phần tối đa 10 ký tự
+    const parts = [];
+    
+    if (user.tenPhuongXa) {
+      const xa = user.tenPhuongXa.length > 10 
+        ? user.tenPhuongXa.substring(0, 10) + '..' 
+        : user.tenPhuongXa;
+      parts.push(xa);
+    }
+    
+    if (user.tenHuyen && parts.length < 2) {
+      const huyen = user.tenHuyen.length > 8 
+        ? user.tenHuyen.substring(0, 8) + '..' 
+        : user.tenHuyen;
+      parts.push(huyen);
+    }
+    
+    return parts.length > 0 ? parts.join(', ') : '-';
+  };
+
+  // Địa chỉ đầy đủ cho tooltip
+  const getDiaChiDayDu = (user) => {
+    const parts = [];
+    if (user.diaChiChiTiet) parts.push(user.diaChiChiTiet);
+    if (user.tenPhuongXa) parts.push(user.tenPhuongXa);
+    if (user.tenHuyen) parts.push(user.tenHuyen);
+    if (user.tenTinh) parts.push(user.tenTinh);
+    return parts.length > 0 ? parts.join(', ') : 'Chưa cập nhật';
+  };
+
   return (
     <div className="admin-card">
       <div className="room-header">
@@ -257,7 +289,7 @@ export default function QuanLyNguoiDung() {
               <th>Trạng thái</th>
               <th>Ngày tạo</th>
               <th>Điện thoại</th>
-              <th>Địa chỉ</th>
+              <th>Địa điểm</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -283,7 +315,7 @@ export default function QuanLyNguoiDung() {
                           style={{
                             fontWeight: 700,
                             fontSize: 13,
-                            color: '#1d4ed8', // xanh đậm để nổi bật tên
+                            color: '#1d4ed8',
                           }}
                         >
                           {u.hoTen || '—'}
@@ -313,13 +345,20 @@ export default function QuanLyNguoiDung() {
                       : '-'}
                   </td>
                   <td>{u.soDienThoai || '-'}</td>
-                  <td>{u.diaChi || '-'}</td>
+                  <td 
+                    className="address-cell" 
+                    title={getDiaChiDayDu(u)}
+                  >
+                    <div className="address-text">
+                      {getDiaChiRutGon(u)}
+                    </div>
+                  </td>
                   <td>
                     <div className="action-buttons">
                       <button
                         className="action-icon-btn edit"
                         title="Chỉnh sửa thông tin"
-                        onClick={() => setEditingUserId(u.maNguoiDung)}   // <-- mở modal
+                        onClick={() => setEditingUserId(u.maNguoiDung)}
                       >
                         ✏️
                       </button>

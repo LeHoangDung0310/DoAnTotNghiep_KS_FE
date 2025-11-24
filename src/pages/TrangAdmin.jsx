@@ -1,30 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuanLyPhong from '../components/Admin/QuanLyPhong';
 import QuanLyTang from '../components/Admin/QuanLyTang';
 import QuanLyTienNghi from '../components/Admin/QuanLyTienNghi';
 import QuanLyNguoiDung from '../components/Admin/QuanLyNguoiDung';
+import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
+import api from '../utils/api';
 
 export default function TrangAdmin() {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('rooms');
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
-  const email = localStorage.getItem('email') || 'tidusmang7890@gmail.com';
-  const userRole = localStorage.getItem('userRole') || 'ADMIN';
-  const avatarLetter = email.charAt(0).toUpperCase();
+  useEffect(() => {
+    loadUserInfo();
+    
+    // Listen for avatar update event
+    const handleAvatarUpdate = () => {
+      console.log('Avatar updated event received');
+      loadUserInfo();
+    };
+    
+    window.addEventListener('avatarUpdated', handleAvatarUpdate);
+    
+    return () => {
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate);
+    };
+  }, []);
+
+  const loadUserInfo = async () => {
+    try {
+      const resp = await api.get('/api/NguoiDung/Profile/Me');
+      const data = resp.data?.data || resp.data;
+      setUserInfo(data);
+      
+      // Lưu vào localStorage để dùng cho các component khác
+      if (data.email) localStorage.setItem('email', data.email);
+      if (data.vaiTro) localStorage.setItem('userRole', data.vaiTro);
+      if (data.hoTen) localStorage.setItem('hoTen', data.hoTen);
+      if (data.anhDaiDien) localStorage.setItem('anhDaiDien', data.anhDaiDien);
+    } catch (err) {
+      console.error('Load user info error:', err);
+    }
+  };
+
+  const email = userInfo?.email || localStorage.getItem('email') || 'user@example.com';
+  const userRole = userInfo?.vaiTro || localStorage.getItem('userRole') || 'Admin';
+  const hoTen = userInfo?.hoTen || localStorage.getItem('hoTen') || '';
+  const anhDaiDien = userInfo?.anhDaiDien || localStorage.getItem('anhDaiDien') || '';
+  const avatarLetter = hoTen?.charAt(0)?.toUpperCase() || email.charAt(0).toUpperCase();
 
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('email');
+    localStorage.removeItem('hoTen');
+    localStorage.removeItem('anhDaiDien');
     navigate('/login');
   };
 
   const goToAccount = () => {
-    // sau này có thể điều hướng đến /account
-    alert('Chức năng quản lý tài khoản sẽ được bổ sung sau.');
+    setActiveMenu('account');
     setOpenUserMenu(false);
   };
 
@@ -38,6 +76,8 @@ export default function TrangAdmin() {
         return <QuanLyTienNghi />;
       case 'users':
         return <QuanLyNguoiDung />;
+      case 'account':
+        return <QuanLyTaiKhoan />;
       case 'dashboard':
         return <div className="admin-card">Trang tổng quan (chưa triển khai).</div>;
       default:
@@ -105,11 +145,27 @@ export default function TrangAdmin() {
             {activeMenu === 'floors' && 'Quản lý tầng'}
             {activeMenu === 'amenities' && 'Quản lý tiện nghi'}
             {activeMenu === 'users' && 'Quản lý người dùng'}
+            {activeMenu === 'account' && 'Quản lý tài khoản'}
           </div>
 
-          {/* Khu vực user info mới */}
+          {/* Khu vực user info */}
           <div className="admin-user-info">
-            <div className="admin-user-avatar">{avatarLetter}</div>
+            <div className="admin-user-avatar">
+              {anhDaiDien ? (
+                <img 
+                  src={`${api.defaults.baseURL}${anhDaiDien}`} 
+                  alt="Avatar" 
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div style={{ display: anhDaiDien ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                {avatarLetter}
+              </div>
+            </div>
             <div className="admin-user-email-role">
               <div className="admin-user-email">{email}</div>
               <div className="admin-user-role">

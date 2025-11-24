@@ -334,6 +334,89 @@
   color: #1d4ed8; /* xanh đậm */
 }
 
+/* Cột địa chỉ - GIỚI HẠN CHẶT CHẼ HƠN */
+.admin-table td.address-cell {
+  max-width: 120px;  /* giảm từ 140px xuống 120px */
+  min-width: 90px;   /* giảm từ 100px xuống 90px */
+  position: relative;
+  cursor: help;
+}
+
+.admin-table .address-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;    /* giảm từ 12px xuống 11px */
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Tooltip */
+.admin-table td.address-cell::after {
+  content: attr(title);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: normal;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+  line-height: 1.5;
+}
+
+.admin-table td.address-cell::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1f2937;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.admin-table td.address-cell:hover::after,
+.admin-table td.address-cell:hover::before {
+  opacity: 1;
+}
+
+/* Đảm bảo cột hành động không bị đẩy */
+.admin-table th:last-child,
+.admin-table td:last-child {
+  min-width: 120px;
+  width: 120px;
+  text-align: center;
+}
+
+/* Thêm CSS */
+.admin-table td.address-cell {
+  max-width: 180px;
+}
+
+.admin-table .address-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-table th:last-child,
+.admin-table td:last-child {
+  min-width: 110px;
+  text-align: center;
+}
+
 /* Tag trạng thái */
 .tag {
   display: inline-flex;
@@ -911,4 +994,10 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+/* Thêm vào file CSS của bạn */
+.modal-large {
+  max-width: 700px !important;
+  width: 90%;
 }

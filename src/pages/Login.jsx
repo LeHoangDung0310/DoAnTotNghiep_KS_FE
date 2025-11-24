@@ -9,6 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState(() => localStorage.getItem('savedEmail') || '');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(() => !!localStorage.getItem('savedEmail'));
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -137,14 +138,34 @@ export default function Login() {
 
           <div className="form-group">
             <label className="form-label">Mật khẩu</label>
-            <input
-              type="password"
-              className={`form-input ${errors.password ? 'error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••"
-              autoComplete="current-password"
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className={`form-input ${errors.password ? 'error' : ''}`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                autoComplete="current-password"
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: '#666'
+                }}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {errors.password && <span className="error-text">{errors.password}</span>}
           </div>
 
