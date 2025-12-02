@@ -261,7 +261,7 @@ export default function QuanLyTienNghi() {
           <button className="btn-primary" onClick={handleSearch}>
             Tìm kiếm
           </button>
-          <button className="btn-primary" onClick={openCreateModal}>
+          <button className="btn-success" onClick={openCreateModal}>
             + Thêm tiện nghi
           </button>
         </div>

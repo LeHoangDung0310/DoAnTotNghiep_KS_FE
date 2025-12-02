@@ -116,4 +116,42 @@ api.interceptors.response.use(
   }
 );
 
+// Load loại phòng
+const loadLoaiPhong = async () => {
+  const resp = await api.get('/api/LoaiPhong');
+  return resp.data;
+};
+
+// Load hình ảnh
+const loadHinhAnhPhong = async (maLoaiPhong) => {
+  const resp = await api.get(`/api/HinhAnhPhong/LoaiPhong/${maLoaiPhong}`);
+  return resp.data;
+};
+
+// Upload hình ảnh
+const uploadHinhAnh = async (formData) => {
+  await api.post('/api/HinhAnhPhong', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+// Update hình ảnh
+const updateHinhAnh = async (id, data) => {
+  await api.put(`/api/HinhAnhPhong/${id}`, data);
+};
+
+// Delete hình ảnh
+const deleteHinhAnh = async (id) => {
+  await api.delete(`/api/HinhAnhPhong/${id}`);
+};
+
 export default api;
+export {
+  loadLoaiPhong,
+  loadHinhAnhPhong,
+  uploadHinhAnh,
+  updateHinhAnh,
+  deleteHinhAnh,
+};

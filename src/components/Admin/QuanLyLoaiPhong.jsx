@@ -2,25 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 const API_BASE = 'http://localhost:5114/api';
 
-function getStatusTagClass(status) {
-  switch (status) {
-    case 'Trong':
-      return 'tag tag-success';
-    case 'DaDat':
-      return 'tag tag-warning';
-    case 'DangSuDung':
-      return 'tag tag-secondary';
-    case 'BaoTri':
-      return 'tag tag-danger';
-    default:
-      return 'tag tag-secondary';
-  }
-}
-
-export default function QuanLyPhong() {
-  const [rooms, setRooms] = useState([]);
+export default function QuanLyLoaiPhong() {
   const [loaiPhongs, setLoaiPhongs] = useState([]);
-  const [tangs, setTangs] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -30,25 +13,23 @@ export default function QuanLyPhong() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
-  const [currentRoom, setCurrentRoom] = useState(null);
+  const [currentLoaiPhong, setCurrentLoaiPhong] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
   const [toast, setToast] = useState(null);
 
   const [filters, setFilters] = useState({
-    soPhong: '',
-    maLoaiPhong: '',
-    trangThai: '',
-    maTang: '',
+    tenLoaiPhong: '',
+    giaMin: '',
+    giaMax: '',
   });
 
   const [formData, setFormData] = useState({
-    soPhong: '',
-    soGiuong: '',
-    soNguoiToiDa: '',
+    tenLoaiPhong: '',
     moTa: '',
-    maTang: '',
-    maLoaiPhong: '',
-    trangThai: 'Trong',
+    soNguoiToiDa: '',
+    soGiuong: '',
+    dienTich: '',
+    giaMoiDem: '',
   });
 
   const accessToken = localStorage.getItem('accessToken');
@@ -58,45 +39,7 @@ export default function QuanLyPhong() {
     setTimeout(() => setToast(null), 2500);
   };
 
-  const fetchLoaiPhongs = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/LoaiPhong`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-      });
-
-      if (!res.ok) throw new Error('Lỗi khi lấy danh sách loại phòng');
-
-      const data = await res.json();
-      setLoaiPhongs(data.data || []);
-    } catch (error) {
-      console.error(error);
-      showToast('error', error.message);
-    }
-  };
-
-  const fetchTangs = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/Tang`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-      });
-
-      if (!res.ok) throw new Error('Lỗi khi lấy danh sách tầng');
-
-      const data = await res.json();
-      setTangs(data.data || []);
-    } catch (error) {
-      console.error(error);
-      showToast('error', error.message);
-    }
-  };
-
-  const fetchRooms = async (page = 1, pageSize = pagination.pageSize) => {
+  const fetchLoaiPhongs = async (page = 1, pageSize = pagination.pageSize) => {
     try {
       setLoading(true);
 
@@ -104,12 +47,12 @@ export default function QuanLyPhong() {
       params.append('pageNumber', page);
       params.append('pageSize', pageSize);
 
-      if (filters.soPhong.trim()) params.append('soPhong', filters.soPhong.trim());
-      if (filters.maLoaiPhong) params.append('maLoaiPhong', filters.maLoaiPhong);
-      if (filters.trangThai) params.append('trangThai', filters.trangThai);
-      if (filters.maTang) params.append('maTang', filters.maTang);
+      if (filters.tenLoaiPhong.trim())
+        params.append('tenLoaiPhong', filters.tenLoaiPhong.trim());
+      if (filters.giaMin) params.append('giaMin', filters.giaMin);
+      if (filters.giaMax) params.append('giaMax', filters.giaMax);
 
-      const res = await fetch(`${API_BASE}/Phong/Search?${params.toString()}`, {
+      const res = await fetch(`${API_BASE}/LoaiPhong/Search?${params.toString()}`, {
         headers: {
           'Content-Type': 'application/json',
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -118,11 +61,11 @@ export default function QuanLyPhong() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Lỗi khi lấy danh sách phòng');
+        throw new Error(err.message || 'Lỗi khi lấy danh sách loại phòng');
       }
 
       const data = await res.json();
-      setRooms(data.data || []);
+      setLoaiPhongs(data.data || []);
       setTotalItems(data.pagination?.totalItems || 0);
       setPagination({
         currentPage: data.pagination?.currentPage || page,
@@ -138,59 +81,51 @@ export default function QuanLyPhong() {
   };
 
   useEffect(() => {
-    fetchLoaiPhongs();
-    fetchTangs();
-  }, []);
-
-  useEffect(() => {
-    fetchRooms(1);
+    fetchLoaiPhongs(1);
   }, [filters, pagination.pageSize]);
 
   const handleSearch = () => {
-    fetchRooms(1, pagination.pageSize);
+    fetchLoaiPhongs(1, pagination.pageSize);
   };
 
   const handleReset = () => {
     setFilters({
-      soPhong: '',
-      maLoaiPhong: '',
-      trangThai: '',
-      maTang: '',
+      tenLoaiPhong: '',
+      giaMin: '',
+      giaMax: '',
     });
-    fetchRooms(1, pagination.pageSize);
+    fetchLoaiPhongs(1, pagination.pageSize);
   };
 
   const handleChangePage = (page) => {
     if (page < 1 || page > pagination.totalPages) return;
-    fetchRooms(page, pagination.pageSize);
+    fetchLoaiPhongs(page, pagination.pageSize);
   };
 
   const openCreateModal = () => {
     setModalMode('create');
-    setCurrentRoom(null);
+    setCurrentLoaiPhong(null);
     setFormData({
-      soPhong: '',
-      soGiuong: '',
-      soNguoiToiDa: '',
+      tenLoaiPhong: '',
       moTa: '',
-      maTang: '',
-      maLoaiPhong: '',
-      trangThai: 'Trong',
+      soNguoiToiDa: '',
+      soGiuong: '',
+      dienTich: '',
+      giaMoiDem: '',
     });
     setShowModal(true);
   };
 
-  const openEditModal = (room) => {
+  const openEditModal = (loaiPhong) => {
     setModalMode('edit');
-    setCurrentRoom(room);
+    setCurrentLoaiPhong(loaiPhong);
     setFormData({
-      soPhong: room.soPhong || '',
-      soGiuong: room.soGiuong || '',
-      soNguoiToiDa: room.soNguoiToiDa || '',
-      moTa: room.moTa || '',
-      maTang: room.maTang || '',
-      maLoaiPhong: room.maLoaiPhong || '',
-      trangThai: room.trangThai || 'Trong',
+      tenLoaiPhong: loaiPhong.tenLoaiPhong || '',
+      moTa: loaiPhong.moTa || '',
+      soNguoiToiDa: loaiPhong.soNguoiToiDa || '',
+      soGiuong: loaiPhong.soGiuong || '',
+      dienTich: loaiPhong.dienTich || '',
+      giaMoiDem: loaiPhong.giaMoiDem || '',
     });
     setShowModal(true);
   };
@@ -200,22 +135,18 @@ export default function QuanLyPhong() {
 
     try {
       const payload = {
-        soPhong: formData.soPhong.trim(),
-        soGiuong: formData.soGiuong ? parseInt(formData.soGiuong) : null,
-        soNguoiToiDa: formData.soNguoiToiDa ? parseInt(formData.soNguoiToiDa) : null,
+        tenLoaiPhong: formData.tenLoaiPhong.trim(),
         moTa: formData.moTa.trim() || null,
-        maTang: formData.maTang ? parseInt(formData.maTang) : null,
-        maLoaiPhong: formData.maLoaiPhong ? parseInt(formData.maLoaiPhong) : null,
+        soNguoiToiDa: formData.soNguoiToiDa ? parseInt(formData.soNguoiToiDa) : null,
+        soGiuong: formData.soGiuong ? parseInt(formData.soGiuong) : null,
+        dienTich: formData.dienTich ? parseInt(formData.dienTich) : null,
+        giaMoiDem: formData.giaMoiDem ? parseFloat(formData.giaMoiDem) : null,
       };
-
-      if (modalMode === 'edit') {
-        payload.trangThai = formData.trangThai;
-      }
 
       const url =
         modalMode === 'create'
-          ? `${API_BASE}/Phong`
-          : `${API_BASE}/Phong/${currentRoom.maPhong}`;
+          ? `${API_BASE}/LoaiPhong`
+          : `${API_BASE}/LoaiPhong/${currentLoaiPhong.maLoaiPhong}`;
 
       const method = modalMode === 'create' ? 'POST' : 'PUT';
 
@@ -234,24 +165,28 @@ export default function QuanLyPhong() {
         throw new Error(data.message || 'Có lỗi xảy ra');
       }
 
-      showToast('success', data.message || (modalMode === 'create' ? 'Tạo phòng thành công' : 'Cập nhật thành công'));
+      showToast(
+        'success',
+        data.message ||
+          (modalMode === 'create' ? 'Tạo loại phòng thành công' : 'Cập nhật thành công')
+      );
       setShowModal(false);
-      fetchRooms(pagination.currentPage, pagination.pageSize);
+      fetchLoaiPhongs(pagination.currentPage, pagination.pageSize);
     } catch (error) {
       console.error(error);
       showToast('error', error.message);
     }
   };
 
-  const openDeleteConfirm = (room) => {
-    setDeletingItem(room);
+  const openDeleteConfirm = (loaiPhong) => {
+    setDeletingItem(loaiPhong);
   };
 
   const handleDelete = async () => {
     if (!deletingItem) return;
 
     try {
-      const res = await fetch(`${API_BASE}/Phong/${deletingItem.maPhong}`, {
+      const res = await fetch(`${API_BASE}/LoaiPhong/${deletingItem.maLoaiPhong}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -261,12 +196,12 @@ export default function QuanLyPhong() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'Xóa phòng thất bại');
+        throw new Error(data.message || 'Xóa loại phòng thất bại');
       }
 
-      showToast('success', data.message || 'Xóa phòng thành công');
+      showToast('success', data.message || 'Xóa loại phòng thành công');
       setDeletingItem(null);
-      fetchRooms(pagination.currentPage, pagination.pageSize);
+      fetchLoaiPhongs(pagination.currentPage, pagination.pageSize);
     } catch (error) {
       console.error(error);
       showToast('error', error.message);
@@ -276,7 +211,7 @@ export default function QuanLyPhong() {
   return (
     <div className="admin-card">
       <div className="room-header">
-        <div className="room-header-title">Quản lý phòng</div>
+        <div className="room-header-title">Quản lý loại phòng</div>
         <div className="room-header-actions">
           <button className="btn-outline" onClick={handleReset}>
             Đặt lại
@@ -285,7 +220,7 @@ export default function QuanLyPhong() {
             Tìm kiếm
           </button>
           <button className="btn-success" onClick={openCreateModal}>
-            + Thêm phòng
+            + Thêm loại phòng
           </button>
         </div>
       </div>
@@ -293,57 +228,35 @@ export default function QuanLyPhong() {
       {/* Thanh tìm kiếm */}
       <div className="room-search-row">
         <div className="room-search-input">
-          <label>Số phòng</label>
+          <label>Tên loại phòng</label>
           <input
             type="text"
-            placeholder="Nhập số phòng"
-            value={filters.soPhong}
-            onChange={(e) => setFilters({ ...filters, soPhong: e.target.value })}
+            placeholder="Nhập tên loại phòng"
+            value={filters.tenLoaiPhong}
+            onChange={(e) => setFilters({ ...filters, tenLoaiPhong: e.target.value })}
           />
         </div>
 
-        <div className="room-search-select">
-          <label>Loại phòng</label>
-          <select
-            value={filters.maLoaiPhong}
-            onChange={(e) => setFilters({ ...filters, maLoaiPhong: e.target.value })}
-          >
-            <option value="">Tất cả</option>
-            {loaiPhongs.map((lp) => (
-              <option key={lp.maLoaiPhong} value={lp.maLoaiPhong}>
-                {lp.tenLoaiPhong}
-              </option>
-            ))}
-          </select>
+        <div className="room-search-input">
+          <label>Giá tối thiểu</label>
+          <input
+            type="number"
+            min="0"
+            placeholder="Giá tối thiểu"
+            value={filters.giaMin}
+            onChange={(e) => setFilters({ ...filters, giaMin: e.target.value })}
+          />
         </div>
 
-        <div className="room-search-select">
-          <label>Trạng thái</label>
-          <select
-            value={filters.trangThai}
-            onChange={(e) => setFilters({ ...filters, trangThai: e.target.value })}
-          >
-            <option value="">Tất cả</option>
-            <option value="Trong">Trống</option>
-            <option value="DaDat">Đã đặt</option>
-            <option value="DangSuDung">Đang sử dụng</option>
-            <option value="BaoTri">Bảo trì</option>
-          </select>
-        </div>
-
-        <div className="room-search-select">
-          <label>Tầng</label>
-          <select
-            value={filters.maTang}
-            onChange={(e) => setFilters({ ...filters, maTang: e.target.value })}
-          >
-            <option value="">Tất cả</option>
-            {tangs.map((t) => (
-              <option key={t.maTang} value={t.maTang}>
-                {t.tenTang}
-              </option>
-            ))}
-          </select>
+        <div className="room-search-input">
+          <label>Giá tối đa</label>
+          <input
+            type="number"
+            min="0"
+            placeholder="Giá tối đa"
+            value={filters.giaMax}
+            onChange={(e) => setFilters({ ...filters, giaMax: e.target.value })}
+          />
         </div>
 
         <div className="room-search-select">
@@ -369,62 +282,60 @@ export default function QuanLyPhong() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Mã phòng</th>
-              <th>Số phòng</th>
-              <th>Loại phòng</th>
+              <th>Mã loại</th>
+              <th>Tên loại phòng</th>
+              <th>Diện tích (m²)</th>
               <th>Số giường</th>
-              <th>Tối đa</th>
-              <th>Tầng</th>
+              <th>Số người tối đa</th>
+              <th>Giá / đêm (VNĐ)</th>
               <th>Mô tả</th>
-              <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9}>Đang tải dữ liệu...</td>
+                <td colSpan={8}>Đang tải dữ liệu...</td>
               </tr>
-            ) : rooms.length === 0 ? (
+            ) : loaiPhongs.length === 0 ? (
               <tr>
-                <td colSpan={9}>Không có dữ liệu</td>
+                <td colSpan={8}>Không có dữ liệu</td>
               </tr>
             ) : (
-              rooms.map((room) => (
-                <tr key={room.maPhong}>
-                  <td>{room.maPhong}</td>
-                  <td>{room.soPhong}</td>
-                  <td>{room.tenLoaiPhong || '-'}</td>
-                  <td>{room.soGiuong ?? '-'}</td>
-                  <td>{room.soNguoiToiDa ?? '-'}</td>
-                  <td>{room.tenTang || '-'}</td>
+              loaiPhongs.map((lp) => (
+                <tr key={lp.maLoaiPhong}>
+                  <td>{lp.maLoaiPhong}</td>
                   <td>
-                    {room.moTa ? (
-                      <span title={room.moTa}>
-                        {room.moTa.length > 30 ? room.moTa.substring(0, 30) + '...' : room.moTa}
+                    <strong>{lp.tenLoaiPhong}</strong>
+                  </td>
+                  <td>{lp.dienTich ?? '-'}</td>
+                  <td>{lp.soGiuong ?? '-'}</td>
+                  <td>{lp.soNguoiToiDa ?? '-'}</td>
+                  <td>
+                    {lp.giaMoiDem != null ? lp.giaMoiDem.toLocaleString('vi-VN') : '-'}
+                  </td>
+                  <td>
+                    {lp.moTa ? (
+                      <span title={lp.moTa}>
+                        {lp.moTa.length > 50 ? lp.moTa.substring(0, 50) + '...' : lp.moTa}
                       </span>
                     ) : (
                       '-'
                     )}
                   </td>
                   <td>
-                    <span className={getStatusTagClass(room.trangThai)}>
-                      {room.trangThai}
-                    </span>
-                  </td>
-                  <td>
                     <div className="action-buttons">
                       <button
                         className="action-icon-btn edit"
                         title="Sửa"
-                        onClick={() => openEditModal(room)}
+                        onClick={() => openEditModal(lp)}
                       >
                         ✏️
                       </button>
                       <button
                         className="action-icon-btn delete"
                         title="Xóa"
-                        onClick={() => openDeleteConfirm(room)}
+                        onClick={() => openDeleteConfirm(lp)}
                       >
                         🗑️
                       </button>
@@ -440,7 +351,7 @@ export default function QuanLyPhong() {
       {/* Phân trang */}
       <div className="pagination">
         <span>
-          Tổng: <strong>{totalItems}</strong> phòng
+          Tổng: <strong>{totalItems}</strong> loại phòng
         </span>
         <button
           onClick={() => handleChangePage(pagination.currentPage - 1)}
@@ -465,73 +376,47 @@ export default function QuanLyPhong() {
         </button>
       </div>
 
-      {/* Modal thêm/sửa phòng */}
+      {/* Modal thêm/sửa loại phòng */}
       {showModal && (
         <div className="modal-backdrop">
           <div className="modal">
             <div className="modal-header">
               <div className="modal-header-left">
-                <h3>{modalMode === 'create' ? 'Thêm phòng mới' : 'Chỉnh sửa phòng'}</h3>
+                <h3>{modalMode === 'create' ? 'Thêm loại phòng mới' : 'Cập nhật loại phòng'}</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setShowModal(false)}>
                 ✕
               </button>
             </div>
-
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
-                {/* Hàng 1: Số phòng */}
                 <div className="form-row full">
-                  <label className="form-label-required">Số phòng</label>
+                  <label className="form-label-required">Tên loại phòng</label>
                   <input
                     type="text"
                     className="form-input"
                     required
-                    value={formData.soPhong}
-                    onChange={(e) => setFormData({ ...formData, soPhong: e.target.value })}
-                    placeholder="VD: P101, A205..."
+                    value={formData.tenLoaiPhong}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tenLoaiPhong: e.target.value })
+                    }
+                    placeholder="Nhập tên loại phòng"
                   />
                 </div>
 
-                {/* Hàng 2: Loại phòng + Tầng */}
                 <div className="form-row">
                   <div style={{ flex: 1 }}>
-                    <label>Loại phòng</label>
-                    <select
+                    <label>Diện tích (m²)</label>
+                    <input
+                      type="number"
                       className="form-input"
-                      value={formData.maLoaiPhong}
-                      onChange={(e) =>
-                        setFormData({ ...formData, maLoaiPhong: e.target.value })
-                      }
-                    >
-                      <option value="">-- Chọn loại phòng --</option>
-                      {loaiPhongs.map((lp) => (
-                        <option key={lp.maLoaiPhong} value={lp.maLoaiPhong}>
-                          {lp.tenLoaiPhong}
-                        </option>
-                      ))}
-                    </select>
+                      min="0"
+                      value={formData.dienTich}
+                      onChange={(e) => setFormData({ ...formData, dienTich: e.target.value })}
+                      placeholder="Diện tích"
+                    />
                   </div>
 
-                  <div style={{ flex: 1 }}>
-                    <label>Tầng</label>
-                    <select
-                      className="form-input"
-                      value={formData.maTang}
-                      onChange={(e) => setFormData({ ...formData, maTang: e.target.value })}
-                    >
-                      <option value="">-- Chọn tầng --</option>
-                      {tangs.map((t) => (
-                        <option key={t.maTang} value={t.maTang}>
-                          {t.tenTang}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Hàng 3: Số giường + Số người tối đa */}
-                <div className="form-row">
                   <div style={{ flex: 1 }}>
                     <label>Số giường</label>
                     <input
@@ -540,10 +425,12 @@ export default function QuanLyPhong() {
                       min="0"
                       value={formData.soGiuong}
                       onChange={(e) => setFormData({ ...formData, soGiuong: e.target.value })}
-                      placeholder="0"
+                      placeholder="Số giường"
                     />
                   </div>
+                </div>
 
+                <div className="form-row">
                   <div style={{ flex: 1 }}>
                     <label>Số người tối đa</label>
                     <input
@@ -554,37 +441,32 @@ export default function QuanLyPhong() {
                       onChange={(e) =>
                         setFormData({ ...formData, soNguoiToiDa: e.target.value })
                       }
-                      placeholder="0"
+                      placeholder="Số người tối đa"
+                    />
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label>Giá / đêm (VNĐ)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      min="0"
+                      step="1000"
+                      value={formData.giaMoiDem}
+                      onChange={(e) => setFormData({ ...formData, giaMoiDem: e.target.value })}
+                      placeholder="Giá mỗi đêm"
                     />
                   </div>
                 </div>
 
-                {/* Hàng 4: Trạng thái (chỉ khi edit) */}
-                {modalMode === 'edit' && (
-                  <div className="form-row full">
-                    <label>Trạng thái</label>
-                    <select
-                      className="form-input"
-                      value={formData.trangThai}
-                      onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
-                    >
-                      <option value="Trong">Trống</option>
-                      <option value="DaDat">Đã đặt</option>
-                      <option value="DangSuDung">Đang sử dụng</option>
-                      <option value="BaoTri">Bảo trì</option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Hàng 5: Mô tả */}
                 <div className="form-row full">
                   <label>Mô tả</label>
                   <textarea
-                    rows="3"
+                    rows="4"
                     className="form-textarea"
                     value={formData.moTa}
                     onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
-                    placeholder="Nhập mô tả phòng (không bắt buộc)"
+                    placeholder="Nhập mô tả loại phòng"
                   />
                 </div>
               </div>
@@ -595,7 +477,7 @@ export default function QuanLyPhong() {
                     Hủy
                   </button>
                   <button type="submit" className="btn-primary">
-                    {modalMode === 'create' ? 'Lưu phòng' : 'Cập nhật'}
+                    {modalMode === 'create' ? 'Thêm mới' : 'Cập nhật'}
                   </button>
                 </div>
               </div>
@@ -610,23 +492,17 @@ export default function QuanLyPhong() {
           <div className="modal modal-sm">
             <div className="modal-header">
               <div className="modal-header-left">
-                <h3>Xóa phòng</h3>
+                <h3>Xóa loại phòng</h3>
               </div>
-              <button
-                className="modal-close-btn"
-                onClick={() => setDeletingItem(null)}
-              >
+              <button className="modal-close-btn" onClick={() => setDeletingItem(null)}>
                 ✕
               </button>
             </div>
 
             <div className="modal-body">
               <p>
-                Bạn có chắc chắn muốn xóa phòng{' '}
-                <strong>
-                  {deletingItem.soPhong} (Mã: {deletingItem.maPhong})
-                </strong>
-                ? Hành động này không thể hoàn tác.
+                Bạn có chắc chắn muốn xóa loại phòng{' '}
+                <strong>{deletingItem.tenLoaiPhong}</strong>? Hành động này không thể hoàn tác.
               </p>
             </div>
 
@@ -661,9 +537,7 @@ export default function QuanLyPhong() {
               (toast.type === 'error' ? 'toast-admin-error' : 'toast-admin-success')
             }
           >
-            <div className="toast-admin-icon">
-              {toast.type === 'error' ? '!' : '✓'}
-            </div>
+            <div className="toast-admin-icon">{toast.type === 'error' ? '!' : '✓'}</div>
             <div className="toast-admin-text">{toast.message}</div>
             <button className="toast-admin-close" onClick={() => setToast(null)}>
               ✕

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuanLyPhong from '../components/Admin/QuanLyPhong';
+import QuanLyLoaiPhong from '../components/Admin/QuanLyLoaiPhong';
+import QuanLyHinhAnhLP from '../components/Admin/QuanLyHinhAnhLP';
 import QuanLyTang from '../components/Admin/QuanLyTang';
 import QuanLyTienNghi from '../components/Admin/QuanLyTienNghi';
 import QuanLyNguoiDung from '../components/Admin/QuanLyNguoiDung';
@@ -16,7 +18,6 @@ export default function TrangAdmin() {
   useEffect(() => {
     loadUserInfo();
     
-    // Listen for avatar update event
     const handleAvatarUpdate = () => {
       console.log('Avatar updated event received');
       loadUserInfo();
@@ -35,7 +36,6 @@ export default function TrangAdmin() {
       const data = resp.data?.data || resp.data;
       setUserInfo(data);
       
-      // Lưu vào localStorage để dùng cho các component khác
       if (data.email) localStorage.setItem('email', data.email);
       if (data.vaiTro) localStorage.setItem('userRole', data.vaiTro);
       if (data.hoTen) localStorage.setItem('hoTen', data.hoTen);
@@ -70,6 +70,10 @@ export default function TrangAdmin() {
     switch (activeMenu) {
       case 'rooms':
         return <QuanLyPhong />;
+      case 'room-types':
+        return <QuanLyLoaiPhong />;
+      case 'room-images':
+        return <QuanLyHinhAnhLP />;
       case 'floors':
         return <QuanLyTang />;
       case 'amenities':
@@ -111,6 +115,22 @@ export default function TrangAdmin() {
           </div>
 
           <div
+            className={`admin-menu-item ${activeMenu === 'room-types' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('room-types')}
+          >
+            <span>🏷️</span>
+            <span>Quản lý loại phòng</span>
+          </div>
+
+          <div
+            className={`admin-menu-item ${activeMenu === 'room-images' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('room-images')}
+          >
+            <span>🖼️</span>
+            <span>Hình ảnh loại phòng</span>
+          </div>
+
+          <div
             className={`admin-menu-item ${activeMenu === 'floors' ? 'active' : ''}`}
             onClick={() => setActiveMenu('floors')}
           >
@@ -142,6 +162,8 @@ export default function TrangAdmin() {
           <div className="admin-page-title">
             {activeMenu === 'dashboard' && 'Tổng quan'}
             {activeMenu === 'rooms' && 'Quản lý phòng'}
+            {activeMenu === 'room-types' && 'Quản lý loại phòng'}
+            {activeMenu === 'room-images' && 'Hình ảnh loại phòng'}
             {activeMenu === 'floors' && 'Quản lý tầng'}
             {activeMenu === 'amenities' && 'Quản lý tiện nghi'}
             {activeMenu === 'users' && 'Quản lý người dùng'}

@@ -189,7 +189,7 @@ export default function QuanLyTang() {
             Tìm kiếm
           </button>
           {/* nút thêm tầng */}
-          <button className="btn-primary" onClick={openCreateModal}>
+          <button className="btn-success" onClick={openCreateModal}>
             + Thêm tầng
           </button>
         </div>
