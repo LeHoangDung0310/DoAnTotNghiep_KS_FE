@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Common/Toast';
 
 const API_BASE = 'http://localhost:5114/api';
 
@@ -32,7 +33,7 @@ export default function QuanLyPhong() {
   const [modalMode, setModalMode] = useState('create');
   const [currentRoom, setCurrentRoom] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState({ show: false, type: '', message: '' });
 
   const [filters, setFilters] = useState({
     soPhong: '',
@@ -54,8 +55,11 @@ export default function QuanLyPhong() {
   const accessToken = localStorage.getItem('accessToken');
 
   const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 2500);
+    setToast({ show: true, type, message });
+  };
+
+  const hideToast = () => {
+    setToast({ show: false, type: '', message: '' });
   };
 
   const fetchLoaiPhongs = async () => {
@@ -275,6 +279,16 @@ export default function QuanLyPhong() {
 
   return (
     <div className="admin-card">
+      {/* ✅ Toast mới */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={hideToast}
+          duration={3000}
+        />
+      )}
+
       <div className="room-header">
         <div className="room-header-title">Quản lý phòng</div>
         <div className="room-header-actions">
@@ -465,139 +479,189 @@ export default function QuanLyPhong() {
         </button>
       </div>
 
-      {/* Modal thêm/sửa phòng */}
+      {/* ✅ Modal mới - Đẹp hơn */}
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <div className="modal-header">
-              <div className="modal-header-left">
-                <h3>{modalMode === 'create' ? 'Thêm phòng mới' : 'Chỉnh sửa phòng'}</h3>
+        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+          <div className="modal modal-large modal-booking" onClick={(e) => e.stopPropagation()}>
+            {/* Header với gradient */}
+            <div className="modal-header-gradient">
+              <div className="modal-header-content">
+                <div className="modal-icon">
+                  {modalMode === 'create' ? '➕' : '✏️'}
+                </div>
+                <div>
+                  <h3 className="modal-title-large">
+                    {modalMode === 'create' ? 'Thêm phòng mới' : 'Chỉnh sửa phòng'}
+                  </h3>
+                  <p className="modal-subtitle">
+                    {modalMode === 'create' 
+                      ? 'Điền thông tin để tạo phòng mới'
+                      : `Cập nhật thông tin phòng ${currentRoom?.soPhong}`
+                    }
+                  </p>
+                </div>
               </div>
-              <button className="modal-close-btn" onClick={() => setShowModal(false)}>
+              <button className="modal-close-btn-gradient" onClick={() => setShowModal(false)}>
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                {/* Hàng 1: Số phòng */}
-                <div className="form-row full">
-                  <label className="form-label-required">Số phòng</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
-                    value={formData.soPhong}
-                    onChange={(e) => setFormData({ ...formData, soPhong: e.target.value })}
-                    placeholder="VD: P101, A205..."
-                  />
-                </div>
-
-                {/* Hàng 2: Loại phòng + Tầng */}
-                <div className="form-row">
-                  <div style={{ flex: 1 }}>
-                    <label>Loại phòng</label>
-                    <select
-                      className="form-input"
-                      value={formData.maLoaiPhong}
-                      onChange={(e) =>
-                        setFormData({ ...formData, maLoaiPhong: e.target.value })
-                      }
-                    >
-                      <option value="">-- Chọn loại phòng --</option>
-                      {loaiPhongs.map((lp) => (
-                        <option key={lp.maLoaiPhong} value={lp.maLoaiPhong}>
-                          {lp.tenLoaiPhong}
-                        </option>
-                      ))}
-                    </select>
+              <div className="modal-body modal-body-scrollable">
+                {/* Thông tin cơ bản */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <div className="form-section-icon">📋</div>
+                    <h4 className="form-section-title">Thông tin cơ bản</h4>
                   </div>
 
-                  <div style={{ flex: 1 }}>
-                    <label>Tầng</label>
-                    <select
-                      className="form-input"
-                      value={formData.maTang}
-                      onChange={(e) => setFormData({ ...formData, maTang: e.target.value })}
-                    >
-                      <option value="">-- Chọn tầng --</option>
-                      {tangs.map((t) => (
-                        <option key={t.maTang} value={t.maTang}>
-                          {t.tenTang}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="form-grid">
+                    {/* Số phòng */}
+                    <div className="form-group full-width">
+                      <label className="form-label">
+                        <span className="form-label-icon">🚪</span>
+                        Số phòng
+                        <span className="form-label-required">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input-modern"
+                        required
+                        value={formData.soPhong}
+                        onChange={(e) => setFormData({ ...formData, soPhong: e.target.value })}
+                        placeholder="VD: 101, A205, VIP-301..."
+                      />
+                    </div>
+
+                    {/* Loại phòng */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        <span className="form-label-icon">🏷️</span>
+                        Loại phòng
+                      </label>
+                      <select
+                        className="form-select-modern"
+                        value={formData.maLoaiPhong}
+                        onChange={(e) => setFormData({ ...formData, maLoaiPhong: e.target.value })}
+                      >
+                        <option value="">-- Chọn loại phòng --</option>
+                        {loaiPhongs.map((lp) => (
+                          <option key={lp.maLoaiPhong} value={lp.maLoaiPhong}>
+                            {lp.tenLoaiPhong}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Tầng */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        <span className="form-label-icon">🏢</span>
+                        Tầng
+                      </label>
+                      <select
+                        className="form-select-modern"
+                        value={formData.maTang}
+                        onChange={(e) => setFormData({ ...formData, maTang: e.target.value })}
+                      >
+                        <option value="">-- Chọn tầng --</option>
+                        {tangs.map((t) => (
+                          <option key={t.maTang} value={t.maTang}>
+                            {t.tenTang}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Số giường */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        <span className="form-label-icon">🛏️</span>
+                        Số giường
+                      </label>
+                      <input
+                        type="number"
+                        className="form-input-modern"
+                        min="0"
+                        value={formData.soGiuong}
+                        onChange={(e) => setFormData({ ...formData, soGiuong: e.target.value })}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    {/* Số người tối đa */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        <span className="form-label-icon">👥</span>
+                        Số người tối đa
+                      </label>
+                      <input
+                        type="number"
+                        className="form-input-modern"
+                        min="0"
+                        value={formData.soNguoiToiDa}
+                        onChange={(e) => setFormData({ ...formData, soNguoiToiDa: e.target.value })}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    {/* Trạng thái - chỉ khi edit */}
+                    {modalMode === 'edit' && (
+                      <div className="form-group full-width">
+                        <label className="form-label">
+                          <span className="form-label-icon">🔄</span>
+                          Trạng thái
+                        </label>
+                        <select
+                          className="form-select-modern"
+                          value={formData.trangThai}
+                          onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
+                        >
+                          <option value="Trong">Trống</option>
+                          <option value="DaDat">Đã đặt</option>
+                          <option value="DangSuDung">Đang sử dụng</option>
+                          <option value="BaoTri">Bảo trì</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Hàng 3: Số giường + Số người tối đa */}
-                <div className="form-row">
-                  <div style={{ flex: 1 }}>
-                    <label>Số giường</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      min="0"
-                      value={formData.soGiuong}
-                      onChange={(e) => setFormData({ ...formData, soGiuong: e.target.value })}
-                      placeholder="0"
+                {/* Mô tả */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <div className="form-section-icon">📝</div>
+                    <h4 className="form-section-title">Mô tả chi tiết</h4>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">💬</span>
+                      Mô tả phòng
+                    </label>
+                    <textarea
+                      rows="4"
+                      className="form-textarea-modern"
+                      value={formData.moTa}
+                      onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
+                      placeholder="Nhập mô tả chi tiết về phòng (không bắt buộc)..."
                     />
                   </div>
-
-                  <div style={{ flex: 1 }}>
-                    <label>Số người tối đa</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      min="0"
-                      value={formData.soNguoiToiDa}
-                      onChange={(e) =>
-                        setFormData({ ...formData, soNguoiToiDa: e.target.value })
-                      }
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-
-                {/* Hàng 4: Trạng thái (chỉ khi edit) */}
-                {modalMode === 'edit' && (
-                  <div className="form-row full">
-                    <label>Trạng thái</label>
-                    <select
-                      className="form-input"
-                      value={formData.trangThai}
-                      onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
-                    >
-                      <option value="Trong">Trống</option>
-                      <option value="DaDat">Đã đặt</option>
-                      <option value="DangSuDung">Đang sử dụng</option>
-                      <option value="BaoTri">Bảo trì</option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Hàng 5: Mô tả */}
-                <div className="form-row full">
-                  <label>Mô tả</label>
-                  <textarea
-                    rows="3"
-                    className="form-textarea"
-                    value={formData.moTa}
-                    onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
-                    placeholder="Nhập mô tả phòng (không bắt buộc)"
-                  />
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <div className="modal-footer-right">
-                  <button type="button" className="btn-outline" onClick={() => setShowModal(false)}>
-                    Hủy
-                  </button>
-                  <button type="submit" className="btn-primary">
-                    {modalMode === 'create' ? 'Lưu phòng' : 'Cập nhật'}
-                  </button>
-                </div>
+              {/* Footer */}
+              <div className="modal-footer modal-footer-modern">
+                <button type="button" className="btn-outline-modern" onClick={() => setShowModal(false)}>
+                  <span className="btn-icon">✕</span>
+                  Hủy
+                </button>
+                <button type="submit" className="btn-primary-modern">
+                  <span className="btn-icon">
+                    {modalMode === 'create' ? '✓' : '↻'}
+                  </span>
+                  {modalMode === 'create' ? 'Lưu phòng' : 'Cập nhật'}
+                </button>
               </div>
             </form>
           </div>
@@ -648,26 +712,6 @@ export default function QuanLyPhong() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="toast-container-admin">
-          <div
-            className={
-              'toast-admin ' +
-              (toast.type === 'error' ? 'toast-admin-error' : 'toast-admin-success')
-            }
-          >
-            <div className="toast-admin-icon">
-              {toast.type === 'error' ? '!' : '✓'}
-            </div>
-            <div className="toast-admin-text">{toast.message}</div>
-            <button className="toast-admin-close" onClick={() => setToast(null)}>
-              ✕
-            </button>
           </div>
         </div>
       )}

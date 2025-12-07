@@ -14,6 +14,12 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
     maPhuongXa: '',
     vaiTro: '',
     trangThai: '',
+    // Thêm các trường mới
+    soCCCD: '',
+    ngayCapCCCD: '',
+    noiCapCCCD: '',
+    ngaySinh: '',
+    gioiTinh: '',
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -90,6 +96,14 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
       }
 
       const u = data.data || {};
+      
+      // Format date cho input type="date"
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toISOString().split('T')[0];
+      };
+
       setForm({
         maNguoiDung: u.maNguoiDung,
         hoTen: u.hoTen || '',
@@ -101,6 +115,12 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
         maPhuongXa: u.maPhuongXa || '',
         vaiTro: u.vaiTro || '',
         trangThai: u.trangThai || '',
+        // Thêm các trường mới
+        soCCCD: u.soCCCD || '',
+        ngayCapCCCD: formatDate(u.ngayCapCCCD),
+        noiCapCCCD: u.noiCapCCCD || '',
+        ngaySinh: formatDate(u.ngaySinh),
+        gioiTinh: u.gioiTinh || '',
       });
 
       // Tải huyện và phường xã nếu có
@@ -158,9 +178,15 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
         maPhuongXa: form.maPhuongXa ? parseInt(form.maPhuongXa) : null,
         vaiTro: form.vaiTro || null,
         trangThai: form.trangThai || null,
+        // Thêm các trường mới
+        soCCCD: form.soCCCD?.trim() || null,
+        ngayCapCCCD: form.ngayCapCCCD || null,
+        noiCapCCCD: form.noiCapCCCD?.trim() || null,
+        ngaySinh: form.ngaySinh || null,
+        gioiTinh: form.gioiTinh || null,
       };
 
-      console.log('Dữ liệu gửi đi:', body); // Debug
+      console.log('Dữ liệu gửi đi:', body);
 
       const res = await fetch(`${API_BASE}/NguoiDung/${userId}`, {
         method: 'PUT',
@@ -245,68 +271,137 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
             <div style={{ padding: 20 }}>Đang tải thông tin...</div>
           ) : (
             <form className="modal-body" onSubmit={handleSubmit}>
-              {/* Hàng 1: ID / Email */}
-              <div className="form-grid-2-rows">
-                <div className="form-row">
-                  <span className="form-row-label">Mã người dùng</span>
-                  <input type="text" value={form.maNguoiDung || ''} disabled />
-                </div>
-                <div className="form-row">
-                  <span className="form-row-label">Email</span>
-                  <input type="email" value={form.email} disabled />
-                </div>
+              {/* SECTION 1: Thông tin cơ bản */}
+              <div style={{ marginBottom: 20 }}>
+                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
+                  📋 Thông tin cơ bản
+                </h4>
+                <div className="form-grid-2-rows">
+                  <div className="form-row">
+                    <span className="form-row-label">Mã người dùng</span>
+                    <input type="text" value={form.maNguoiDung || ''} disabled />
+                  </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Email</span>
+                    <input type="email" value={form.email} disabled />
+                  </div>
 
-                {/* Hàng 2: Họ tên / SĐT */}
-                <div className="form-row">
-                  <span className="form-row-label">Họ tên</span>
-                  <input
-                    type="text"
-                    value={form.hoTen}
-                    onChange={(e) => handleChange('hoTen', e.target.value)}
-                  />
-                </div>
-                <div className="form-row">
-                  <span className="form-row-label">Số điện thoại</span>
-                  <input
-                    type="text"
-                    value={form.soDienThoai}
-                    onChange={(e) => handleChange('soDienThoai', e.target.value)}
-                  />
-                </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Họ tên</span>
+                    <input
+                      type="text"
+                      value={form.hoTen}
+                      onChange={(e) => handleChange('hoTen', e.target.value)}
+                      placeholder="Nguyễn Văn A"
+                    />
+                  </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Số điện thoại</span>
+                    <input
+                      type="text"
+                      value={form.soDienThoai}
+                      onChange={(e) => handleChange('soDienThoai', e.target.value)}
+                      placeholder="0909123456"
+                    />
+                  </div>
 
-                {/* Hàng 3: Vai trò / Trạng thái */}
-                <div className="form-row">
-                  <span className="form-row-label">Vai trò</span>
-                  <select
-                    value={form.vaiTro}
-                    onChange={(e) => handleChange('vaiTro', e.target.value)}
-                  >
-                    <option value="">-- Chọn vai trò --</option>
-                    <option value="Admin">Admin</option>
-                    <option value="LeTan">Lễ tân</option>
-                    <option value="KhachHang">Khách hàng</option>
-                  </select>
-                </div>
-                <div className="form-row">
-                  <span className="form-row-label">Trạng thái</span>
-                  <select
-                    value={form.trangThai}
-                    onChange={(e) => handleChange('trangThai', e.target.value)}
-                  >
-                    <option value="">-- Chọn trạng thái --</option>
-                    <option value="Hoạt động">Hoạt động</option>
-                    <option value="Tạm khóa">Tạm khóa</option>
-                  </select>
+                  <div className="form-row">
+                    <span className="form-row-label">Vai trò</span>
+                    <select
+                      value={form.vaiTro}
+                      onChange={(e) => handleChange('vaiTro', e.target.value)}
+                    >
+                      <option value="">-- Chọn vai trò --</option>
+                      <option value="Admin">Admin</option>
+                      <option value="LeTan">Lễ tân</option>
+                      <option value="KhachHang">Khách hàng</option>
+                    </select>
+                  </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Trạng thái</span>
+                    <select
+                      value={form.trangThai}
+                      onChange={(e) => handleChange('trangThai', e.target.value)}
+                    >
+                      <option value="">-- Chọn trạng thái --</option>
+                      <option value="Hoạt động">Hoạt động</option>
+                      <option value="Tạm khóa">Tạm khóa</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* Địa chỉ */}
-              <div style={{ marginTop: 16 }}>
-                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600 }}>
-                  Địa chỉ
+              {/* SECTION 2: Thông tin cá nhân */}
+              <div style={{ marginBottom: 20 }}>
+                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
+                  👤 Thông tin cá nhân
                 </h4>
                 <div className="form-grid-2-rows">
-                  {/* Tỉnh / Huyện */}
+                  <div className="form-row">
+                    <span className="form-row-label">Ngày sinh</span>
+                    <input
+                      type="date"
+                      value={form.ngaySinh}
+                      onChange={(e) => handleChange('ngaySinh', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Giới tính</span>
+                    <select
+                      value={form.gioiTinh}
+                      onChange={(e) => handleChange('gioiTinh', e.target.value)}
+                    >
+                      <option value="">-- Chọn giới tính --</option>
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                      <option value="Khác">Khác</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: CCCD */}
+              <div style={{ marginBottom: 20 }}>
+                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
+                  🆔 Thông tin CCCD
+                </h4>
+                <div className="form-grid-2-rows">
+                  <div className="form-row">
+                    <span className="form-row-label">Số CCCD</span>
+                    <input
+                      type="text"
+                      value={form.soCCCD}
+                      onChange={(e) => handleChange('soCCCD', e.target.value)}
+                      placeholder="001234567890"
+                      maxLength={20}
+                    />
+                  </div>
+                  <div className="form-row">
+                    <span className="form-row-label">Ngày cấp</span>
+                    <input
+                      type="date"
+                      value={form.ngayCapCCCD}
+                      onChange={(e) => handleChange('ngayCapCCCD', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-row" style={{ gridColumn: '1 / -1' }}>
+                    <span className="form-row-label">Nơi cấp</span>
+                    <input
+                      type="text"
+                      value={form.noiCapCCCD}
+                      onChange={(e) => handleChange('noiCapCCCD', e.target.value)}
+                      placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: Địa chỉ */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
+                  📍 Địa chỉ
+                </h4>
+                <div className="form-grid-2-rows">
                   <div className="form-row">
                     <span className="form-row-label">Tỉnh/Thành phố</span>
                     <select
@@ -337,7 +432,6 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                     </select>
                   </div>
 
-                  {/* Phường xã / Địa chỉ chi tiết */}
                   <div className="form-row">
                     <span className="form-row-label">Phường/Xã</span>
                     <select

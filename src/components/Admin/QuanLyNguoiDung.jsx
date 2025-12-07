@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ChinhSuaNguoiDung from './ChinhSuaNguoiDung';
+import ChiTietNguoiDung from './ChiTietNguoiDung';
 
 const API_BASE = 'http://localhost:5114/api'; // dùng port 5114 theo launchSettings
 
@@ -38,6 +39,7 @@ export default function QuanLyNguoiDung() {
   const [loading, setLoading] = useState(false);
 
   const [editingUserId, setEditingUserId] = useState(null);
+  const [viewingUserId, setViewingUserId] = useState(null);
 
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -180,18 +182,12 @@ export default function QuanLyNguoiDung() {
     const parts = [];
     
     if (user.tenPhuongXa) {
-      const xa = user.tenPhuongXa.length > 10 
-        ? user.tenPhuongXa.substring(0, 10) + '..' 
+      const xa = user.tenPhuongXa.length > 6 
+        ? user.tenPhuongXa.substring(0, 6) + '..' 
         : user.tenPhuongXa;
       parts.push(xa);
     }
     
-    if (user.tenHuyen && parts.length < 2) {
-      const huyen = user.tenHuyen.length > 8 
-        ? user.tenHuyen.substring(0, 8) + '..' 
-        : user.tenHuyen;
-      parts.push(huyen);
-    }
     
     return parts.length > 0 ? parts.join(', ') : '-';
   };
@@ -345,16 +341,18 @@ export default function QuanLyNguoiDung() {
                       : '-'}
                   </td>
                   <td>{u.soDienThoai || '-'}</td>
-                  <td 
-                    className="address-cell" 
-                    title={getDiaChiDayDu(u)}
-                  >
-                    <div className="address-text">
-                      {getDiaChiRutGon(u)}
-                    </div>
+                  <td className="address-cell" title={getDiaChiDayDu(u)}>
+                    <div className="address-text">{getDiaChiRutGon(u)}</div>
                   </td>
                   <td>
                     <div className="action-buttons">
+                      <button
+                        className="action-icon-btn view"
+                        title="Xem chi tiết"
+                        onClick={() => setViewingUserId(u.maNguoiDung)}
+                      >
+                        👁️
+                      </button>
                       <button
                         className="action-icon-btn edit"
                         title="Chỉnh sửa thông tin"
@@ -413,12 +411,22 @@ export default function QuanLyNguoiDung() {
         </button>
       </div>
 
+      {/* Modal Chi tiết người dùng */}
+      {viewingUserId && (
+        <ChiTietNguoiDung
+          userId={viewingUserId}
+          onClose={() => setViewingUserId(null)}
+          onShowToast={showToast}
+        />
+      )}
+
+      {/* Modal Chỉnh sửa người dùng */}
       {editingUserId && (
         <ChinhSuaNguoiDung
           userId={editingUserId}
           onClose={() => setEditingUserId(null)}
           onUpdated={() => fetchUsers(pagination.currentPage, pagination.pageSize)}
-          onShowToast={showToast}   // tất cả toast đi qua đây
+          onShowToast={showToast}
         />
       )}
 
