@@ -109,64 +109,67 @@ export default function QuanLyKhachHangLT() {
       )}
 
       {/* Header */}
-      <div className="admin-card-header">
-        <div className="admin-card-header-left">
+      <div className="letan-header-layout">
+        <div className="letan-header-left">
           <h3 className="admin-card-title">👥 Quản lý khách hàng</h3>
-          <p className="admin-card-subtitle">
-            Xem và chỉnh sửa thông tin khách hàng (không thể đổi vai trò)
-          </p>
-        </div>
-        <div className="admin-card-header-right">
-          <button className="btn-outline" onClick={handleReset}>
+          <button className="btn-outline letan-reset-btn" onClick={handleReset}>
             🔄 Đặt lại
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="admin-filters">
-        <div className="admin-search-group">
-          <input
-            ref={searchInputRef}
-            type="text"
-            className="admin-search-input"
-            placeholder="Tìm theo tên, email, SĐT, CCCD..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <button className="btn-primary" onClick={handleSearch}>
+      {/* Filters - CẬP NHẬT */}
+      <div className="letan-search-section">
+        <div className="letan-search-row">
+          {/* Search Input */}
+          <div className="letan-search-input-wrapper">
+            <span className="letan-search-icon">🔍</span>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="letan-search-input"
+              placeholder="Tìm theo tên, email, SĐT, CCCD..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+          </div>
+
+          {/* Filter Status */}
+          <select
+            className="letan-select"
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">📋 Tất cả trạng thái</option>
+            <option value="Hoạt động">✅ Hoạt động</option>
+            <option value="Tạm khóa">🔒 Tạm khóa</option>
+          </select>
+
+          {/* Page Size */}
+          <select
+            className="letan-select"
+            value={pageSize}
+            onChange={(e) => {
+              const newSize = Number(e.target.value);
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>📄 5 / trang</option>
+            <option value={10}>📄 10 / trang</option>
+            <option value={20}>📄 20 / trang</option>
+            <option value={50}>📄 50 / trang</option>
+          </select>
+
+          {/* Search Button */}
+          <button className="letan-btn-search" onClick={handleSearch}>
             🔍 Tìm kiếm
           </button>
         </div>
-
-        <select
-          className="admin-select"
-          value={filterStatus}
-          onChange={(e) => {
-            setFilterStatus(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="Hoạt động">Hoạt động</option>
-          <option value="Tạm khóa">Tạm khóa</option>
-        </select>
-
-        <select
-          className="admin-select"
-          value={pageSize}
-          onChange={(e) => {
-            const newSize = Number(e.target.value);
-            setPageSize(newSize);
-            setCurrentPage(1);
-          }}
-        >
-          <option value={5}>5 / trang</option>
-          <option value={10}>10 / trang</option>
-          <option value={20}>20 / trang</option>
-          <option value={50}>50 / trang</option>
-        </select>
       </div>
 
       {/* Table */}

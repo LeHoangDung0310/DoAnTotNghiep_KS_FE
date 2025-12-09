@@ -160,21 +160,71 @@ export default function ChiTietDatPhong({ bookingId, onClose, onShowToast, onUpd
               <div className="detail-card">
                 <div className="detail-card-icon">🔑</div>
                 <div>
-                  <div className="detail-card-label">Nhận phòng</div>
+                  <div className="detail-card-label">Nhận phòng (dự kiến)</div>
                   <div className="detail-card-value">
                     {new Date(booking.ngayNhanPhong).toLocaleDateString('vi-VN')}
                   </div>
                 </div>
               </div>
+
+              {/* ✅ THÊM MỚI - Thời gian check-in thực tế */}
+              {booking.thoiGianCheckIn && (
+                <div className="detail-card" style={{
+                  background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                  border: '2px solid #6ee7b7'
+                }}>
+                  <div className="detail-card-icon" style={{ background: '#059669' }}>✅</div>
+                  <div>
+                    <div className="detail-card-label" style={{ color: '#065f46', fontWeight: 600 }}>
+                      Check-in thực tế
+                    </div>
+                    <div className="detail-card-value" style={{ color: '#047857', fontWeight: 700 }}>
+                      {new Date(booking.thoiGianCheckIn).toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="detail-card">
                 <div className="detail-card-icon">🚪</div>
                 <div>
-                  <div className="detail-card-label">Trả phòng</div>
+                  <div className="detail-card-label">Trả phòng (dự kiến)</div>
                   <div className="detail-card-value">
                     {new Date(booking.ngayTraPhong).toLocaleDateString('vi-VN')}
                   </div>
                 </div>
               </div>
+
+              {/* ✅ THÊM MỚI - Thời gian check-out thực tế */}
+              {booking.thoiGianCheckOut && (
+                <div className="detail-card" style={{
+                  background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                  border: '2px solid #fca5a5'
+                }}>
+                  <div className="detail-card-icon" style={{ background: '#dc2626' }}>🚪</div>
+                  <div>
+                    <div className="detail-card-label" style={{ color: '#991b1b', fontWeight: 600 }}>
+                      Check-out thực tế
+                    </div>
+                    <div className="detail-card-value" style={{ color: '#b91c1c', fontWeight: 700 }}>
+                      {new Date(booking.thoiGianCheckOut).toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="detail-card">
                 <div className="detail-card-icon">⏱️</div>
                 <div>

@@ -81,6 +81,13 @@ export default function QuanLyDatPhongLT() {
   const hideToast = () => {
     setToast({ show: false, type: '', message: '' });
   };
+  const handleReset = () => {
+    setSearchTerm('');
+    setFilterStatus('');
+    setCurrentPage(1);
+    setPageSize(10);
+    fetchUsers();
+  };
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -231,58 +238,74 @@ export default function QuanLyDatPhongLT() {
       )}
 
       {/* Header */}
-      <div className="admin-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 className="admin-card-title">📅 Quản lý đặt phòng</h3>
-        <button className="btn-success" onClick={() => setShowCreateModal(true)}>
-          ➕ Đặt phòng trực tiếp
-        </button>
+      <div className="letan-header-layout">
+        <div className="letan-header-left">
+          <h3 className="admin-card-title">📅 Quản lý đặt phòng</h3>
+          <button className="btn-outline letan-reset-btn" onClick={handleReset}>
+            🔄 Đặt lại
+          </button>
+        </div>
+        
+        <div className="letan-header-right">
+          <button className="btn-success" onClick={() => setShowCreateModal(true)}>
+            ➕ Đặt phòng trực tiếp
+          </button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="admin-filters">
-        <div className="admin-search-group">
-          <input
-            type="text"
-            className="admin-search-input"
-            placeholder="Tìm theo mã, tên, email, SĐT..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-          />
-          <button className="btn-primary" onClick={handleSearch}>
+      {/* Filters - CẬP NHẬT */}
+      <div className="letan-search-section">
+        <div className="letan-search-row">
+          {/* Search Input */}
+          <div className="letan-search-input-wrapper">
+            <span className="letan-search-icon">🔍</span>
+            <input
+              type="text"
+              className="letan-search-input"
+              placeholder="Tìm theo mã, tên, email, SĐT..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+
+          {/* Filter Status */}
+          <select
+            className="letan-select"
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">📋 Tất cả trạng thái</option>
+            <option value="ChoDuyet">⏳ Chờ duyệt</option>
+            <option value="DaDuyet">✅ Đã duyệt</option>
+            <option value="DangSuDung">🏨 Đang sử dụng</option>
+            <option value="HoanThanh">✔️ Hoàn thành</option>
+            <option value="DaHuy">❌ Đã hủy</option>
+            <option value="TuChoi">🚫 Từ chối</option>
+          </select>
+
+          {/* Filter Type */}
+          <select
+            className="letan-select"
+            value={filterType}
+            onChange={(e) => {
+              setFilterType(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">🏷️ Tất cả loại</option>
+            <option value="Online">🌐 Online</option>
+            <option value="TrucTiep">🏪 Trực tiếp</option>
+          </select>
+
+          {/* Search Button */}
+          <button className="letan-btn-search" onClick={handleSearch}>
             🔍 Tìm kiếm
           </button>
         </div>
-
-        <select
-          className="admin-select"
-          value={filterStatus}
-          onChange={(e) => {
-            setFilterStatus(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="ChoDuyet">Chờ duyệt</option>
-          <option value="DaDuyet">Đã duyệt</option>
-          <option value="DangSuDung">Đang sử dụng</option>
-          <option value="HoanThanh">Hoàn thành</option>
-          <option value="DaHuy">Đã hủy</option>
-          <option value="TuChoi">Từ chối</option>
-        </select>
-
-        <select
-          className="admin-select"
-          value={filterType}
-          onChange={(e) => {
-            setFilterType(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">Tất cả loại</option>
-          <option value="Online">Online</option>
-          <option value="TrucTiep">Trực tiếp</option>
-        </select>
       </div>
 
       {/* Table */}
@@ -308,6 +331,7 @@ export default function QuanLyDatPhongLT() {
                   <th>Loại</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
+                  <th>Thời gian thực tế</th> {/* Thêm cột mới vào table */}
                 </tr>
               </thead>
               <tbody>
@@ -366,6 +390,33 @@ export default function QuanLyDatPhongLT() {
                     <td>{getTypeTag(booking.loaiDatPhong)}</td>
                     <td>{getStatusTag(booking.trangThai)}</td>
                     <td>{renderActions(booking)}</td>
+                    <td>
+                      <div style={{ fontSize: 12 }}>
+                        {booking.thoiGianCheckIn && (
+                          <div style={{ color: '#059669' }}>
+                            ✅ In: {new Date(booking.thoiGianCheckIn).toLocaleString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                        )}
+                        {booking.thoiGianCheckOut && (
+                          <div style={{ color: '#dc2626' }}>
+                            🚪 Out: {new Date(booking.thoiGianCheckOut).toLocaleString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                        )}
+                        {!booking.thoiGianCheckIn && !booking.thoiGianCheckOut && '—'}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
