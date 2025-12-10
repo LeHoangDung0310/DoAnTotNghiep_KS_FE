@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Toast from '../Common/Toast'; // ✅ IMPORT
+import Toast from '../Common/Toast';
 import api from '../../utils/api';
 
 export default function QuanLyHinhAnhLP() {
@@ -12,10 +12,10 @@ export default function QuanLyHinhAnhLP() {
   const [uploadFiles, setUploadFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ ĐỔI
+  const [toast, setToast] = useState({ show: false, type: '', message: '' });
 
   const showToast = (type, message) => {
-    setToast({ show: true, type, message }); // ✅ ĐỔI
+    setToast({ show: true, type, message });
   };
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function QuanLyHinhAnhLP() {
       setLoaiPhongs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Load loại phòng error:', err);
-      showToast('error', 'Lỗi tải danh sách loại phòng');
+      showToast('error', '❌ Lỗi tải danh sách loại phòng');
     }
   };
 
@@ -81,7 +81,7 @@ export default function QuanLyHinhAnhLP() {
   const handleFiles = (files) => {
     const imageFiles = files.filter((file) => file.type.startsWith('image/'));
     if (imageFiles.length === 0) {
-      showToast('error', 'Vui lòng chọn file hình ảnh!');
+      showToast('error', '⚠️ Vui lòng chọn file hình ảnh!');
       return;
     }
     const previews = imageFiles.map((file) => ({
@@ -117,14 +117,14 @@ export default function QuanLyHinhAnhLP() {
         });
       }
 
-      showToast('success', `Upload thành công ${uploadFiles.length} hình ảnh!`);
+      showToast('success', `✅ Upload thành công ${uploadFiles.length} hình ảnh!`);
       setShowUploadModal(false);
       uploadFiles.forEach((f) => URL.revokeObjectURL(f.preview));
       setUploadFiles([]);
       loadHinhAnhs();
     } catch (err) {
       console.error('Upload error:', err);
-      showToast('error', err.response?.data?.message || 'Lỗi upload hình ảnh');
+      showToast('error', `❌ ${err.response?.data?.message || 'Lỗi upload hình ảnh'}`);
     } finally {
       setLoading(false);
     }
@@ -150,7 +150,6 @@ export default function QuanLyHinhAnhLP() {
 
   const deleteSelected = async () => {
     if (selectedImages.length === 0) return;
-
     setDeletingItem({ isMultiple: true, count: selectedImages.length });
   };
 
@@ -163,16 +162,16 @@ export default function QuanLyHinhAnhLP() {
         for (const id of selectedImages) {
           await api.delete(`/api/HinhAnhLPhong/${id}`);
         }
-        showToast('success', `Đã xóa ${selectedImages.length} hình ảnh!`);
+        showToast('success', `✅ Đã xóa ${selectedImages.length} hình ảnh!`);
       } else {
         await api.delete(`/api/HinhAnhLPhong/${deletingItem.maHinhAnh}`);
-        showToast('success', 'Xóa hình ảnh thành công!');
+        showToast('success', '✅ Xóa hình ảnh thành công!');
       }
       setDeletingItem(null);
       loadHinhAnhs();
     } catch (err) {
       console.error('Delete error:', err);
-      showToast('error', 'Lỗi xóa hình ảnh');
+      showToast('error', '❌ Lỗi xóa hình ảnh');
     } finally {
       setLoading(false);
     }
@@ -180,7 +179,6 @@ export default function QuanLyHinhAnhLP() {
 
   return (
     <div className="admin-card">
-      {/* ✅ Toast Component */}
       {toast.show && (
         <Toast
           type={toast.type}
@@ -245,11 +243,11 @@ export default function QuanLyHinhAnhLP() {
         <div style={{ padding: '20px 0' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px', color: '#6b7280' }}>
-              Đang tải...
+              ⏳ Đang tải...
             </div>
           ) : hinhAnhs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: '#6b7280' }}>
-              <p style={{ marginBottom: '16px', fontSize: '15px' }}>Chưa có hình ảnh nào</p>
+              <p style={{ marginBottom: '16px', fontSize: '15px' }}>📷 Chưa có hình ảnh nào</p>
               <button className="btn-success" onClick={() => setShowUploadModal(true)}>
                 + Upload ảnh đầu tiên
               </button>
@@ -334,124 +332,181 @@ export default function QuanLyHinhAnhLP() {
         </div>
       )}
 
-      {/* Upload Modal */}
+      {/* ✅ MODAL UPLOAD MỚI - GRADIENT HEADER */}
       {showUploadModal && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <div className="modal-header">
-              <div className="modal-header-left">
-                <h3>Upload hình ảnh</h3>
+        <div className="modal-backdrop" onClick={() => setShowUploadModal(false)}>
+          <div className="modal modal-large modal-booking" onClick={(e) => e.stopPropagation()}>
+            {/* Header gradient */}
+            <div className="modal-header-gradient">
+              <div className="modal-header-content">
+                <div className="modal-icon">📤</div>
+                <div>
+                  <h3 className="modal-title-large">Upload hình ảnh loại phòng</h3>
+                  <p className="modal-subtitle">
+                    Thêm hình ảnh cho loại phòng "{selectedLoaiPhong?.tenLoaiPhong}"
+                  </p>
+                </div>
               </div>
-              <button className="modal-close-btn" onClick={() => setShowUploadModal(false)}>
+              <button 
+                className="modal-close-btn-gradient" 
+                onClick={() => setShowUploadModal(false)}
+              >
                 ✕
               </button>
             </div>
 
-            <div className="modal-body">
-              <div
-                style={{
-                  border: dragActive ? '2px dashed #2563eb' : '2px dashed #d1d5db',
-                  borderRadius: '12px',
-                  padding: '60px 20px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  background: dragActive ? '#eff6ff' : '#f9fafb',
-                  transition: 'all 0.3s',
-                }}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('file-input').click()}
-              >
-                <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
-                  📁 Kéo thả ảnh vào đây hoặc click để chọn
-                </p>
-                <input
-                  id="file-input"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
-              </div>
+            <div className="modal-body modal-body-scrollable">
+              {/* Section: Upload zone */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <div className="form-section-icon">📁</div>
+                  <h4 className="form-section-title">Chọn hình ảnh</h4>
+                </div>
 
-              {uploadFiles.length > 0 && (
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '16px',
-                    marginTop: '20px',
+                    border: dragActive ? '2px dashed #2563eb' : '2px dashed #d1d5db',
+                    borderRadius: '12px',
+                    padding: '60px 20px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: dragActive ? '#eff6ff' : '#f9fafb',
+                    transition: 'all 0.3s',
                   }}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => document.getElementById('file-input').click()}
                 >
-                  {uploadFiles.map((item, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '10px',
-                        overflow: 'hidden',
-                        background: 'white',
-                        position: 'relative',
-                      }}
-                    >
-                      <img
-                        src={item.preview}
-                        alt="Preview"
+                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>
+                    {dragActive ? '⬇️' : '📸'}
+                  </div>
+                  <p style={{ color: '#374151', fontSize: '15px', margin: '0 0 8px 0', fontWeight: 500 }}>
+                    {dragActive ? 'Thả ảnh vào đây' : 'Kéo thả ảnh vào đây'}
+                  </p>
+                  <p style={{ color: '#6b7280', fontSize: '13px', margin: 0 }}>
+                    hoặc click để chọn từ máy tính
+                  </p>
+                  <p style={{ color: '#9ca3af', fontSize: '12px', marginTop: '12px' }}>
+                    💡 Hỗ trợ: JPG, PNG, GIF (Tối đa 10MB/ảnh)
+                  </p>
+                  <input
+                    id="file-input"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              </div>
+
+              {/* Section: Preview */}
+              {uploadFiles.length > 0 && (
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <div className="form-section-icon">🖼️</div>
+                    <h4 className="form-section-title">
+                      Xem trước ({uploadFiles.length} ảnh)
+                    </h4>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                      gap: '16px',
+                    }}
+                  >
+                    {uploadFiles.map((item, idx) => (
+                      <div
+                        key={idx}
                         style={{
-                          width: '100%',
-                          height: '150px',
-                          objectFit: 'cover',
-                          display: 'block',
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          background: 'white',
+                          position: 'relative',
+                          transition: 'all 0.3s',
                         }}
-                      />
-                      <div style={{ padding: '10px' }}>
-                        <button
-                          onClick={() => removeUploadFile(idx)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#2563eb';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#e5e7eb';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        <img
+                          src={item.preview}
+                          alt="Preview"
                           style={{
                             width: '100%',
-                            padding: '6px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: '#fee2e2',
-                            color: '#b91c1c',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: '600',
+                            height: '140px',
+                            objectFit: 'cover',
+                            display: 'block',
                           }}
-                        >
-                          ✕ Xóa
-                        </button>
+                        />
+                        <div style={{ padding: '10px' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeUploadFile(idx);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              background: '#fee2e2',
+                              color: '#b91c1c',
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.background = '#fecaca';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.background = '#fee2e2';
+                            }}
+                          >
+                            ✕ Xóa
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="modal-footer">
-              <div className="modal-footer-right">
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={() => {
-                    uploadFiles.forEach((f) => URL.revokeObjectURL(f.preview));
-                    setUploadFiles([]);
-                    setShowUploadModal(false);
-                  }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={uploadImages}
-                  disabled={loading || uploadFiles.length === 0}
-                >
-                  {loading ? 'Đang upload...' : `Upload ${uploadFiles.length} ảnh`}
-                </button>
-              </div>
+            {/* Footer */}
+            <div className="modal-footer modal-footer-modern">
+              <button
+                type="button"
+                className="btn-outline-modern"
+                onClick={() => {
+                  uploadFiles.forEach((f) => URL.revokeObjectURL(f.preview));
+                  setUploadFiles([]);
+                  setShowUploadModal(false);
+                }}
+                disabled={loading}
+              >
+                <span className="btn-icon">✕</span>
+                Hủy
+              </button>
+              <button
+                type="button"
+                className="btn-primary-modern"
+                onClick={uploadImages}
+                disabled={loading || uploadFiles.length === 0}
+              >
+                <span className="btn-icon">{loading ? '⏳' : '📤'}</span>
+                {loading ? 'Đang upload...' : `Upload ${uploadFiles.length} ảnh`}
+              </button>
             </div>
           </div>
         </div>
@@ -463,7 +518,7 @@ export default function QuanLyHinhAnhLP() {
           <div className="modal modal-sm">
             <div className="modal-header">
               <div className="modal-header-left">
-                <h3>Xóa hình ảnh</h3>
+                <h3>🗑️ Xóa hình ảnh</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setDeletingItem(null)}>
                 ✕
@@ -475,7 +530,8 @@ export default function QuanLyHinhAnhLP() {
                 {deletingItem.isMultiple
                   ? `Bạn có chắc chắn muốn xóa ${deletingItem.count} hình ảnh đã chọn?`
                   : 'Bạn có chắc chắn muốn xóa hình ảnh này?'}{' '}
-                Hành động này không thể hoàn tác.
+                <br/>
+                <strong style={{ color: '#dc2626' }}>Hành động này không thể hoàn tác.</strong>
               </p>
             </div>
 
@@ -488,8 +544,13 @@ export default function QuanLyHinhAnhLP() {
                 >
                   Hủy
                 </button>
-                <button type="button" className="btn-primary btn-danger" onClick={handleDelete}>
-                  Xóa
+                <button 
+                  type="button" 
+                  className="btn-primary btn-danger" 
+                  onClick={handleDelete}
+                  disabled={loading}
+                >
+                  {loading ? '⏳ Đang xóa...' : '🗑️ Xóa'}
                 </button>
               </div>
             </div>

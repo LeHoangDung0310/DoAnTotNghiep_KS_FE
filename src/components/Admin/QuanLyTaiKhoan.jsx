@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Common/Toast';
 import api from '../../utils/api';
 import '../../styles/quanlytaikhoan.css';
 
 export default function QuanLyTaiKhoan() {
   const [activeTab, setActiveTab] = useState('info');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [toast, setToast] = useState({ show: false, type: '', message: '' });
   
   // Thông tin người dùng
   const [userInfo, setUserInfo] = useState({
@@ -23,7 +24,17 @@ export default function QuanLyTaiKhoan() {
     anhDaiDien: '',
     vaiTro: '',
     trangThai: '',
-    ngayTao: ''
+    ngayTao: '',
+    // CCCD
+    soCCCD: '',
+    ngayCapCCCD: null,
+    noiCapCCCD: '',
+    ngaySinh: null,
+    gioiTinh: '',
+    // Ngân hàng
+    nganHang: '',
+    soTaiKhoan: '',
+    tenChuTK: ''
   });
 
   // Form cập nhật thông tin
@@ -31,7 +42,15 @@ export default function QuanLyTaiKhoan() {
     hoTen: '',
     soDienThoai: '',
     diaChiChiTiet: '',
-    maPhuongXa: null
+    maPhuongXa: null,
+    soCCCD: '',
+    ngayCapCCCD: '',
+    noiCapCCCD: '',
+    ngaySinh: '',
+    gioiTinh: '',
+    nganHang: '',
+    soTaiKhoan: '',
+    tenChuTK: ''
   });
 
   // Form đổi mật khẩu
@@ -58,23 +77,17 @@ export default function QuanLyTaiKhoan() {
   const [selectedTinh, setSelectedTinh] = useState(null);
   const [selectedHuyen, setSelectedHuyen] = useState(null);
 
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+  };
+
   useEffect(() => {
     loadUserInfo();
     loadTinhs();
   }, []);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
   const loadUserInfo = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      console.log('Access token:', token ? 'exists' : 'missing');
-      
       const resp = await api.get('/api/NguoiDung/Profile/Me');
       const data = resp.data?.data || resp.data;
       
@@ -95,14 +108,32 @@ export default function QuanLyTaiKhoan() {
         anhDaiDien: data.anhDaiDien || '',
         vaiTro: data.vaiTro || '',
         trangThai: data.trangThai || '',
-        ngayTao: data.ngayTao || ''
+        ngayTao: data.ngayTao || '',
+        // CCCD
+        soCCCD: data.soCCCD || '',
+        ngayCapCCCD: data.ngayCapCCCD || null,
+        noiCapCCCD: data.noiCapCCCD || '',
+        ngaySinh: data.ngaySinh || null,
+        gioiTinh: data.gioiTinh || '',
+        // Ngân hàng
+        nganHang: data.nganHang || '',
+        soTaiKhoan: data.soTaiKhoan || '',
+        tenChuTK: data.tenChuTK || ''
       });
 
       setFormInfo({
         hoTen: data.hoTen || '',
         soDienThoai: data.soDienThoai || '',
         diaChiChiTiet: data.diaChiChiTiet || '',
-        maPhuongXa: data.maPhuongXa || null
+        maPhuongXa: data.maPhuongXa || null,
+        soCCCD: data.soCCCD || '',
+        ngayCapCCCD: data.ngayCapCCCD ? data.ngayCapCCCD.split('T')[0] : '',
+        noiCapCCCD: data.noiCapCCCD || '',
+        ngaySinh: data.ngaySinh ? data.ngaySinh.split('T')[0] : '',
+        gioiTinh: data.gioiTinh || '',
+        nganHang: data.nganHang || '',
+        soTaiKhoan: data.soTaiKhoan || '',
+        tenChuTK: data.tenChuTK || ''
       });
 
       if (data.maTinh) {
@@ -115,17 +146,16 @@ export default function QuanLyTaiKhoan() {
       }
     } catch (err) {
       console.error('Load user info error:', err);
-      console.error('Error response:', err.response?.data);
       
       if (err.response?.status === 401) {
-        setMessage({ type: 'error', text: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' });
+        showToast('error', '⚠️ Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
         return;
       }
       
-      setMessage({ type: 'error', text: 'Không thể tải thông tin người dùng' });
+      showToast('error', '❌ Không thể tải thông tin người dùng');
     }
   };
 
@@ -191,21 +221,18 @@ export default function QuanLyTaiKhoan() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
-      setMessage({ type: 'error', text: 'Vui lòng chọn file ảnh (jpg, png, gif)' });
+      showToast('error', '⚠️ Vui lòng chọn file ảnh (jpg, png, gif)');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Kích thước ảnh tối đa 5MB' });
+      showToast('error', '⚠️ Kích thước ảnh tối đa 5MB');
       return;
     }
 
     setSelectedFile(file);
     
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result);
@@ -216,7 +243,7 @@ export default function QuanLyTaiKhoan() {
   // Upload avatar
   const handleUploadAvatar = async () => {
     if (!selectedFile) {
-      setMessage({ type: 'error', text: 'Vui lòng chọn ảnh để tải lên' });
+      showToast('error', '⚠️ Vui lòng chọn ảnh để tải lên');
       return;
     }
 
@@ -231,16 +258,13 @@ export default function QuanLyTaiKhoan() {
         },
       });
 
-      setMessage({ type: 'success', text: 'Cập nhật ảnh đại diện thành công!' });
+      showToast('success', '✅ Cập nhật ảnh đại diện thành công!');
       
-      // Reset
       setSelectedFile(null);
       setPreviewUrl('');
       
-      // Reload user info to get new avatar URL
       await loadUserInfo();
       
-      // Dispatch custom event để TrangAdmin cập nhật avatar
       window.dispatchEvent(new CustomEvent('avatarUpdated', { 
         detail: { 
           avatarUrl: response.data?.avatarUrl || response.data?.data?.avatarUrl 
@@ -249,13 +273,12 @@ export default function QuanLyTaiKhoan() {
     } catch (err) {
       console.error('Upload avatar error:', err);
       const msg = err.response?.data?.message || 'Tải ảnh lên thất bại';
-      setMessage({ type: 'error', text: msg });
+      showToast('error', `❌ ${msg}`);
     } finally {
       setUploadingAvatar(false);
     }
   };
 
-  // Cancel avatar upload
   const handleCancelAvatar = () => {
     setSelectedFile(null);
     setPreviewUrl('');
@@ -268,6 +291,19 @@ export default function QuanLyTaiKhoan() {
     if (formInfo.soDienThoai && !/^0\d{9}$/.test(formInfo.soDienThoai)) {
       e.soDienThoai = 'Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)';
     }
+    if (formInfo.soCCCD && !/^\d{12}$/.test(formInfo.soCCCD)) {
+      e.soCCCD = 'Số CCCD phải là 12 chữ số';
+    }
+    
+    // ✅ VALIDATE TÊN CHỦ TÀI KHOẢN
+    if (formInfo.tenChuTK && formInfo.tenChuTK.trim()) {
+      const tenChuTK = formInfo.tenChuTK.trim();
+      // Kiểm tra chỉ chứa chữ cái viết hoa và khoảng trắng
+      if (!/^[A-Z\s]+$/.test(tenChuTK)) {
+        e.tenChuTK = 'Tên chủ tài khoản phải viết hoa không dấu (VD: NGUYEN VAN A)';
+      }
+    }
+    
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -297,16 +333,25 @@ export default function QuanLyTaiKhoan() {
         HoTen: formInfo.hoTen?.trim(),
         SoDienThoai: formInfo.soDienThoai?.trim() || null,
         DiaChiChiTiet: formInfo.diaChiChiTiet?.trim() || null,
-        MaPhuongXa: formInfo.maPhuongXa || null
+        MaPhuongXa: formInfo.maPhuongXa || null,
+        SoCCCD: formInfo.soCCCD?.trim() || null,
+        NgayCapCCCD: formInfo.ngayCapCCCD || null,
+        NoiCapCCCD: formInfo.noiCapCCCD?.trim() || null,
+        NgaySinh: formInfo.ngaySinh || null,
+        GioiTinh: formInfo.gioiTinh || null,
+        // ✅ THÊM THÔNG TIN NGÂN HÀNG VÀO PAYLOAD
+        NganHang: formInfo.nganHang?.trim() || null,
+        SoTaiKhoan: formInfo.soTaiKhoan?.trim() || null,
+        TenChuTK: formInfo.tenChuTK?.trim() || null
       };
 
       await api.put('/api/NguoiDung/Profile/Me', payload);
-      setMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+      showToast('success', '✅ Cập nhật thông tin thành công!');
       await loadUserInfo();
     } catch (err) {
       console.error('Update info error:', err);
       const msg = err.response?.data?.message || 'Cập nhật thông tin thất bại';
-      setMessage({ type: 'error', text: msg });
+      showToast('error', `❌ ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -327,7 +372,7 @@ export default function QuanLyTaiKhoan() {
       };
 
       await api.put('/api/NguoiDung/Profile/ChangePassword', payload);
-      setMessage({ type: 'success', text: 'Đổi mật khẩu thành công!' });
+      showToast('success', '✅ Đổi mật khẩu thành công!');
       
       setFormPassword({
         matKhauCu: '',
@@ -340,7 +385,7 @@ export default function QuanLyTaiKhoan() {
     } catch (err) {
       console.error('Change password error:', err);
       const msg = err.response?.data?.message || err.response?.data?.Message || 'Đổi mật khẩu thất bại';
-      setMessage({ type: 'error', text: msg });
+      showToast('error', `❌ ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -362,9 +407,17 @@ export default function QuanLyTaiKhoan() {
 
   return (
     <div className="account-management">
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
+      )}
+
       <div className="account-header">
         <div className="account-avatar">
-          {/* Chỉ hiển thị 1 trong 3: Preview > Avatar từ server > Placeholder */}
           {previewUrl ? (
             <img src={previewUrl} alt="Preview" className="avatar-img" />
           ) : userInfo.anhDaiDien ? (
@@ -384,7 +437,6 @@ export default function QuanLyTaiKhoan() {
             </div>
           )}
           
-          {/* Nút đổi ảnh - chỉ hiện khi KHÔNG có preview */}
           {!previewUrl && (
             <div className="avatar-upload-overlay">
               <label htmlFor="avatar-upload" className="avatar-upload-btn">
@@ -416,7 +468,6 @@ export default function QuanLyTaiKhoan() {
             Tham gia từ: {formatDate(userInfo.ngayTao)}
           </p>
           
-          {/* Avatar upload actions - CHỈ HIỆN KHI CÓ PREVIEW */}
           {selectedFile && previewUrl && (
             <div className="avatar-actions">
               <button 
@@ -460,9 +511,11 @@ export default function QuanLyTaiKhoan() {
             
             {/* Thông tin cơ bản */}
             <div className="form-section">
-              <h4 className="form-section-title">Thông tin cơ bản</h4>
+              <h4 className="form-section-title">
+                <span className="form-section-icon">👤</span>
+                Thông tin cơ bản
+              </h4>
               
-              {/* Hàng 1: Họ tên + Số điện thoại */}
               <div className="form-row">
                 <div className="form-group">
                   <label>Họ và tên <span className="required">*</span></label>
@@ -489,7 +542,32 @@ export default function QuanLyTaiKhoan() {
                 </div>
               </div>
 
-              {/* Hàng 2: Email + Vai trò */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ngày sinh</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formInfo.ngaySinh || ''}
+                    onChange={(e) => setFormInfo({ ...formInfo, ngaySinh: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Giới tính</label>
+                  <select
+                    className="form-input"
+                    value={formInfo.gioiTinh || ''}
+                    onChange={(e) => setFormInfo({ ...formInfo, gioiTinh: e.target.value })}
+                  >
+                    <option value="">-- Chọn giới tính --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Email <span className="required">*</span></label>
@@ -515,12 +593,63 @@ export default function QuanLyTaiKhoan() {
               </div>
             </div>
 
+            {/* ✅ THÔNG TIN CCCD */}
+            <div className="form-section">
+              <h4 className="form-section-title">
+                <span className="form-section-icon">🪪</span>
+                Thông tin CCCD
+              </h4>
+
+              {/* Row 1: Số CCCD + Ngày cấp */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Số CCCD</label>
+                  <input
+                    type="text"
+                    className={`form-input ${errors.soCCCD ? 'error' : ''}`}
+                    value={formInfo.soCCCD || ''}
+                    onChange={(e) => setFormInfo({ ...formInfo, soCCCD: e.target.value })}
+                    placeholder="001234567890"
+                    maxLength={12}
+                  />
+                  {errors.soCCCD && <span className="error-text">{errors.soCCCD}</span>}
+                  <small>12 chữ số</small>
+                </div>
+
+                <div className="form-group">
+                  <label>Ngày cấp</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formInfo.ngayCapCCCD || ''}
+                    onChange={(e) => setFormInfo({ ...formInfo, ngayCapCCCD: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Nơi cấp (field độc lập) */}
+              <div className="form-group">
+                <label>Nơi cấp</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formInfo.noiCapCCCD || ''}
+                  onChange={(e) => setFormInfo({ ...formInfo, noiCapCCCD: e.target.value })}
+                  placeholder="Cục Cảnh sát quản lý hành chính về trật tự xã hội"
+                />
+              </div>
+            </div>
+
             {/* Địa chỉ */}
             <div className="form-section">
-              <h4 className="form-section-title">Địa chỉ</h4>
+              <h4 className="form-section-title">
+                <span className="form-section-icon">📍</span>
+                Địa chỉ thường trú
+              </h4>
 
+              {/* Địa chỉ hiện tại */}
               <div className="form-group">
-                <label>Địa chỉ thường trú</label>
+                <label>Địa chỉ hiện tại</label>
                 <div className="address-display">
                   {userInfo.diaChiChiTiet || userInfo.tenPhuongXa ? (
                     <span>
@@ -536,6 +665,7 @@ export default function QuanLyTaiKhoan() {
                 </div>
               </div>
 
+              {/* 3 cột: Tỉnh + Huyện + Phường */}
               <div className="form-row-3">
                 <div className="form-group">
                   <label>Tỉnh/Thành phố</label>
@@ -582,6 +712,7 @@ export default function QuanLyTaiKhoan() {
                 </div>
               </div>
 
+              {/* Địa chỉ chi tiết */}
               <div className="form-group">
                 <label>Địa chỉ chi tiết</label>
                 <textarea
@@ -594,12 +725,97 @@ export default function QuanLyTaiKhoan() {
               </div>
             </div>
 
+            {/* ✅ NGÂN HÀNG */}
+            <div className="form-section">
+              <h4 className="form-section-title">
+                <span className="form-section-icon">🏦</span>
+                Thông tin tài khoản ngân hàng
+              </h4>
+
+              {/* Row 1: Tên ngân hàng + Số tài khoản */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Tên ngân hàng</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formInfo.nganHang || ''}
+                    onChange={(e) => setFormInfo({ ...formInfo, nganHang: e.target.value })}
+                    placeholder="VD: Vietcombank, Techcombank, MB Bank..."
+                  />
+                  <small>💡 Nhập tên ngân hàng đầy đủ</small>
+                </div>
+
+                <div className="form-group">
+                  <label>Số tài khoản</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formInfo.soTaiKhoan || ''}
+                    onChange={(e) => {
+                      // Chỉ cho nhập số
+                      const value = e.target.value.replace(/\D/g, '');
+                      setFormInfo({ ...formInfo, soTaiKhoan: value });
+                    }}
+                    placeholder="Nhập số tài khoản ngân hàng"
+                  />
+                  <small>💡 Chỉ nhập chữ số</small>
+                </div>
+              </div>
+
+              {/* Row 2: Tên chủ tài khoản */}
+              <div className="form-group">
+                <label>Tên chủ tài khoản</label>
+                <input
+                  type="text"
+                  className={`form-input ${errors.tenChuTK ? 'error' : ''}`}
+                  value={formInfo.tenChuTK || ''}
+                  onChange={(e) => {
+                    // Chuyển thành chữ hoa và loại bỏ ký tự đặc biệt
+                    const value = e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z\s]/g, ''); // Chỉ giữ A-Z và khoảng trắng
+                    setFormInfo({ ...formInfo, tenChuTK: value });
+                  }}
+                  placeholder="NGUYEN VAN A"
+                  maxLength={100}
+                />
+                {errors.tenChuTK && <span className="error-text">{errors.tenChuTK}</span>}
+                <small>💡 Viết hoa không dấu, khớp với tên trên thẻ ngân hàng</small>
+              </div>
+
+              {/* Warning */}
+              {!formInfo.nganHang && !formInfo.soTaiKhoan && (
+                <div style={{ 
+                  background: '#fffbeb', 
+                  border: '1px solid #fbbf24', 
+                  borderRadius: '8px', 
+                  padding: '12px 16px',
+                  marginTop: '16px'
+                }}>
+                  <p style={{ 
+                    color: '#92400e', 
+                    fontSize: '14px', 
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>⚠️</span>
+                    <span>
+                      Vui lòng cập nhật thông tin tài khoản ngân hàng để nhận thanh toán từ hệ thống.
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={loadUserInfo}>
                 Hủy
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                {loading ? '⏳ Đang lưu...' : '💾 Lưu thay đổi'}
               </button>
             </div>
           </form>
@@ -676,11 +892,11 @@ export default function QuanLyTaiKhoan() {
               </div>
 
               <div className="password-requirements">
-                <p>Yêu cầu mật khẩu:</p>
+                <p>📋 Yêu cầu mật khẩu:</p>
                 <ul>
-                  <li>Ít nhất 6 ký tự</li>
-                  <li>Nên kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt</li>
-                  <li>Không sử dụng mật khẩu quá đơn giản</li>
+                  <li>✓ Ít nhất 6 ký tự</li>
+                  <li>✓ Nên kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt</li>
+                  <li>✓ Không sử dụng mật khẩu quá đơn giản</li>
                 </ul>
               </div>
             </div>
@@ -697,18 +913,12 @@ export default function QuanLyTaiKhoan() {
                 Hủy
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? 'Đang xử lý...' : 'Lưu thay đổi'}
+                {loading ? '⏳ Đang xử lý...' : '🔒 Lưu thay đổi'}
               </button>
             </div>
           </form>
         )}
       </div>
-
-      {message && (
-        <div className={`toast-message ${message.type}`}>
-          {message.text}
-        </div>
-      )}
     </div>
   );
 }
