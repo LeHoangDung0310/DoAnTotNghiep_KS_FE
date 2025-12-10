@@ -14,13 +14,17 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
     maPhuongXa: '',
     vaiTro: '',
     trangThai: '',
-    // Thêm các trường mới
     soCCCD: '',
     ngayCapCCCD: '',
     noiCapCCCD: '',
     ngaySinh: '',
     gioiTinh: '',
+    // Thông tin ngân hàng
+    nganHang: '',
+    soTaiKhoan: '',
+    tenChuTK: '',
   });
+  
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -115,12 +119,15 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
         maPhuongXa: u.maPhuongXa || '',
         vaiTro: u.vaiTro || '',
         trangThai: u.trangThai || '',
-        // Thêm các trường mới
         soCCCD: u.soCCCD || '',
         ngayCapCCCD: formatDate(u.ngayCapCCCD),
         noiCapCCCD: u.noiCapCCCD || '',
         ngaySinh: formatDate(u.ngaySinh),
         gioiTinh: u.gioiTinh || '',
+        // Thông tin ngân hàng
+        nganHang: u.nganHang || '',
+        soTaiKhoan: u.soTaiKhoan || '',
+        tenChuTK: u.tenChuTK || '',
       });
 
       // Tải huyện và phường xã nếu có
@@ -178,12 +185,15 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
         maPhuongXa: form.maPhuongXa ? parseInt(form.maPhuongXa) : null,
         vaiTro: form.vaiTro || null,
         trangThai: form.trangThai || null,
-        // Thêm các trường mới
         soCCCD: form.soCCCD?.trim() || null,
         ngayCapCCCD: form.ngayCapCCCD || null,
         noiCapCCCD: form.noiCapCCCD?.trim() || null,
         ngaySinh: form.ngaySinh || null,
         gioiTinh: form.gioiTinh || null,
+        // Thông tin ngân hàng
+        nganHang: form.nganHang?.trim() || null,
+        soTaiKhoan: form.soTaiKhoan?.trim() || null,
+        tenChuTK: form.tenChuTK?.trim() || null,
       };
 
       console.log('Dữ liệu gửi đi:', body);
@@ -216,138 +226,95 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
   if (!userId) return null;
 
   return (
-    <>
-      <div className="modal-backdrop">
-        <div className="modal modal-large">
-          <div className="modal-header">
-            <div className="modal-header-left">
-              <h3>Chỉnh sửa người dùng</h3>
-              <div className="modal-sub-info">
-                {form.maNguoiDung && (
-                  <span className="badge">
-                    <span>#</span>
-                    <span>{form.maNguoiDung}</span>
-                  </span>
-                )}
-
-                {form.vaiTro && (
-                  <span
-                    className={
-                      'badge ' +
-                      (form.vaiTro === 'Admin'
-                        ? 'badge-role-admin'
-                        : form.vaiTro === 'LeTan'
-                        ? 'badge-role-letan'
-                        : 'badge-role-khach')
-                    }
-                  >
-                    <span>Vai trò</span>
-                    <span>• {form.vaiTro}</span>
-                  </span>
-                )}
-
-                {form.trangThai && (
-                  <span
-                    className={
-                      'badge ' +
-                      (form.trangThai === 'Hoạt động'
-                        ? 'badge-status-active'
-                        : 'badge-status-locked')
-                    }
-                  >
-                    <span>Trạng thái</span>
-                    <span>• {form.trangThai}</span>
-                  </span>
-                )}
-              </div>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal modal-large"
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: 900 }}
+      >
+        {/* Header với gradient */}
+        <div className="modal-header-gradient">
+          <div className="modal-header-content">
+            <div className="modal-icon">✏️</div>
+            <div>
+              <h3 className="modal-title-large">Chỉnh sửa thông tin người dùng</h3>
+              <p className="modal-subtitle">
+                Cập nhật thông tin chi tiết người dùng #{form.maNguoiDung} • {form.email}
+              </p>
             </div>
-
-            <button className="modal-close-btn" onClick={onClose}>
-              ✕
-            </button>
           </div>
+          <button className="modal-close-btn-gradient" onClick={onClose}>
+            ✕
+          </button>
+        </div>
 
-          {loading ? (
-            <div style={{ padding: 20 }}>Đang tải thông tin...</div>
-          ) : (
-            <form className="modal-body" onSubmit={handleSubmit}>
-              {/* SECTION 1: Thông tin cơ bản */}
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
-                  📋 Thông tin cơ bản
-                </h4>
-                <div className="form-grid-2-rows">
-                  <div className="form-row">
-                    <span className="form-row-label">Mã người dùng</span>
-                    <input type="text" value={form.maNguoiDung || ''} disabled />
-                  </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Email</span>
-                    <input type="email" value={form.email} disabled />
-                  </div>
+        {loading ? (
+          <div className="admin-loading">
+            <div className="admin-loading-spinner"></div>
+            <p>Đang tải thông tin...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="modal-body-scrollable">
+              {/* Thông tin cơ bản */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <div className="form-section-icon">👤</div>
+                  <h4 className="form-section-title">Thông tin cơ bản</h4>
+                </div>
 
-                  <div className="form-row">
-                    <span className="form-row-label">Họ tên</span>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">📝</span>
+                      Họ tên
+                      <span className="form-label-required">*</span>
+                    </label>
                     <input
                       type="text"
+                      className="form-input-modern"
+                      placeholder="Nhập họ và tên đầy đủ"
                       value={form.hoTen}
                       onChange={(e) => handleChange('hoTen', e.target.value)}
-                      placeholder="Nguyễn Văn A"
+                      required
                     />
                   </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Số điện thoại</span>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">📧</span>
+                      Email
+                    </label>
                     <input
-                      type="text"
+                      type="email"
+                      className="form-input-modern"
+                      value={form.email}
+                      disabled
+                      style={{ background: '#f3f4f6', color: '#6b7280' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">📱</span>
+                      Số điện thoại
+                    </label>
+                    <input
+                      type="tel"
+                      className="form-input-modern"
+                      placeholder="0xxx xxx xxx"
                       value={form.soDienThoai}
                       onChange={(e) => handleChange('soDienThoai', e.target.value)}
-                      placeholder="0909123456"
                     />
                   </div>
 
-                  <div className="form-row">
-                    <span className="form-row-label">Vai trò</span>
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">⚧</span>
+                      Giới tính
+                    </label>
                     <select
-                      value={form.vaiTro}
-                      onChange={(e) => handleChange('vaiTro', e.target.value)}
-                    >
-                      <option value="">-- Chọn vai trò --</option>
-                      <option value="Admin">Admin</option>
-                      <option value="LeTan">Lễ tân</option>
-                      <option value="KhachHang">Khách hàng</option>
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Trạng thái</span>
-                    <select
-                      value={form.trangThai}
-                      onChange={(e) => handleChange('trangThai', e.target.value)}
-                    >
-                      <option value="">-- Chọn trạng thái --</option>
-                      <option value="Hoạt động">Hoạt động</option>
-                      <option value="Tạm khóa">Tạm khóa</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: Thông tin cá nhân */}
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
-                  👤 Thông tin cá nhân
-                </h4>
-                <div className="form-grid-2-rows">
-                  <div className="form-row">
-                    <span className="form-row-label">Ngày sinh</span>
-                    <input
-                      type="date"
-                      value={form.ngaySinh}
-                      onChange={(e) => handleChange('ngaySinh', e.target.value)}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Giới tính</span>
-                    <select
+                      className="form-select-modern"
                       value={form.gioiTinh}
                       onChange={(e) => handleChange('gioiTinh', e.target.value)}
                     >
@@ -357,54 +324,121 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                       <option value="Khác">Khác</option>
                     </select>
                   </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🎂</span>
+                      Ngày sinh
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input-modern"
+                      value={form.ngaySinh}
+                      onChange={(e) => handleChange('ngaySinh', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🎭</span>
+                      Vai trò
+                    </label>
+                    <select
+                      className="form-select-modern"
+                      value={form.vaiTro}
+                      onChange={(e) => handleChange('vaiTro', e.target.value)}
+                    >
+                      <option value="">-- Chọn vai trò --</option>
+                      <option value="Admin">🔴 Admin</option>
+                      <option value="LeTan">🔵 Lễ tân</option>
+                      <option value="KhachHang">🟢 Khách hàng</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">📊</span>
+                      Trạng thái
+                    </label>
+                    <select
+                      className="form-select-modern"
+                      value={form.trangThai}
+                      onChange={(e) => handleChange('trangThai', e.target.value)}
+                    >
+                      <option value="">-- Chọn trạng thái --</option>
+                      <option value="Hoạt động">✅ Hoạt động</option>
+                      <option value="Tạm khóa">🔒 Tạm khóa</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* SECTION 3: CCCD */}
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
-                  🆔 Thông tin CCCD
-                </h4>
-                <div className="form-grid-2-rows">
-                  <div className="form-row">
-                    <span className="form-row-label">Số CCCD</span>
+              {/* CCCD */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <div className="form-section-icon">🆔</div>
+                  <h4 className="form-section-title">Thông tin CCCD</h4>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🔢</span>
+                      Số CCCD
+                    </label>
                     <input
                       type="text"
+                      className="form-input-modern"
+                      placeholder="Nhập số CCCD (12 chữ số)"
                       value={form.soCCCD}
                       onChange={(e) => handleChange('soCCCD', e.target.value)}
-                      placeholder="001234567890"
-                      maxLength={20}
                     />
                   </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Ngày cấp</span>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">📅</span>
+                      Ngày cấp
+                    </label>
                     <input
                       type="date"
+                      className="form-input-modern"
                       value={form.ngayCapCCCD}
                       onChange={(e) => handleChange('ngayCapCCCD', e.target.value)}
                     />
                   </div>
-                  <div className="form-row" style={{ gridColumn: '1 / -1' }}>
-                    <span className="form-row-label">Nơi cấp</span>
+
+                  <div className="form-group full-width">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏛️</span>
+                      Nơi cấp
+                    </label>
                     <input
                       type="text"
+                      className="form-input-modern"
+                      placeholder="VD: Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
                       value={form.noiCapCCCD}
                       onChange={(e) => handleChange('noiCapCCCD', e.target.value)}
-                      placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 4: Địa chỉ */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: '#374151' }}>
-                  📍 Địa chỉ
-                </h4>
-                <div className="form-grid-2-rows">
-                  <div className="form-row">
-                    <span className="form-row-label">Tỉnh/Thành phố</span>
+              {/* Địa chỉ */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <div className="form-section-icon">📍</div>
+                  <h4 className="form-section-title">Địa chỉ liên hệ</h4>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏙️</span>
+                      Tỉnh/Thành phố
+                    </label>
                     <select
+                      className="form-select-modern"
                       value={form.maTinh}
                       onChange={(e) => handleChange('maTinh', e.target.value)}
                     >
@@ -416,9 +450,14 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                       ))}
                     </select>
                   </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Quận/Huyện</span>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏘️</span>
+                      Quận/Huyện
+                    </label>
                     <select
+                      className="form-select-modern"
                       value={form.maHuyen}
                       onChange={(e) => handleChange('maHuyen', e.target.value)}
                       disabled={!form.maTinh}
@@ -432,9 +471,13 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                     </select>
                   </div>
 
-                  <div className="form-row">
-                    <span className="form-row-label">Phường/Xã</span>
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏡</span>
+                      Phường/Xã
+                    </label>
                     <select
+                      className="form-select-modern"
                       value={form.maPhuongXa}
                       onChange={(e) => handleChange('maPhuongXa', e.target.value)}
                       disabled={!form.maHuyen}
@@ -447,11 +490,16 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                       ))}
                     </select>
                   </div>
-                  <div className="form-row">
-                    <span className="form-row-label">Địa chỉ chi tiết</span>
+
+                  <div className="form-group full-width">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏠</span>
+                      Địa chỉ chi tiết
+                    </label>
                     <input
                       type="text"
-                      placeholder="Số nhà, tên đường..."
+                      className="form-input-modern"
+                      placeholder="Số nhà, tên đường, khu vực..."
                       value={form.diaChiChiTiet}
                       onChange={(e) => handleChange('diaChiChiTiet', e.target.value)}
                     />
@@ -459,29 +507,73 @@ export default function ChinhSuaNguoiDung({ userId, onClose, onUpdated, onShowTo
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn-secondary-ghost"
-                  onClick={onClose}
-                  disabled={saving}
-                >
-                  Hủy
-                </button>
-                <div className="modal-footer-right">
-                  <button
-                    type="submit"
-                    className="btn-primary-rounded"
-                    disabled={saving}
-                  >
-                    {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-                  </button>
+              {/* Tài khoản ngân hàng - MỚI */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <div className="form-section-icon">🏦</div>
+                  <h4 className="form-section-title">Thông tin tài khoản ngân hàng</h4>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">🏦</span>
+                      Ngân hàng
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input-modern"
+                      placeholder="VD: Vietcombank, Techcombank..."
+                      value={form.nganHang}
+                      onChange={(e) => handleChange('nganHang', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="form-label-icon">💳</span>
+                      Số tài khoản
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input-modern"
+                      placeholder="Nhập số tài khoản"
+                      value={form.soTaiKhoan}
+                      onChange={(e) => handleChange('soTaiKhoan', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label className="form-label">
+                      <span className="form-label-icon">👤</span>
+                      Tên chủ tài khoản
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input-modern"
+                      placeholder="Họ và tên chủ tài khoản (viết HOA KHÔNG DẤU)"
+                      value={form.tenChuTK}
+                      onChange={(e) => handleChange('tenChuTK', e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
-            </form>
-          )}
-        </div>
+            </div>
+
+            {/* Footer */}
+            <div className="modal-footer-modern">
+              <button type="button" className="btn-outline-modern" onClick={onClose}>
+                <span className="btn-icon">✕</span>
+                Hủy bỏ
+              </button>
+              <button type="submit" className="btn-primary-modern" disabled={saving}>
+                <span className="btn-icon">💾</span>
+                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
-    </>
+    </div>
   );
 }

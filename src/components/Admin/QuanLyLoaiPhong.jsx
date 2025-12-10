@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Common/Toast'; // ✅ IMPORT
 
 const API_BASE = 'http://localhost:5114/api';
 
@@ -15,7 +16,7 @@ export default function QuanLyLoaiPhong() {
   const [modalMode, setModalMode] = useState('create');
   const [currentLoaiPhong, setCurrentLoaiPhong] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ ĐỔI
 
   const [filters, setFilters] = useState({
     tenLoaiPhong: '',
@@ -35,8 +36,7 @@ export default function QuanLyLoaiPhong() {
   const accessToken = localStorage.getItem('accessToken');
 
   const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 2500);
+    setToast({ show: true, type, message }); // ✅ ĐỔI
   };
 
   const fetchLoaiPhongs = async (page = 1, pageSize = pagination.pageSize) => {
@@ -210,6 +210,16 @@ export default function QuanLyLoaiPhong() {
 
   return (
     <div className="admin-card">
+      {/* ✅ Toast Component */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
+      )}
+
       <div className="room-header">
         <div className="room-header-title">Quản lý loại phòng</div>
         <div className="room-header-actions">
@@ -524,24 +534,6 @@ export default function QuanLyLoaiPhong() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="toast-container-admin">
-          <div
-            className={
-              'toast-admin ' +
-              (toast.type === 'error' ? 'toast-admin-error' : 'toast-admin-success')
-            }
-          >
-            <div className="toast-admin-icon">{toast.type === 'error' ? '!' : '✓'}</div>
-            <div className="toast-admin-text">{toast.message}</div>
-            <button className="toast-admin-close" onClick={() => setToast(null)}>
-              ✕
-            </button>
           </div>
         </div>
       )}

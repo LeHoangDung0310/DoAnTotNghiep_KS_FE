@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuanLyKhachHangLT from '../components/LeTan/QuanLyKhachHangLT';
 import QuanLyDatPhongLT from '../components/LeTan/QuanLyDatPhongLT';
+import QuanLyHuyDatPhong from '../components/LeTan/QuanLyHuyDatPhong';
 import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
 import api from '../utils/api';
 
@@ -72,6 +73,8 @@ export default function TrangLeTan() {
         return <QuanLyDatPhongLT />;
       case 'khach-hang':
         return <QuanLyKhachHangLT />;
+      case 'huy-dat-phong':
+        return <QuanLyHuyDatPhong />;
       case 'account':
         return <QuanLyTaiKhoan />;
       case 'dashboard':
@@ -118,6 +121,14 @@ export default function TrangLeTan() {
             <span>👥</span>
             <span>Quản lý khách hàng</span>
           </div>
+
+          <div
+            className={`admin-menu-item ${activeMenu === 'huy-dat-phong' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('huy-dat-phong')}
+          >
+            <span>🚫</span>
+            <span>Quản lý hủy đặt phòng</span>
+          </div>
         </div>
       </aside>
 
@@ -129,6 +140,7 @@ export default function TrangLeTan() {
             {activeMenu === 'dashboard' && 'Tổng quan'}
             {activeMenu === 'dat-phong' && 'Quản lý đặt phòng'}
             {activeMenu === 'khach-hang' && 'Quản lý khách hàng'}
+            {activeMenu === 'huy-dat-phong' && 'Quản lý hủy đặt phòng'}
             {activeMenu === 'account' && 'Quản lý tài khoản'}
           </div>
 

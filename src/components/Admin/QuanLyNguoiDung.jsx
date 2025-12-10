@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import ChinhSuaNguoiDung from './ChinhSuaNguoiDung';
 import ChiTietNguoiDung from './ChiTietNguoiDung';
+import Toast from '../Common/Toast'; // ✅ IMPORT Toast Component
 
-const API_BASE = 'http://localhost:5114/api'; // dùng port 5114 theo launchSettings
+const API_BASE = 'http://localhost:5114/api';
 
 function getRoleTagClass(role) {
   switch (role) {
@@ -47,9 +48,8 @@ export default function QuanLyNguoiDung() {
     trangThai: '',
   });
 
-  const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
+  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ ĐỔI THÀNH OBJECT
   const [confirmState, setConfirmState] = useState(null);
-  // { type: 'delete' | 'status', user: object, newStatus?: string }
 
   const accessToken = localStorage.getItem('accessToken');
 
@@ -74,7 +74,6 @@ export default function QuanLyNguoiDung() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         if (res.status === 401) {
-          // TODO: gọi refresh token hoặc navigate('/login')
           throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
         }
         throw new Error(err.message || 'Lỗi khi lấy danh sách người dùng');
@@ -90,7 +89,7 @@ export default function QuanLyNguoiDung() {
       });
     } catch (e) {
       console.error(e);
-      alert(e.message);
+      showToast('error', e.message);
     } finally {
       setLoading(false);
     }
@@ -98,7 +97,6 @@ export default function QuanLyNguoiDung() {
 
   useEffect(() => {
     fetchUsers(1, pagination.pageSize);
-    // không dùng eslint rule react-hooks/exhaustive-deps nên không cần comment
   }, []);
 
   const handleSearch = () => {
@@ -129,9 +127,7 @@ export default function QuanLyNguoiDung() {
   };
 
   const showToast = (type, message) => {
-    setToast({ type, message });
-    // auto close sau 2.5s
-    setTimeout(() => setToast(null), 2500);
+    setToast({ show: true, type, message }); // ✅ ĐỔI THÀNH show: true
   };
 
   const doToggleStatus = async ({ user, newStatus }) => {
@@ -148,11 +144,11 @@ export default function QuanLyNguoiDung() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Không thể cập nhật trạng thái');
 
-      showToast('success', data.message || 'Cập nhật trạng thái thành công');
+      showToast('success', `✅ ${data.message || 'Cập nhật trạng thái thành công'}`);
       fetchUsers(pagination.currentPage, pagination.pageSize);
     } catch (e) {
       console.error(e);
-      showToast('error', e.message);
+      showToast('error', `❌ ${e.message}`);
     }
   };
 
@@ -168,17 +164,15 @@ export default function QuanLyNguoiDung() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Không thể xóa người dùng');
 
-      showToast('success', data.message || 'Xóa người dùng thành công');
+      showToast('success', `✅ Xóa người dùng "${user.hoTen || user.email}" thành công`);
       fetchUsers(pagination.currentPage, pagination.pageSize);
     } catch (e) {
       console.error(e);
-      showToast('error', e.message);
+      showToast('error', `❌ ${e.message}`);
     }
   };
 
-  // Helper function - hiển thị địa chỉ RẤT NGẮN GỌN
   const getDiaChiRutGon = (user) => {
-    // Chỉ lấy 2 phần: Xã + Huyện, mỗi phần tối đa 10 ký tự
     const parts = [];
     
     if (user.tenPhuongXa) {
@@ -188,11 +182,9 @@ export default function QuanLyNguoiDung() {
       parts.push(xa);
     }
     
-    
     return parts.length > 0 ? parts.join(', ') : '-';
   };
 
-  // Địa chỉ đầy đủ cho tooltip
   const getDiaChiDayDu = (user) => {
     const parts = [];
     if (user.diaChiChiTiet) parts.push(user.diaChiChiTiet);
@@ -204,6 +196,16 @@ export default function QuanLyNguoiDung() {
 
   return (
     <div className="admin-card">
+      {/* ✅ Toast Component - GIỐNG Quản lý đặt phòng */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
+      )}
+
       <div className="room-header">
         <div className="room-header-title">Quản lý người dùng</div>
         <div className="room-header-actions">
@@ -216,7 +218,7 @@ export default function QuanLyNguoiDung() {
         </div>
       </div>
 
-      {/* Thanh tìm kiếm (tên / email, vai trò, trạng thái, pageSize) */}
+      {/* Thanh tìm kiếm */}
       <div className="room-search-row">
         <div className="room-search-input">
           <label>Tên / Email</label>
@@ -270,7 +272,6 @@ export default function QuanLyNguoiDung() {
           </select>
         </div>
 
-        {/* cột trống cho đẹp grid */}
         <div />
       </div>
 
@@ -430,30 +431,7 @@ export default function QuanLyNguoiDung() {
         />
       )}
 
-      {toast && (
-        <div className="toast-container">
-          <div
-            className={
-              'toast ' +
-              (toast.type === 'error' ? 'toast-error' : 'toast-success')
-            }
-          >
-            <div className="toast-icon">
-              {toast.type === 'error' ? '!' : '✓'}
-            </div>
-
-            {/* chỉ 1 text, không chia 2 dòng nữa */}
-            <div className="toast-single-text">
-              {toast.message}
-            </div>
-
-            <button className="toast-close" onClick={() => setToast(null)}>
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-
+      {/* Modal Confirm */}
       {confirmState && (
         <div className="modal-backdrop">
           <div className="modal confirm-modal">

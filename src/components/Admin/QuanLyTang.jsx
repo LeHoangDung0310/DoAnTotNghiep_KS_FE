@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Common/Toast'; // ✅ IMPORT
 
 const API_BASE = 'http://localhost:5114/api';
 
@@ -26,7 +27,7 @@ export default function QuanLyTang() {
   const [deletingItem, setDeletingItem] = useState(null);
 
   // Toast
-  const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
+  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ ĐỔI
 
   const accessToken = localStorage.getItem('accessToken');
 
@@ -173,12 +174,21 @@ export default function QuanLyTang() {
   };
 
   const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 2500);
+    setToast({ show: true, type, message }); // ✅ ĐỔI
   };
 
   return (
     <div className="admin-card">
+      {/* ✅ Toast Component */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
+      )}
+
       <div className="room-header">
         <div className="room-header-title">Quản lý tầng</div>
         <div className="room-header-actions">
@@ -428,25 +438,6 @@ export default function QuanLyTang() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {toast && (
-        <div className="toast-container-admin">
-          <div
-            className={
-              'toast-admin ' +
-              (toast.type === 'error' ? 'toast-admin-error' : 'toast-admin-success')
-            }
-          >
-            <div className="toast-admin-icon">
-              {toast.type === 'error' ? '!' : '✓'}
-            </div>
-            <div className="toast-admin-text">{toast.message}</div>
-            <button className="toast-admin-close" onClick={() => setToast(null)}>
-              ✕
-            </button>
           </div>
         </div>
       )}

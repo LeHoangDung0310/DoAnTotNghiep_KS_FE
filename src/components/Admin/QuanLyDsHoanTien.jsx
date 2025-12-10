@@ -7,7 +7,7 @@ import ChiTietHoanTien from './ChiTietHoanTien';
 export default function QuanLyDsHoanTien() {
   const [hoanTiens, setHoanTiens] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('ChoXuLy');
+  const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const [selectedHoanTien, setSelectedHoanTien] = useState(null);
@@ -63,9 +63,10 @@ export default function QuanLyDsHoanTien() {
 
   // ✅ RESET BỘ LỌC
   const handleReset = () => {
-    setFilterStatus('ChoXuLy');
+    setFilterStatus('');
     setSearchTerm('');
-    showToast('info', '🔄 Đã đặt lại bộ lọc');
+    fetchHoanTiens();
+    showToast('info', '🔄 Đã làm mới dữ liệu');
   };
 
   // ✅ TAG TRẠNG THÁI
@@ -105,241 +106,244 @@ export default function QuanLyDsHoanTien() {
   };
 
   return (
-    <div className="admin-layout">
-      <div className="admin-container">
-        {/* Toast */}
-        {toast.show && (
-          <Toast
-            type={toast.type}
-            message={toast.message}
-            onClose={hideToast}
-            duration={3000}
-          />
-        )}
+    <div className="admin-container">
+      {/* Toast */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={hideToast}
+          duration={3000}
+        />
+      )}
 
-        {/* Header */}
-        <div className="admin-header">
-          <div>
-            <h2 className="admin-title">💸 Quản lý hoàn tiền</h2>
-            <p className="admin-subtitle">Danh sách yêu cầu hoàn tiền đã được duyệt</p>
+      {/* Header */}
+      <div className="admin-header">
+        <div>
+          <h2 className="admin-title">💸 Quản lý hoàn tiền</h2>
+          <p className="admin-subtitle">Danh sách yêu cầu hoàn tiền đã được duyệt</p>
+        </div>
+        <button className="btn-outline" onClick={handleReset}>
+          🔄 Làm mới
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="admin-stats-grid">
+        <div className="admin-stat-card gradient-orange">
+          <div className="admin-stat-icon">⏳</div>
+          <div className="admin-stat-content">
+            <div className="admin-stat-value">{tongChoXuLy}</div>
+            <div className="admin-stat-label">Chờ xử lý</div>
           </div>
-          <button className="btn-outline" onClick={handleReset}>
-            🔄 Làm mới
-          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="admin-stats-grid">
-          <div className="admin-stat-card gradient-orange">
-            <div className="admin-stat-icon">⏳</div>
-            <div className="admin-stat-content">
-              <div className="admin-stat-value">{tongChoXuLy}</div>
-              <div className="admin-stat-label">Chờ xử lý</div>
-            </div>
+        <div className="admin-stat-card gradient-green">
+          <div className="admin-stat-icon">✅</div>
+          <div className="admin-stat-content">
+            <div className="admin-stat-value">{tongDaHoan}</div>
+            <div className="admin-stat-label">Đã hoàn</div>
           </div>
+        </div>
 
-          <div className="admin-stat-card gradient-green">
-            <div className="admin-stat-icon">✅</div>
-            <div className="admin-stat-content">
-              <div className="admin-stat-value">{tongDaHoan}</div>
-              <div className="admin-stat-label">Đã hoàn</div>
+        <div className="admin-stat-card gradient-red">
+          <div className="admin-stat-icon">💰</div>
+          <div className="admin-stat-content">
+            <div className="admin-stat-value">
+              {(tongTienChoXuLy / 1000000).toFixed(1)}tr
             </div>
+            <div className="admin-stat-label">Tổng tiền chờ hoàn</div>
           </div>
+        </div>
 
-          <div className="admin-stat-card gradient-red">
-            <div className="admin-stat-icon">💰</div>
-            <div className="admin-stat-content">
-              <div className="admin-stat-value">
-                {(tongTienChoXuLy / 1000000).toFixed(1)}tr
-              </div>
-              <div className="admin-stat-label">Tổng tiền chờ hoàn</div>
-            </div>
+        <div className="admin-stat-card gradient-blue">
+          <div className="admin-stat-icon">📋</div>
+          <div className="admin-stat-content">
+            <div className="admin-stat-value">{hoanTiens.length}</div>
+            <div className="admin-stat-label">Tổng yêu cầu</div>
           </div>
+        </div>
+      </div>
 
-          <div className="admin-stat-card gradient-blue">
-            <div className="admin-stat-icon">📋</div>
-            <div className="admin-stat-content">
-              <div className="admin-stat-value">{hoanTiens.length}</div>
-              <div className="admin-stat-label">Tổng yêu cầu</div>
-            </div>
-          </div>
+      {/* Card chứa bộ lọc và bảng */}
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 className="admin-card-title">📋 Danh sách hoàn tiền</h3>
         </div>
 
         {/* Filters */}
-        <div className="admin-card">
-          <div className="admin-search-section">
-            <div className="admin-search-row">
-              {/* Search Input */}
-              <div className="admin-search-wrapper">
-                <span className="admin-search-icon">🔍</span>
-                <input
-                  type="text"
-                  className="admin-search-input"
-                  placeholder="Tìm theo tên, email, SĐT, STK, mã đặt phòng..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              {/* Filter Status */}
-              <select
-                className="admin-select"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="">📋 Tất cả trạng thái</option>
-                <option value="ChoXuLy">⏳ Chờ xử lý</option>
-                <option value="DaHoan">✅ Đã hoàn</option>
-              </select>
+        <div className="admin-search-section">
+          <div className="admin-search-row">
+            {/* Search Input */}
+            <div className="admin-search-wrapper">
+              <span className="admin-search-icon">🔍</span>
+              <input
+                type="text"
+                className="admin-search-input"
+                placeholder="Tìm theo tên, email, SĐT, STK, mã đặt phòng..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
+
+            {/* Filter Status */}
+            <select
+              className="admin-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">📋 Tất cả trạng thái</option>
+              <option value="ChoXuLy">⏳ Chờ xử lý</option>
+              <option value="DaHoan">✅ Đã hoàn</option>
+            </select>
           </div>
-
-          {/* Table */}
-          {loading ? (
-            <div className="admin-loading">
-              <div className="admin-loading-spinner"></div>
-              <p>Đang tải danh sách...</p>
-            </div>
-          ) : filteredList.length === 0 ? (
-            <div className="admin-empty">
-              <div className="admin-empty-icon">📭</div>
-              <p className="admin-empty-text">Không có yêu cầu hoàn tiền nào</p>
-            </div>
-          ) : (
-            <div className="admin-table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: 200 }}>Khách hàng</th>
-                    <th style={{ minWidth: 100 }}>Mã ĐP</th>
-                    <th style={{ minWidth: 150 }}>Ngân hàng</th>
-                    <th style={{ minWidth: 150 }}>Số tài khoản</th>
-                    <th style={{ minWidth: 180 }}>Tên chủ TK</th>
-                    <th style={{ minWidth: 120 }}>Tiền hoàn</th>
-                    <th style={{ minWidth: 120 }}>Trạng thái</th>
-                    <th style={{ minWidth: 150 }}>Ngày yêu cầu</th>
-                    <th style={{ minWidth: 150 }}>Hành động</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredList.map((hoanTien) => (
-                    <tr key={hoanTien.maHoanTien}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div
-                            className="admin-user-avatar"
-                            style={{
-                              width: 40,
-                              height: 40,
-                              fontSize: 16,
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            }}
-                          >
-                            {(hoanTien.tenKhachHang || '?').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>
-                              {hoanTien.tenKhachHang || '—'}
-                            </div>
-                            <div style={{ fontSize: 12, color: '#64748b' }}>
-                              {hoanTien.emailKhachHang || '—'}
-                            </div>
-                            <div style={{ fontSize: 12, color: '#64748b' }}>
-                              📱 {hoanTien.soDienThoai || '—'}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="tag tag-primary">#{hoanTien.maDatPhong}</span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 18 }}>🏦</span>
-                          <span style={{ fontSize: 13, fontWeight: 500 }}>
-                            {hoanTien.nganHang || '—'}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div
-                          style={{
-                            background: '#f8fafc',
-                            padding: '6px 12px',
-                            borderRadius: 8,
-                            fontFamily: 'monospace',
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: '#334155',
-                            border: '2px solid #e2e8f0',
-                          }}
-                        >
-                          {hoanTien.soTaiKhoan || '—'}
-                        </div>
-                      </td>
-                      <td style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>
-                        {hoanTien.tenChuTK || '—'}
-                      </td>
-                      <td>
-                        <div
-                          style={{
-                            fontSize: 16,
-                            fontWeight: 700,
-                            color: '#10b981',
-                            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-                            padding: '8px 12px',
-                            borderRadius: 8,
-                            border: '2px solid #6ee7b7',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {hoanTien.tienHoan?.toLocaleString('vi-VN')}đ
-                        </div>
-                      </td>
-                      <td>{getStatusTag(hoanTien.trangThaiHoanTien)}</td>
-                      <td style={{ fontSize: 13 }}>
-                        {hoanTien.ngayYeuCau
-                          ? new Date(hoanTien.ngayYeuCau).toLocaleString('vi-VN', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : '—'}
-                      </td>
-                      <td>{renderActions(hoanTien)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
 
-        {/* Modal Chi tiết */}
-        {selectedHoanTien && (
-          <ChiTietHoanTien
-            hoanTien={selectedHoanTien}
-            onClose={() => setSelectedHoanTien(null)}
-            onShowToast={showToast}
-            onUpdate={fetchHoanTiens}
-          />
-        )}
-
-        {/* Modal Xác nhận hoàn tiền */}
-        {showXacNhanModal && (
-          <XacNhanHoanTienModal
-            hoanTien={showXacNhanModal}
-            onClose={() => setShowXacNhanModal(null)}
-            onSuccess={() => {
-              setShowXacNhanModal(null);
-              fetchHoanTiens();
-            }}
-            onShowToast={showToast}
-          />
+        {/* Table */}
+        {loading ? (
+          <div className="admin-loading">
+            <div className="admin-loading-spinner"></div>
+            <p>Đang tải danh sách...</p>
+          </div>
+        ) : filteredList.length === 0 ? (
+          <div className="admin-empty">
+            <div className="admin-empty-icon">📭</div>
+            <p className="admin-empty-text">Không có yêu cầu hoàn tiền nào</p>
+          </div>
+        ) : (
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th style={{ minWidth: 200 }}>Khách hàng</th>
+                  <th style={{ minWidth: 100 }}>Mã ĐP</th>
+                  <th style={{ minWidth: 150 }}>Ngân hàng</th>
+                  <th style={{ minWidth: 150 }}>Số tài khoản</th>
+                  <th style={{ minWidth: 180 }}>Tên chủ TK</th>
+                  <th style={{ minWidth: 120 }}>Tiền hoàn</th>
+                  <th style={{ minWidth: 120 }}>Trạng thái</th>
+                  <th style={{ minWidth: 150 }}>Ngày yêu cầu</th>
+                  <th style={{ minWidth: 150 }}>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredList.map((hoanTien) => (
+                  <tr key={hoanTien.maHoanTien}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div
+                          className="admin-user-avatar"
+                          style={{
+                            width: 40,
+                            height: 40,
+                            fontSize: 16,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          }}
+                        >
+                          {(hoanTien.tenKhachHang || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>
+                            {hoanTien.tenKhachHang || '—'}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#64748b' }}>
+                            {hoanTien.emailKhachHang || '—'}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#64748b' }}>
+                            📱 {hoanTien.soDienThoai || '—'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="tag tag-primary">#{hoanTien.maDatPhong}</span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 18 }}>🏦</span>
+                        <span style={{ fontSize: 13, fontWeight: 500 }}>
+                          {hoanTien.nganHang || '—'}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div
+                        style={{
+                          background: '#f8fafc',
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: '#334155',
+                          border: '2px solid #e2e8f0',
+                        }}
+                      >
+                        {hoanTien.soTaiKhoan || '—'}
+                      </div>
+                    </td>
+                    <td style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>
+                      {hoanTien.tenChuTK || '—'}
+                    </td>
+                    <td>
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: '#10b981',
+                          background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          border: '2px solid #6ee7b7',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {hoanTien.tienHoan?.toLocaleString('vi-VN')}đ
+                      </div>
+                    </td>
+                    <td>{getStatusTag(hoanTien.trangThaiHoanTien)}</td>
+                    <td style={{ fontSize: 13 }}>
+                      {hoanTien.ngayYeuCau
+                        ? new Date(hoanTien.ngayYeuCau).toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '—'}
+                    </td>
+                    <td>{renderActions(hoanTien)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {/* Modal Chi tiết */}
+      {selectedHoanTien && (
+        <ChiTietHoanTien
+          hoanTien={selectedHoanTien}
+          onClose={() => setSelectedHoanTien(null)}
+          onShowToast={showToast}
+          onUpdate={fetchHoanTiens}
+        />
+      )}
+
+      {/* Modal Xác nhận hoàn tiền */}
+      {showXacNhanModal && (
+        <XacNhanHoanTienModal
+          hoanTien={showXacNhanModal}
+          onClose={() => setShowXacNhanModal(null)}
+          onSuccess={() => {
+            setShowXacNhanModal(null);
+            fetchHoanTiens();
+          }}
+          onShowToast={showToast}
+        />
+      )}
     </div>
   );
 }

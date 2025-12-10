@@ -44,12 +44,13 @@ export default function Toast({ type, message, onClose, duration = 3000 }) {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      zIndex: 999999,
+      zIndex: 9999999, // ✅ TĂNG z-index CỰC CAO
       minWidth: '280px',
       maxWidth: '400px',
       borderLeft: `4px solid ${colors[type]}`,
       opacity: isVisible ? 1 : 0,
-      transition: 'all 0.3s cubic-bezier(0.21, 1.02, 0.73, 1)'
+      transition: 'all 0.3s cubic-bezier(0.21, 1.02, 0.73, 1)',
+      pointerEvents: 'auto' // ✅ Cho phép click
     }}>
       <div style={{
         width: '20px',

@@ -16,6 +16,10 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
     maHuyen: '',
     maPhuongXa: '',
     trangThai: 'Hoạt động',
+    // Thông tin ngân hàng
+    nganHang: '',
+    soTaiKhoan: '',
+    tenChuTK: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -47,6 +51,10 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
         maHuyen: user.maHuyen || '',
         maPhuongXa: user.maPhuongXa || '',
         trangThai: user.trangThai || 'Hoạt động',
+        // Thông tin ngân hàng
+        nganHang: user.nganHang || '',
+        soTaiKhoan: user.soTaiKhoan || '',
+        tenChuTK: user.tenChuTK || '',
       });
 
       if (user.maTinh) {
@@ -57,7 +65,7 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
       }
     } catch (err) {
       console.error('Lỗi khi tải thông tin:', err);
-      onShowToast('error', 'Không thể tải thông tin người dùng');
+      onShowToast && onShowToast('error', 'Không thể tải thông tin người dùng');
     }
   };
 
@@ -106,32 +114,77 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate
+    if (!formData.hoTen?.trim()) {
+      onShowToast && onShowToast('error', '⚠️ Vui lòng nhập họ tên');
+      return;
+    }
+
+    if (!formData.email?.trim()) {
+      onShowToast && onShowToast('error', '⚠️ Vui lòng nhập email');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const updateData = {
-        hoTen: formData.hoTen,
-        soDienThoai: formData.soDienThoai,
-        email: formData.email,
-        soCCCD: formData.soCCCD,
+        hoTen: formData.hoTen.trim(),
+        soDienThoai: formData.soDienThoai?.trim() || null,
+        email: formData.email.trim(),
+        soCCCD: formData.soCCCD?.trim() || null,
         ngayCapCCCD: formData.ngayCapCCCD || null,
-        noiCapCCCD: formData.noiCapCCCD,
+        noiCapCCCD: formData.noiCapCCCD?.trim() || null,
         ngaySinh: formData.ngaySinh || null,
-        gioiTinh: formData.gioiTinh,
-        diaChiChiTiet: formData.diaChiChiTiet,
+        gioiTinh: formData.gioiTinh || null,
+        diaChiChiTiet: formData.diaChiChiTiet?.trim() || null,
         maPhuongXa: formData.maPhuongXa ? parseInt(formData.maPhuongXa) : null,
         trangThai: formData.trangThai,
-        // KHÔNG GỬI VaiTro
+        // Thông tin ngân hàng
+        nganHang: formData.nganHang?.trim() || null,
+        soTaiKhoan: formData.soTaiKhoan?.trim() || null,
+        tenChuTK: formData.tenChuTK?.trim() || null,
       };
 
+      console.log('📤 Dữ liệu gửi lên server:', updateData);
+
       await api.put(`/api/NguoiDung/${userId}`, updateData);
-      onSuccess();
+      
+      // ✅ GỌI onSuccess TRƯỚC để refresh data
+      onSuccess && onSuccess();
+      
+      // ✅ ĐÓNG modal TRƯỚC
+      onClose && onClose();
+      
+      // ✅ SAU ĐÓ MỚI hiển thị toast (sau khi modal đã đóng)
+      setTimeout(() => {
+        onShowToast && onShowToast(
+          'success', 
+          `✅ Cập nhật thông tin khách hàng "${formData.hoTen}" thành công!`
+        );
+      }, 100);
+
     } catch (err) {
-      console.error('Lỗi khi cập nhật:', err);
-      onShowToast(
-        'error',
-        err.response?.data?.message || 'Cập nhật thất bại'
-      );
+      console.error('❌ Lỗi khi cập nhật:', err);
+      
+      // Xử lý các loại lỗi cụ thể
+      let errorMessage = '❌ Cập nhật thất bại! Vui lòng thử lại';
+      
+      if (err.response?.status === 400) {
+        errorMessage = `⚠️ ${err.response.data.message || 'Dữ liệu không hợp lệ'}`;
+      } else if (err.response?.status === 404) {
+        errorMessage = '❌ Không tìm thấy người dùng';
+      } else if (err.response?.status === 401) {
+        errorMessage = '🔒 Bạn không có quyền thực hiện thao tác này';
+      } else if (err.response?.status === 500) {
+        errorMessage = '⚠️ Lỗi máy chủ! Vui lòng thử lại sau';
+      } else if (err.message === 'Network Error') {
+        errorMessage = '📡 Lỗi kết nối! Vui lòng kiểm tra mạng';
+      }
+      
+      // ✅ Lỗi thì hiển thị toast NGAY (modal vẫn mở)
+      onShowToast && onShowToast('error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -140,29 +193,47 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal modal-lg"
+        className="modal modal-large"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 800 }}
+        style={{ maxWidth: 900 }}
       >
-        <div className="modal-header">
-          <h3 className="modal-title">✏️ Chỉnh sửa thông tin khách hàng</h3>
-          <button className="modal-close-btn" onClick={onClose}>
+        {/* Header với gradient */}
+        <div className="modal-header-gradient">
+          <div className="modal-header-content">
+            <div className="modal-icon">✏️</div>
+            <div>
+              <h3 className="modal-title-large">Chỉnh sửa thông tin khách hàng</h3>
+              <p className="modal-subtitle">
+                Cập nhật thông tin chi tiết người dùng #{userId} • {formData.email}
+              </p>
+            </div>
+          </div>
+          <button className="modal-close-btn-gradient" onClick={onClose}>
             ✕
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          <div className="modal-body-scrollable">
             {/* Thông tin cá nhân */}
             <div className="form-section">
-              <h4 className="form-section-title">Thông tin cá nhân</h4>
+              <div className="form-section-header">
+                <div className="form-section-icon">👤</div>
+                <h4 className="form-section-title">Thông tin cá nhân</h4>
+              </div>
+
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Họ tên *</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">📝</span>
+                    Họ tên
+                    <span className="form-label-required">*</span>
+                  </label>
                   <input
                     type="text"
                     name="hoTen"
-                    className="form-control"
+                    className="form-input-modern"
+                    placeholder="Nhập họ và tên đầy đủ"
                     value={formData.hoTen}
                     onChange={handleChange}
                     required
@@ -170,11 +241,16 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                 </div>
 
                 <div className="form-group">
-                  <label>Email *</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">📧</span>
+                    Email
+                    <span className="form-label-required">*</span>
+                  </label>
                   <input
                     type="email"
                     name="email"
-                    className="form-control"
+                    className="form-input-modern"
+                    placeholder="example@email.com"
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -182,25 +258,32 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                 </div>
 
                 <div className="form-group">
-                  <label>Số điện thoại</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">📱</span>
+                    Số điện thoại
+                  </label>
                   <input
                     type="tel"
                     name="soDienThoai"
-                    className="form-control"
+                    className="form-input-modern"
+                    placeholder="0xxx xxx xxx"
                     value={formData.soDienThoai}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Giới tính</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">⚧</span>
+                    Giới tính
+                  </label>
                   <select
                     name="gioiTinh"
-                    className="form-control"
+                    className="form-select-modern"
                     value={formData.gioiTinh}
                     onChange={handleChange}
                   >
-                    <option value="">-- Chọn --</option>
+                    <option value="">-- Chọn giới tính --</option>
                     <option value="Nam">Nam</option>
                     <option value="Nữ">Nữ</option>
                     <option value="Khác">Khác</option>
@@ -208,26 +291,32 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                 </div>
 
                 <div className="form-group">
-                  <label>Ngày sinh</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">🎂</span>
+                    Ngày sinh
+                  </label>
                   <input
                     type="date"
                     name="ngaySinh"
-                    className="form-control"
+                    className="form-input-modern"
                     value={formData.ngaySinh}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Trạng thái</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">📊</span>
+                    Trạng thái
+                  </label>
                   <select
                     name="trangThai"
-                    className="form-control"
+                    className="form-select-modern"
                     value={formData.trangThai}
                     onChange={handleChange}
                   >
-                    <option value="Hoạt động">Hoạt động</option>
-                    <option value="Tạm khóa">Tạm khóa</option>
+                    <option value="Hoạt động">✅ Hoạt động</option>
+                    <option value="Tạm khóa">🔒 Tạm khóa</option>
                   </select>
                 </div>
               </div>
@@ -235,36 +324,52 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
 
             {/* CCCD */}
             <div className="form-section">
-              <h4 className="form-section-title">Thông tin CCCD</h4>
+              <div className="form-section-header">
+                <div className="form-section-icon">🆔</div>
+                <h4 className="form-section-title">Thông tin CCCD</h4>
+              </div>
+
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Số CCCD</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">🔢</span>
+                    Số CCCD
+                  </label>
                   <input
                     type="text"
                     name="soCCCD"
-                    className="form-control"
+                    className="form-input-modern"
+                    placeholder="Nhập số CCCD (12 chữ số)"
                     value={formData.soCCCD}
                     onChange={handleChange}
+                    maxLength={12}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Ngày cấp</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">📅</span>
+                    Ngày cấp
+                  </label>
                   <input
                     type="date"
                     name="ngayCapCCCD"
-                    className="form-control"
+                    className="form-input-modern"
                     value={formData.ngayCapCCCD}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label>Nơi cấp</label>
+                <div className="form-group full-width">
+                  <label className="form-label">
+                    <span className="form-label-icon">🏛️</span>
+                    Nơi cấp
+                  </label>
                   <input
                     type="text"
                     name="noiCapCCCD"
-                    className="form-control"
+                    className="form-input-modern"
+                    placeholder="VD: Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
                     value={formData.noiCapCCCD}
                     onChange={handleChange}
                   />
@@ -274,17 +379,24 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
 
             {/* Địa chỉ */}
             <div className="form-section">
-              <h4 className="form-section-title">Địa chỉ</h4>
+              <div className="form-section-header">
+                <div className="form-section-icon">📍</div>
+                <h4 className="form-section-title">Địa chỉ liên hệ</h4>
+              </div>
+
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Tỉnh/Thành phố</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">🏙️</span>
+                    Tỉnh/Thành phố
+                  </label>
                   <select
                     name="maTinh"
-                    className="form-control"
+                    className="form-select-modern"
                     value={formData.maTinh}
                     onChange={handleChange}
                   >
-                    <option value="">-- Chọn tỉnh --</option>
+                    <option value="">-- Chọn tỉnh/thành phố --</option>
                     {provinces.map((t) => (
                       <option key={t.maTinh} value={t.maTinh}>
                         {t.tenTinh}
@@ -294,15 +406,18 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                 </div>
 
                 <div className="form-group">
-                  <label>Quận/Huyện</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">🏘️</span>
+                    Quận/Huyện
+                  </label>
                   <select
                     name="maHuyen"
-                    className="form-control"
+                    className="form-select-modern"
                     value={formData.maHuyen}
                     onChange={handleChange}
                     disabled={!formData.maTinh}
                   >
-                    <option value="">-- Chọn huyện --</option>
+                    <option value="">-- Chọn quận/huyện --</option>
                     {districts.map((h) => (
                       <option key={h.maHuyen} value={h.maHuyen}>
                         {h.tenHuyen}
@@ -312,15 +427,18 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                 </div>
 
                 <div className="form-group">
-                  <label>Phường/Xã</label>
+                  <label className="form-label">
+                    <span className="form-label-icon">🏡</span>
+                    Phường/Xã
+                  </label>
                   <select
                     name="maPhuongXa"
-                    className="form-control"
+                    className="form-select-modern"
                     value={formData.maPhuongXa}
                     onChange={handleChange}
                     disabled={!formData.maHuyen}
                   >
-                    <option value="">-- Chọn xã --</option>
+                    <option value="">-- Chọn phường/xã --</option>
                     {wards.map((x) => (
                       <option key={x.maPhuongXa} value={x.maPhuongXa}>
                         {x.tenPhuongXa}
@@ -329,27 +447,89 @@ export default function SuaNguoiDungLT({ userId, onClose, onSuccess, onShowToast
                   </select>
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label>Địa chỉ chi tiết</label>
+                <div className="form-group full-width">
+                  <label className="form-label">
+                    <span className="form-label-icon">🏠</span>
+                    Địa chỉ chi tiết
+                  </label>
                   <input
                     type="text"
                     name="diaChiChiTiet"
-                    className="form-control"
-                    placeholder="Số nhà, tên đường..."
+                    className="form-input-modern"
+                    placeholder="Số nhà, tên đường, khu vực..."
                     value={formData.diaChiChiTiet}
                     onChange={handleChange}
                   />
                 </div>
               </div>
             </div>
+
+            {/* Tài khoản ngân hàng */}
+            <div className="form-section">
+              <div className="form-section-header">
+                <div className="form-section-icon">🏦</div>
+                <h4 className="form-section-title">Thông tin tài khoản ngân hàng</h4>
+              </div>
+
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="form-label-icon">🏦</span>
+                    Ngân hàng
+                  </label>
+                  <input
+                    type="text"
+                    name="nganHang"
+                    className="form-input-modern"
+                    placeholder="VD: Vietcombank, Techcombank, VPBank..."
+                    value={formData.nganHang}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="form-label-icon">💳</span>
+                    Số tài khoản
+                  </label>
+                  <input
+                    type="text"
+                    name="soTaiKhoan"
+                    className="form-input-modern"
+                    placeholder="Nhập số tài khoản ngân hàng"
+                    value={formData.soTaiKhoan}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label className="form-label">
+                    <span className="form-label-icon">👤</span>
+                    Tên chủ tài khoản
+                  </label>
+                  <input
+                    type="text"
+                    name="tenChuTK"
+                    className="form-input-modern"
+                    placeholder="Họ và tên chủ tài khoản (viết HOA KHÔNG DẤU)"
+                    value={formData.tenChuTK}
+                    onChange={handleChange}
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn-outline" onClick={onClose}>
-              Hủy
+          {/* Footer */}
+          <div className="modal-footer-modern">
+            <button type="button" className="btn-outline-modern" onClick={onClose} disabled={loading}>
+              <span className="btn-icon">✕</span>
+              Hủy bỏ
             </button>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Đang lưu...' : '💾 Lưu thay đổi'}
+            <button type="submit" className="btn-primary-modern" disabled={loading}>
+              <span className="btn-icon">{loading ? '⏳' : '💾'}</span>
+              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
           </div>
         </form>

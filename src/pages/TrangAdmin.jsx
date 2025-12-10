@@ -7,6 +7,7 @@ import QuanLyTang from '../components/Admin/QuanLyTang';
 import QuanLyTienNghi from '../components/Admin/QuanLyTienNghi';
 import QuanLyNguoiDung from '../components/Admin/QuanLyNguoiDung';
 import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
+import QuanLyDsHoanTien from '../components/Admin/QuanLyDsHoanTien';
 import api from '../utils/api';
 
 export default function TrangAdmin() {
@@ -80,6 +81,8 @@ export default function TrangAdmin() {
         return <QuanLyTienNghi />;
       case 'users':
         return <QuanLyNguoiDung />;
+      case 'hoan-tien':
+        return <QuanLyDsHoanTien />;
       case 'account':
         return <QuanLyTaiKhoan />;
       case 'dashboard':
@@ -153,6 +156,14 @@ export default function TrangAdmin() {
             <span>👤</span>
             <span>Quản lý người dùng</span>
           </div>
+
+          <div
+            className={`admin-menu-item ${activeMenu === 'hoan-tien' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('hoan-tien')}
+          >
+            <span>💸</span>
+            <span>Danh sách hoàn tiền</span>
+          </div>
         </div>
       </aside>
 
@@ -167,6 +178,7 @@ export default function TrangAdmin() {
             {activeMenu === 'floors' && 'Quản lý tầng'}
             {activeMenu === 'amenities' && 'Quản lý tiện nghi'}
             {activeMenu === 'users' && 'Quản lý người dùng'}
+            {activeMenu === 'hoan-tien' && 'Danh sách hoàn tiền'}
             {activeMenu === 'account' && 'Quản lý tài khoản'}
           </div>
 

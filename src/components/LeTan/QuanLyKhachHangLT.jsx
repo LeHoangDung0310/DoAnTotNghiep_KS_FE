@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChiTietNguoiDung from '../Admin/ChiTietNguoiDung';
 import SuaNguoiDungLT from './SuaNguoiDungLT';
+import Toast from '../Common/Toast'; // ✅ IMPORT Component Toast
 import api from '../../utils/api';
 import '../../styles/admin.css';
 import '../../styles/letan.css';
@@ -16,7 +17,7 @@ export default function QuanLyKhachHangLT() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [editUserId, setEditUserId] = useState(null);
-  const [toast, setToast] = useState({ show: false, type: '', message: '' });
+  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ GIỮ NGUYÊN
 
   const searchInputRef = useRef(null);
 
@@ -51,7 +52,6 @@ export default function QuanLyKhachHangLT() {
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
-    setTimeout(() => setToast({ show: false, type: '', message: '' }), 3000);
   };
 
   const handleSearch = () => {
@@ -101,11 +101,14 @@ export default function QuanLyKhachHangLT() {
 
   return (
     <div className="admin-card letan-layout">
-      {/* Toast */}
+      {/* ✅ Toast Component - GIỐNG Quản lý đặt phòng */}
       {toast.show && (
-        <div className={`toast toast-${toast.type}`}>
-          <span>{toast.message}</span>
-        </div>
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
       )}
 
       {/* Header */}
@@ -118,7 +121,7 @@ export default function QuanLyKhachHangLT() {
         </div>
       </div>
 
-      {/* Filters - CẬP NHẬT */}
+      {/* Filters */}
       <div className="letan-search-section">
         <div className="letan-search-row">
           {/* Search Input */}
@@ -315,8 +318,6 @@ export default function QuanLyKhachHangLT() {
           onClose={() => setEditUserId(null)}
           onSuccess={() => {
             fetchUsers();
-            setEditUserId(null);
-            showToast('success', 'Cập nhật thông tin khách hàng thành công');
           }}
           onShowToast={showToast}
         />

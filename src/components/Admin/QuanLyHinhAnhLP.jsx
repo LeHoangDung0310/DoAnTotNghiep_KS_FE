@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Common/Toast'; // ✅ IMPORT
 import api from '../../utils/api';
 
 export default function QuanLyHinhAnhLP() {
@@ -11,11 +12,10 @@ export default function QuanLyHinhAnhLP() {
   const [uploadFiles, setUploadFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState({ show: false, type: '', message: '' }); // ✅ ĐỔI
 
   const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 2500);
+    setToast({ show: true, type, message }); // ✅ ĐỔI
   };
 
   useEffect(() => {
@@ -180,6 +180,16 @@ export default function QuanLyHinhAnhLP() {
 
   return (
     <div className="admin-card">
+      {/* ✅ Toast Component */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ show: false, type: '', message: '' })}
+          duration={3000}
+        />
+      )}
+
       {/* Header */}
       <div className="room-header">
         <div className="room-header-title">Hình ảnh loại phòng</div>
@@ -483,24 +493,6 @@ export default function QuanLyHinhAnhLP() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="toast-container-admin">
-          <div
-            className={
-              'toast-admin ' +
-              (toast.type === 'error' ? 'toast-admin-error' : 'toast-admin-success')
-            }
-          >
-            <div className="toast-admin-icon">{toast.type === 'error' ? '!' : '✓'}</div>
-            <div className="toast-admin-text">{toast.message}</div>
-            <button className="toast-admin-close" onClick={() => setToast(null)}>
-              ✕
-            </button>
           </div>
         </div>
       )}
