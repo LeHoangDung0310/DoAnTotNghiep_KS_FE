@@ -1,0 +1,18 @@
+/* MainLayout - Layout chính cho trang khách hàng */
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  background: #f9fafb;
+}
+
+/* Đảm bảo content không bị footer đè lên */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: 20px;
+  }
+}

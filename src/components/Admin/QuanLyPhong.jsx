@@ -44,8 +44,6 @@ export default function QuanLyPhong() {
 
   const [formData, setFormData] = useState({
     soPhong: '',
-    soGiuong: '',
-    soNguoiToiDa: '',
     moTa: '',
     maTang: '',
     maLoaiPhong: '',
@@ -174,8 +172,6 @@ export default function QuanLyPhong() {
     setCurrentRoom(null);
     setFormData({
       soPhong: '',
-      soGiuong: '',
-      soNguoiToiDa: '',
       moTa: '',
       maTang: '',
       maLoaiPhong: '',
@@ -189,8 +185,6 @@ export default function QuanLyPhong() {
     setCurrentRoom(room);
     setFormData({
       soPhong: room.soPhong || '',
-      soGiuong: room.soGiuong || '',
-      soNguoiToiDa: room.soNguoiToiDa || '',
       moTa: room.moTa || '',
       maTang: room.maTang || '',
       maLoaiPhong: room.maLoaiPhong || '',
@@ -386,8 +380,6 @@ export default function QuanLyPhong() {
               <th>Mã phòng</th>
               <th>Số phòng</th>
               <th>Loại phòng</th>
-              <th>Số giường</th>
-              <th>Tối đa</th>
               <th>Tầng</th>
               <th>Mô tả</th>
               <th>Trạng thái</th>
@@ -397,11 +389,11 @@ export default function QuanLyPhong() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9}>Đang tải dữ liệu...</td>
+                <td colSpan={7}>Đang tải dữ liệu...</td>
               </tr>
             ) : rooms.length === 0 ? (
               <tr>
-                <td colSpan={9}>Không có dữ liệu</td>
+                <td colSpan={7}>Không có dữ liệu</td>
               </tr>
             ) : (
               rooms.map((room) => (
@@ -409,8 +401,6 @@ export default function QuanLyPhong() {
                   <td>{room.maPhong}</td>
                   <td>{room.soPhong}</td>
                   <td>{room.tenLoaiPhong || '-'}</td>
-                  <td>{room.soGiuong ?? '-'}</td>
-                  <td>{room.soNguoiToiDa ?? '-'}</td>
                   <td>{room.tenTang || '-'}</td>
                   <td>
                     {room.moTa ? (
@@ -573,38 +563,7 @@ export default function QuanLyPhong() {
                       </select>
                     </div>
 
-                    {/* Số giường */}
-                    <div className="form-group">
-                      <label className="form-label">
-                        <span className="form-label-icon">🛏️</span>
-                        Số giường
-                      </label>
-                      <input
-                        type="number"
-                        className="form-input-modern"
-                        min="0"
-                        value={formData.soGiuong}
-                        onChange={(e) => setFormData({ ...formData, soGiuong: e.target.value })}
-                        placeholder="0"
-                      />
-                    </div>
-
-                    {/* Số người tối đa */}
-                    <div className="form-group">
-                      <label className="form-label">
-                        <span className="form-label-icon">👥</span>
-                        Số người tối đa
-                      </label>
-                      <input
-                        type="number"
-                        className="form-input-modern"
-                        min="0"
-                        value={formData.soNguoiToiDa}
-                        onChange={(e) => setFormData({ ...formData, soNguoiToiDa: e.target.value })}
-                        placeholder="0"
-                      />
-                    </div>
-
+                    
                     {/* Trạng thái - chỉ khi edit */}
                     {modalMode === 'edit' && (
                       <div className="form-group full-width">

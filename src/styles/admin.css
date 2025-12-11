@@ -1010,7 +1010,7 @@
 
 /* Thêm vào file CSS của bạn */
 .modal-large {
-  max-width: 700px !important;
+  max-width: 750px !important;
   width: 90vw !important;
 }
 
@@ -1019,7 +1019,7 @@
    ============================================ */
 
 .modal-large {
-  max-width: 700px !important;
+  max-width: 750px !important;
   width: 90vw !important;
 }
 
@@ -1096,12 +1096,16 @@
 .modal-body-scrollable {
   max-height: 60vh;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 32px;
+  box-sizing: border-box;
 }
 
 /* Form Section */
 .form-section {
   margin-bottom: 32px;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .form-section:last-child {
@@ -1141,12 +1145,15 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  min-width: 0;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .form-group.full-width {
@@ -1177,6 +1184,8 @@
 .form-input-modern,
 .form-select-modern,
 .form-textarea-modern {
+  width: 100%;
+  max-width: 100%;
   padding: 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 10px;
@@ -1184,6 +1193,7 @@
   font-family: inherit;
   transition: all 0.3s ease;
   background: #fff;
+  box-sizing: border-box;
 }
 
 .form-input-modern:focus,
@@ -1260,8 +1270,9 @@
 /* Responsive */
 @media (max-width: 768px) {
   .modal-large {
-    width: 95vw !important;
-    max-width: none !important;
+    width: 98vw !important;
+    max-width: 98% !important;
+    margin: 10px auto;
   }
 
   .modal-header-gradient {
