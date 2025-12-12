@@ -443,16 +443,20 @@ export default function TaoDatPhongTrucTiep({ onClose, onSuccess, onShowToast })
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal modal-booking" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="modal-header booking-modal-header">
-          <div>
-            <h3 className="modal-title">➕ Đặt phòng trực tiếp</h3>
-            <p className="modal-subtitle">Tạo đặt phòng mới cho khách hàng</p>
+          <div className="modal-header-gradient">
+          <div className="modal-header-content">
+            <div className="modal-icon">➕</div>
+            <div>
+              <h3 className="modal-title-large">Đặt phòng trực tiếp</h3>
+              <p className="modal-subtitle">
+                Tạo đặt phòng mới cho khách hàng
+              </p>
+            </div>
           </div>
           <button className="modal-close-btn" onClick={onClose}>
             ✕
           </button>
         </div>
-
         {/* Steps */}
         <div className="booking-steps">
           {[

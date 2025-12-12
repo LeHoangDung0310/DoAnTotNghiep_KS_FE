@@ -3,6 +3,7 @@ import Toast from '../Common/Toast';
 import TaoDatPhongTrucTiep from './TaoDatPhongTrucTiep';
 import ChiTietDatPhong from './ChiTietDatPhong';
 import ThanhToanModal from './ThanhToanModal';
+import DoiPhongStep from './Steps/DoiPhongStep';
 import api from '../../utils/api';
 
 // Import CSS
@@ -23,6 +24,9 @@ export default function QuanLyDatPhongLT() {
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentBookingId, setPaymentBookingId] = useState(null);
+
+  const [showDoiPhongModal, setShowDoiPhongModal] = useState(false);
+  const [doiPhongBookingId, setDoiPhongBookingId] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -221,6 +225,20 @@ export default function QuanLyDatPhongLT() {
             🚪
           </button>
         )}
+
+        {/* Đổi phòng - CHỈ hiện khi trạng thái "DangSuDung" */}
+        {trangThai === 'DangSuDung' && (
+          <button
+            className="action-icon-btn info"
+            onClick={() => {
+              setDoiPhongBookingId(maDatPhong);
+              setShowDoiPhongModal(true);
+            }}
+            title="Đổi phòng"
+          >
+            🔄
+          </button>
+        )}
       </div>
     );
   };
@@ -237,8 +255,8 @@ export default function QuanLyDatPhongLT() {
         />
       )}
 
-      {/* Header */}
-      <div className="letan-header-layout">
+       {/* Header */}
+      <div className="letan-header-layout" >
         <div className="letan-header-left">
           <h3 className="admin-card-title">📅 Quản lý đặt phòng</h3>
           <button className="btn-outline letan-reset-btn" onClick={handleReset}>
@@ -481,6 +499,19 @@ export default function QuanLyDatPhongLT() {
             fetchBookings();
             showToast('success', 'Thanh toán thành công');
           }}
+          onShowToast={showToast}
+        />
+      )}
+
+      {/* Modal Đổi Phòng */}
+      {showDoiPhongModal && doiPhongBookingId && (
+        <DoiPhongStep
+          bookingId={doiPhongBookingId}
+          onClose={() => {
+            setShowDoiPhongModal(false);
+            setDoiPhongBookingId(null);
+          }}
+          onSuccess={fetchBookings}
           onShowToast={showToast}
         />
       )}

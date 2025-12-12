@@ -31,26 +31,51 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!soTien || parseFloat(soTien) <= 0) {
+    const soTienFloat = parseFloat(soTien);
+    
+    // Cho phép số tiền âm (hoàn tiền) hoặc dương (thanh toán)
+    if (!soTien || soTienFloat === 0) {
       onShowToast('error', 'Vui lòng nhập số tiền hợp lệ');
       return;
     }
 
-    if (parseFloat(soTien) > thongTin.conLai) {
-      onShowToast('error', `Số tiền không được vượt quá ${thongTin.conLai.toLocaleString('vi-VN')}đ`);
-      return;
+    // Khi còn lại dương: Khách cần trả thêm tiền
+    if (thongTin.conLai > 0) {
+      if (soTienFloat <= 0) {
+        onShowToast('error', 'Số tiền thanh toán phải lớn hơn 0');
+        return;
+      }
+      if (soTienFloat > thongTin.conLai) {
+        onShowToast('error', `Số tiền không được vượt quá ${thongTin.conLai.toLocaleString('vi-VN')}đ`);
+        return;
+      }
+    }
+    
+    // Khi còn lại âm: Cần hoàn tiền cho khách
+    if (thongTin.conLai < 0) {
+      if (soTienFloat >= 0) {
+        onShowToast('error', 'Số tiền hoàn trả phải là số âm');
+        return;
+      }
+      if (soTienFloat < thongTin.conLai) {
+        onShowToast('error', `Số tiền hoàn trả không được lớn hơn ${Math.abs(thongTin.conLai).toLocaleString('vi-VN')}đ`);
+        return;
+      }
     }
 
     setProcessing(true);
     try {
       const res = await api.post('/api/ThanhToan', {
         maDatPhong: bookingId,
-        soTien: parseFloat(soTien),
+        soTien: soTienFloat,
         phuongThuc: phuongThuc,
       });
 
       onSuccess();
-      onShowToast('success', res.data.message || 'Thanh toán thành công');
+      const message = soTienFloat < 0 
+        ? 'Xác nhận hoàn tiền thành công'
+        : res.data.message || 'Thanh toán thành công';
+      onShowToast('success', message);
       onClose();
     } catch (err) {
       console.error('Lỗi khi thanh toán:', err);
@@ -82,7 +107,7 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
       <div 
         className="modal modal-booking" 
         onClick={(e) => e.stopPropagation()} 
-        style={{ maxWidth: 700 }}
+        style={{ maxWidth: 900, width: '95%' }}
       >
         {/* ✅ HEADER GRADIENT */}
         <div className="modal-header-gradient">
@@ -111,77 +136,150 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
 
               <div style={{ 
                 background: 'linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%)', 
-                padding: 24, 
+                padding: 28, 
                 borderRadius: 12,
-                border: '2px solid #fee'
+                border: '2px solid #fee',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.1)'
               }}>
-                <div style={{ display: 'grid', gap: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 16, fontWeight: 600, color: '#475569' }}>
-                      💵 Tổng tiền:
+                <div style={{ display: 'grid', gap: 20 }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    borderRadius: 10,
+                    border: '2px solid rgba(239, 68, 68, 0.15)'
+                  }}>
+                    <span style={{ fontSize: 17, fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 24 }}>💵</span> Tổng tiền:
                     </span>
-                    <span style={{ fontSize: 20, fontWeight: 700, color: '#e74c3c' }}>
+                    <span style={{ fontSize: 24, fontWeight: 800, color: '#e74c3c' }}>
                       {thongTin.tongTien.toLocaleString('vi-VN')}đ
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 16, fontWeight: 600, color: '#475569' }}>
-                      ✅ Đã thanh toán:
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    borderRadius: 10,
+                    border: '2px solid rgba(46, 204, 113, 0.25)'
+                  }}>
+                    <span style={{ fontSize: 17, fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 24 }}>✅</span> Đã thanh toán:
                     </span>
-                    <span style={{ fontSize: 18, fontWeight: 700, color: '#2ecc71' }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: '#2ecc71' }}>
                       {thongTin.daThanhToan.toLocaleString('vi-VN')}đ
                     </span>
                   </div>
 
-                  <div style={{ height: 2, background: '#fecaca', margin: '8px 0' }}></div>
+                  <div style={{ height: 3, background: 'linear-gradient(90deg, transparent 0%, #fecaca 50%, transparent 100%)', margin: '4px 0' }}></div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 18, fontWeight: 700, color: '#1e293b' }}>
-                      ⚠️ Còn lại:
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '20px 24px',
+                    background: thongTin.conLai >= 0 
+                      ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.15) 100%)'
+                      : 'linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(251, 191, 36, 0.15) 100%)',
+                    borderRadius: 12,
+                    border: thongTin.conLai >= 0 ? '3px solid #fca5a5' : '3px solid #fcd34d',
+                    boxShadow: thongTin.conLai >= 0 
+                      ? '0 4px 12px rgba(220, 38, 38, 0.15)'
+                      : '0 4px 12px rgba(234, 179, 8, 0.15)'
+                  }}>
+                    <span style={{ fontSize: 20, fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 28 }}>{thongTin.conLai >= 0 ? '⚠️' : '💸'}</span> 
+                      {thongTin.conLai >= 0 ? 'Còn lại:' : 'Cần hoàn trả:'}
                     </span>
-                    <span style={{ fontSize: 24, fontWeight: 700, color: '#dc2626' }}>
-                      {thongTin.conLai.toLocaleString('vi-VN')}đ
+                    <span style={{ 
+                      fontSize: 32, 
+                      fontWeight: 900, 
+                      color: thongTin.conLai >= 0 ? '#dc2626' : '#eab308', 
+                      letterSpacing: '-0.5px' 
+                    }}>
+                      {thongTin.conLai >= 0 
+                        ? thongTin.conLai.toLocaleString('vi-VN')
+                        : Math.abs(thongTin.conLai).toLocaleString('vi-VN')}đ
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ✅ FORM THANH TOÁN */}
-            {thongTin.conLai > 0 && (
+            {/* ✅ FORM THANH TOÁN / HOÀN TIỀN */}
+            {thongTin.conLai !== 0 && (
               <div className="form-section">
                 <div className="form-section-header">
-                  <div className="form-section-icon">💳</div>
-                  <h4 className="form-section-title">Thông tin thanh toán mới</h4>
+                  <div className="form-section-icon">{thongTin.conLai > 0 ? '💳' : '💸'}</div>
+                  <h4 className="form-section-title">
+                    {thongTin.conLai > 0 ? 'Thông tin thanh toán mới' : 'Xác nhận hoàn tiền'}
+                  </h4>
                 </div>
 
-                <div className="form-grid">
+                {thongTin.conLai < 0 && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                    padding: 20,
+                    borderRadius: 12,
+                    border: '2px solid #fcd34d',
+                    marginBottom: 20
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'start', gap: 12 }}>
+                      <span style={{ fontSize: 28 }}>⚠️</span>
+                      <div>
+                        <h5 style={{ fontSize: 16, fontWeight: 700, color: '#92400e', margin: '0 0 8px 0' }}>
+                          Khách đã thanh toán thừa!
+                        </h5>
+                        <p style={{ fontSize: 14, color: '#78350f', margin: 0, lineHeight: 1.6 }}>
+                          Do đổi phòng từ đắt sang rẻ hơn, cần hoàn trả <strong>{Math.abs(thongTin.conLai).toLocaleString('vi-VN')}đ</strong> cho khách hàng. 
+                          Vui lòng nhập số tiền âm và xác nhận đã hoàn tiền.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-grid" style={{ gap: 24 }}>
                   <div className="form-group full-width">
-                    <label className="form-label">
+                    <label className="form-label" style={{ fontSize: 15, fontWeight: 700 }}>
                       <span className="form-label-icon">💵</span>
-                      Số tiền thanh toán
+                      {thongTin.conLai > 0 ? 'Số tiền thanh toán' : 'Số tiền hoàn trả'}
                       <span className="form-label-required">*</span>
                     </label>
                     <input
                       type="number"
                       className="form-input-modern"
-                      placeholder="Nhập số tiền"
+                      placeholder={thongTin.conLai > 0 ? 'Nhập số tiền' : 'Nhập số tiền âm (VD: -50000)'}
                       value={soTien}
                       onChange={(e) => setSoTien(e.target.value)}
-                      min={0}
-                      max={thongTin.conLai}
                       required
+                      step="any"
+                      style={{ fontSize: 16, padding: '14px 16px' }}
                     />
                     <small style={{ color: '#64748b', fontSize: 13, marginTop: 4, display: 'block' }}>
-                      💡 Tối đa: <strong style={{ color: '#e74c3c' }}>
-                        {thongTin.conLai.toLocaleString('vi-VN')}đ
-                      </strong>
+                      {thongTin.conLai > 0 ? (
+                        <>
+                          💡 Tối đa: <strong style={{ color: '#e74c3c' }}>
+                            {thongTin.conLai.toLocaleString('vi-VN')}đ
+                          </strong>
+                        </>
+                      ) : (
+                        <>
+                          💸 Nhập số âm để xác nhận hoàn tiền: <strong style={{ color: '#eab308' }}>
+                            {thongTin.conLai.toLocaleString('vi-VN')}đ
+                          </strong>
+                        </>
+                      )}
                     </small>
                   </div>
 
                   <div className="form-group full-width">
-                    <label className="form-label">
+                    <label className="form-label" style={{ fontSize: 15, fontWeight: 700 }}>
                       <span className="form-label-icon">🏦</span>
                       Phương thức thanh toán
                       <span className="form-label-required">*</span>
@@ -190,12 +288,11 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
                       className="form-select-modern"
                       value={phuongThuc}
                       onChange={(e) => setPhuongThuc(e.target.value)}
+                      style={{ fontSize: 16, padding: '14px 16px' }}
                     >
                       <option value="TienMat">💵 Tiền mặt</option>
                       <option value="ChuyenKhoan">🏦 Chuyển khoản</option>
                       <option value="TheATM">💳 Thẻ ATM</option>
-                      <option value="MoMo">📱 MoMo</option>
-                      <option value="ZaloPay">💰 ZaloPay</option>
                     </select>
                   </div>
                 </div>
@@ -213,10 +310,11 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
                 </div>
 
                 <div style={{ 
-                  maxHeight: 300, 
+                  maxHeight: 320, 
                   overflowY: 'auto',
                   border: '2px solid #e5e7eb',
-                  borderRadius: 12
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
                 }}>
                   <table className="admin-table">
                     <thead>
@@ -272,10 +370,11 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
             {thongTin.conLai === 0 && (
               <div style={{
                 background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-                padding: 20,
-                borderRadius: 12,
-                border: '2px solid #6ee7b7',
-                textAlign: 'center'
+                padding: 32,
+                borderRadius: 16,
+                border: '3px solid #6ee7b7',
+                textAlign: 'center',
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.2)'
               }}>
                 <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
                 <h4 style={{ fontSize: 18, fontWeight: 700, color: '#065f46', margin: '0 0 8px 0' }}>
@@ -295,16 +394,18 @@ export default function ThanhToanModal({ bookingId, onClose, onSuccess, onShowTo
               Đóng
             </button>
             
-            {thongTin.conLai > 0 && (
+            {thongTin.conLai !== 0 && (
               <button 
                 type="submit" 
                 className="btn-primary-modern" 
                 disabled={processing}
               >
                 <span className="btn-icon">
-                  {processing ? '⏳' : '💰'}
+                  {processing ? '⏳' : (thongTin.conLai > 0 ? '💰' : '✅')}
                 </span>
-                {processing ? 'Đang xử lý...' : 'Thanh toán'}
+                {processing 
+                  ? 'Đang xử lý...' 
+                  : (thongTin.conLai > 0 ? 'Thanh toán' : 'Xác nhận đã hoàn tiền')}
               </button>
             )}
           </div>

@@ -1,0 +1,531 @@
+/* DoiPhongStep Modal Styles */
+
+.doiphong-modal {
+  max-width: 850px;
+  width: 95%;
+}
+
+.doiphong-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.doiphong-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.doiphong-body {
+  padding: 28px 32px;
+}
+
+/* Booking Info Card */
+.doiphong-info-card {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 2px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.doiphong-info-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.doiphong-info-header span {
+  font-size: 24px;
+}
+
+.doiphong-info-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.doiphong-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  font-size: 14px;
+}
+
+.doiphong-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doiphong-info-item span {
+  font-size: 18px;
+}
+
+.doiphong-info-item .label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.doiphong-info-item strong {
+  color: #1e293b;
+}
+
+/* Form Group */
+.doiphong-form-group {
+  margin-bottom: 20px;
+}
+
+.doiphong-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.doiphong-label span {
+  font-size: 20px;
+}
+
+.doiphong-label .required {
+  color: #ef4444;
+}
+
+.doiphong-label .optional {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.doiphong-select {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.doiphong-select:hover {
+  border-color: #cbd5e1;
+}
+
+.doiphong-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.doiphong-select:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.doiphong-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+  min-height: 100px;
+}
+
+.doiphong-textarea:hover {
+  border-color: #cbd5e1;
+}
+
+.doiphong-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Loading Indicator */
+.doiphong-loading {
+  font-size: 13px;
+  color: #3b82f6;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doiphong-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #dbeafe;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: doiphong-spin 0.6s linear infinite;
+}
+
+@keyframes doiphong-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Room Info Boxes */
+.doiphong-room-old {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 10px;
+  border: 2px solid #fbbf24;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+}
+
+.doiphong-room-new {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 10px;
+  border: 2px solid #6ee7b7;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.doiphong-room-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.doiphong-room-header span:first-child {
+  font-size: 18px;
+}
+
+.doiphong-room-header span:last-child {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.doiphong-room-old .doiphong-room-header span:last-child {
+  color: #92400e;
+}
+
+.doiphong-room-new .doiphong-room-header span:last-child {
+  color: #065f46;
+}
+
+.doiphong-room-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.doiphong-room-card {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+
+.doiphong-room-old .doiphong-room-card {
+  border: 1px solid #fbbf24;
+}
+
+.doiphong-room-new .doiphong-room-card {
+  border: 1px solid #6ee7b7;
+}
+
+.doiphong-room-card-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doiphong-room-card-content > span {
+  font-size: 20px;
+}
+
+.doiphong-room-card-label {
+  font-size: 12px;
+}
+
+.doiphong-room-old .doiphong-room-card-label {
+  color: #78350f;
+}
+
+.doiphong-room-new .doiphong-room-card-label {
+  color: #047857;
+}
+
+.doiphong-room-card-value {
+  font-size: 15px;
+}
+
+.doiphong-room-old .doiphong-room-card-value {
+  color: #92400e;
+}
+
+.doiphong-room-old .doiphong-room-card-value.price {
+  color: #d97706;
+}
+
+.doiphong-room-new .doiphong-room-card-value {
+  color: #065f46;
+}
+
+.doiphong-room-new .doiphong-room-card-value.price {
+  color: #059669;
+}
+
+/* Confirmation Section */
+.doiphong-confirm-card {
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16px;
+  border: 2px solid #0ea5e9;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.15);
+}
+
+.doiphong-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.doiphong-confirm-header span {
+  font-size: 32px;
+}
+
+.doiphong-confirm-header h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0c4a6e;
+}
+
+.doiphong-confirm-list {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 24px;
+}
+
+.doiphong-confirm-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  align-items: center;
+}
+
+.doiphong-confirm-item:nth-child(even) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.doiphong-confirm-item span {
+  color: #475569;
+  font-size: 15px;
+}
+
+.doiphong-confirm-item strong {
+  font-size: 15px;
+  color: #1e293b;
+}
+
+.doiphong-confirm-item.new-room strong {
+  color: #059669;
+}
+
+/* Fee Summary */
+.doiphong-fee-box {
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid;
+  margin-bottom: 20px;
+}
+
+.doiphong-fee-box.zero {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #6ee7b7;
+}
+
+.doiphong-fee-box.positive {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  border-color: #f87171;
+}
+
+.doiphong-fee-box.negative {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #60a5fa;
+}
+
+.doiphong-fee-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doiphong-fee-content span {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.doiphong-fee-content strong {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.doiphong-fee-box.zero strong {
+  color: #059669;
+}
+
+.doiphong-fee-box.positive strong {
+  color: #dc2626;
+}
+
+.doiphong-fee-box.negative strong {
+  color: #0369a1;
+}
+
+/* Alert Boxes */
+.doiphong-alert {
+  margin-top: 15px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.doiphong-alert.success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #6ee7b7;
+  color: #065f46;
+}
+
+.doiphong-alert.warning {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #f87171;
+  color: #7f1d1d;
+}
+
+.doiphong-alert.info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #60a5fa;
+  color: #1e3a8a;
+}
+
+.doiphong-alert.note {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  color: #1e293b;
+}
+
+/* Footer Buttons */
+.doiphong-footer {
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 20px 32px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.doiphong-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.doiphong-btn-cancel {
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  color: #64748b;
+}
+
+.doiphong-btn-cancel:hover {
+  background: #f8f9fa;
+  border-color: #cbd5e1;
+}
+
+.doiphong-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.doiphong-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+}
+
+.doiphong-btn-primary:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .doiphong-modal {
+    width: 98%;
+    max-width: none;
+  }
+
+  .doiphong-body {
+    padding: 20px 16px;
+  }
+
+  .doiphong-info-grid,
+  .doiphong-room-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .doiphong-confirm-card {
+    padding: 20px 16px;
+  }
+
+  .doiphong-confirm-header h4 {
+    font-size: 18px;
+  }
+
+  .doiphong-confirm-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .doiphong-fee-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .doiphong-footer {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .doiphong-btn {
+    width: 100%;
+  }
+}

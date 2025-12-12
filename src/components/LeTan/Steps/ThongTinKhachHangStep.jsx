@@ -132,7 +132,7 @@ export default function ThongTinKhachHangStep({
               value={customerInfo.maTinh}
               onChange={handleCustomerChange}
             >
-              <option value="">-- Chọn tỉnh/thành phố --</option>
+              <option value="">-Chọn tỉnh/thành phố-</option>
               {provinces.map((t) => (
                 <option key={t.maTinh} value={t.maTinh}>
                   {t.tenTinh}
@@ -150,7 +150,7 @@ export default function ThongTinKhachHangStep({
               onChange={handleCustomerChange}
               disabled={!customerInfo.maTinh}
             >
-              <option value="">-- Chọn quận/huyện --</option>
+              <option value="">-Chọn quận/huyện-</option>
               {districts.map((h) => (
                 <option key={h.maHuyen} value={h.maHuyen}>
                   {h.tenHuyen}
@@ -168,7 +168,7 @@ export default function ThongTinKhachHangStep({
               onChange={handleCustomerChange}
               disabled={!customerInfo.maHuyen}
             >
-              <option value="">-- Chọn phường/xã --</option>
+              <option value="">-Chọn phường/xã-</option>
               {wards.map((x) => (
                 <option key={x.maPhuongXa} value={x.maPhuongXa}>
                   {x.tenPhuongXa}

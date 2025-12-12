@@ -1,0 +1,323 @@
+/* ============================================
+   CHI TIẾT ĐẶT PHÒNG - STYLES
+   ============================================ */
+
+/* Modal Layout */
+.chitiet-modal {
+  max-width: 1100px;
+  border-radius: 16px;
+  width: 95%;
+}
+
+.chitiet-modal-body {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.chitiet-modal-footer {
+  padding: 20px 32px;
+}
+
+/* Status Banner */
+.chitiet-status-banner {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #dee2e6;
+}
+
+.chitiet-status-label {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.chitiet-status-value {
+  font-size: 20px;
+}
+
+.chitiet-status-right {
+  text-align: right;
+}
+
+.chitiet-status-type {
+  font-size: 16px;
+}
+
+/* Section Styles */
+.chitiet-section {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.chitiet-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Grid Layout */
+.chitiet-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Info Cards */
+.chitiet-card {
+  padding: 16px;
+  border-radius: 10px;
+  border: 2px solid;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.chitiet-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.chitiet-card-content {
+  flex: 1;
+}
+
+.chitiet-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.chitiet-card-value {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Card Color Variants */
+.chitiet-card-blue {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-color: #bae6fd;
+}
+
+.chitiet-card-blue .chitiet-card-icon {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.chitiet-card-blue .chitiet-card-label {
+  color: #0369a1;
+}
+
+.chitiet-card-blue .chitiet-card-value {
+  color: #0c4a6e;
+}
+
+.chitiet-card-yellow {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #fcd34d;
+}
+
+.chitiet-card-yellow .chitiet-card-icon {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+}
+
+.chitiet-card-yellow .chitiet-card-label {
+  color: #a16207;
+}
+
+.chitiet-card-yellow .chitiet-card-value {
+  color: #78350f;
+}
+
+.chitiet-card-green {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #6ee7b7;
+}
+
+.chitiet-card-green .chitiet-card-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.chitiet-card-green .chitiet-card-label {
+  color: #065f46;
+}
+
+.chitiet-card-green .chitiet-card-value {
+  color: #047857;
+}
+
+.chitiet-card-pink {
+  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+  border-color: #f9a8d4;
+}
+
+.chitiet-card-pink .chitiet-card-icon {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.chitiet-card-pink .chitiet-card-label {
+  color: #9f1239;
+}
+
+.chitiet-card-pink .chitiet-card-value {
+  color: #831843;
+}
+
+.chitiet-card-red {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #fca5a5;
+}
+
+.chitiet-card-red .chitiet-card-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.chitiet-card-red .chitiet-card-label {
+  color: #991b1b;
+}
+
+.chitiet-card-red .chitiet-card-value {
+  color: #b91c1c;
+}
+
+.chitiet-card-purple {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+  border-color: #d8b4fe;
+}
+
+.chitiet-card-purple .chitiet-card-icon {
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.chitiet-card-purple .chitiet-card-label {
+  color: #6b21a8;
+}
+
+.chitiet-card-purple .chitiet-card-value {
+  color: #581c87;
+}
+
+.chitiet-card-lightblue {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #93c5fd;
+}
+
+.chitiet-card-lightblue .chitiet-card-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.chitiet-card-lightblue .chitiet-card-label {
+  color: #1e40af;
+}
+
+.chitiet-card-lightblue .chitiet-card-value {
+  color: #1e3a8a;
+}
+
+/* Creator Info */
+.chitiet-creator-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Room Table */
+.chitiet-table-wrapper {
+  overflow-x: auto;
+}
+
+.chitiet-room-badge {
+  background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.chitiet-room-type {
+  font-weight: 500;
+}
+
+.chitiet-room-price {
+  font-weight: 600;
+}
+
+.chitiet-room-total {
+  font-weight: 700;
+  color: #e74c3c;
+  font-size: 15px;
+}
+
+/* Total Section */
+.chitiet-total-section {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #fee;
+}
+
+.chitiet-total-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.chitiet-total-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #e74c3c;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .chitiet-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .chitiet-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .chitiet-modal-body {
+    padding: 16px 20px;
+  }
+
+  .chitiet-section {
+    padding: 16px;
+  }
+
+  .chitiet-total-section {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
