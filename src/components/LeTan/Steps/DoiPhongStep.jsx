@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../utils/api';
-import '../../../styles/modal.css';
 import '../../../styles/doiphong.css';
 
-export default function DoiPhongStep({ bookingId, onClose, onSuccess, onShowToast }) {
+export default function DoiPhongStep({ bookingId, onClose, onSuccess, onShowToast, customStyle }) {
   const [loading, setLoading] = useState(false);
   const [bookingInfo, setBookingInfo] = useState(null);
   const [availableRooms, setAvailableRooms] = useState([]);
@@ -130,313 +129,207 @@ export default function DoiPhongStep({ bookingId, onClose, onSuccess, onShowToas
 
   if (!bookingInfo) {
     return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-loading">Đang tải...</div>
-        </div>
+      <div className={customStyle ? 'modal-body-custom' : ''} style={{ textAlign: 'center', padding: 32 }}>
+        Đang tải thông tin đặt phòng...
       </div>
     );
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container doiphong-modal" onClick={(e) => e.stopPropagation()}>
-        
-        <div className="modal-header-gradient">
-          <div className="modal-header-content">
-            <div className="modal-icon">🔄</div>
-            <div>
-              <h3 className="modal-title-large">Đổi phòng</h3>
-              <p className="modal-subtitle">
-                Mã đặt phòng #{bookingId}
-              </p>
+    <div className="doiphong-body">
+      <h3 style={{ marginBottom: 18, color: '#764ba2', fontWeight: 700, fontSize: '1.35rem' }}>Đổi phòng</h3>
+      {!showConfirm ? (
+        <>
+          {/* Thông tin booking */}
+          <div className="doiphong-info-card">
+            <div className="doiphong-info-header">
+              <span>👤</span>
+              <h4>Khách hàng: <span style={{ color: '#3b82f6' }}>{bookingInfo.tenKhachHang}</span></h4>
+            </div>
+            <div className="doiphong-info-grid">
+              <div className="doiphong-info-item"><span>📅</span> <span className="label">Ngày trả phòng:</span> <strong>{new Date(bookingInfo.ngayTraPhong).toLocaleDateString('vi-VN')}</strong></div>
             </div>
           </div>
-          <button className="modal-close-btn doiphong-close-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
 
-        <div className="modal-body doiphong-body">
-          {!showConfirm ? (
-            <>
-              {/* Thông tin booking */}
-              <div className="doiphong-info-card">
-                <div className="doiphong-info-header">
-                  <span>💼</span>
-                  <h4>Thông tin đặt phòng</h4>
+          {/* Chọn phòng cũ */}
+          <div className="doiphong-form-group">
+            <label className="doiphong-label">Phòng hiện tại cần đổi <span className="required">*</span></label>
+            <select
+              className="doiphong-select"
+              value={selectedOldRoom}
+              onChange={e => {
+                setSelectedOldRoom(e.target.value);
+                setSelectedNewRoom('');
+                setCalculatedFee(null);
+                setOldRoomDetails(null);
+              }}
+            >
+              <option value="">— Chọn phòng —</option>
+              {bookingInfo.danhSachPhong?.map(phong => (
+                <option key={phong.maPhong} value={phong.maPhong}>
+                  Phòng {phong.soPhong} - {phong.tenLoaiPhong}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Thông tin phòng cũ */}
+          {selectedOldRoom && oldRoomDetails && (
+            <div className="doiphong-room-old" style={{ boxShadow: '0 4px 16px #fbbf2466', marginBottom: 28, padding: '28px 28px', borderRadius: 16, border: '2.5px solid #fbbf24', background: 'linear-gradient(135deg, #fffbe6 0%, #fde68a 100%)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
+                <span style={{ fontSize: 32, marginRight: 8, color: '#fbbf24' }}>🏨</span>
+                <span style={{ fontWeight: 800, fontSize: 20, color: '#92400e', letterSpacing: 1 }}>Phòng hiện tại</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #fbbf24', boxShadow: '0 2px 8px #fbbf2433', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#92400e' }}>🔢</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#92400e' }}>Số phòng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#d97706', marginLeft: 8 }}>{oldRoomDetails.soPhong}</span>
                 </div>
-                <div className="doiphong-info-grid">
-                  <div className="doiphong-info-item">
-                    <span>👤</span>
-                    <div>
-                      <div className="label">Khách hàng</div>
-                      <strong>{bookingInfo.tenKhachHang}</strong>
-                    </div>
-                  </div>
-                  <div className="doiphong-info-item">
-                    <span>📅</span>
-                    <div>
-                      <div className="label">Ngày trả phòng</div>
-                      <strong>{new Date(bookingInfo.ngayTraPhong).toLocaleDateString('vi-VN')}</strong>
-                    </div>
-                  </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #fbbf24', boxShadow: '0 2px 8px #fbbf2433', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#92400e' }}>🏷️</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#92400e' }}>Loại phòng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#d97706', marginLeft: 8 }}>{oldRoomDetails.tenLoaiPhong}</span>
+                </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #fbbf24', boxShadow: '0 2px 8px #fbbf2433', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#92400e' }}>🏢</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#92400e' }}>Tầng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#d97706', marginLeft: 8 }}>{oldRoomDetails.tenTang || 'N/A'}</span>
+                </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #fbbf24', boxShadow: '0 2px 8px #fbbf2433', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#92400e' }}>💸</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#92400e' }}>Giá/đêm:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#d97706', marginLeft: 8 }}>{(oldRoomDetails.giaMoiDem || 0).toLocaleString('vi-VN')}đ</span>
                 </div>
               </div>
-
-              {/* Chọn phòng cũ */}
-              <div className="doiphong-form-group">
-                <label className="doiphong-label">
-                  <span>🏨</span>
-                  Chọn phòng hiện tại cần đổi
-                  <span className="required">*</span>
-                </label>
-                <select
-                  className="doiphong-select"
-                  value={selectedOldRoom}
-                  onChange={(e) => {
-                    setSelectedOldRoom(e.target.value);
-                    setSelectedNewRoom('');
-                    setCalculatedFee(null);
-                    setOldRoomDetails(null);
-                  }}
-                >
-                  <option value="">— Chọn phòng —</option>
-                  {bookingInfo.danhSachPhong?.map(phong => (
-                    <option key={phong.maPhong} value={phong.maPhong}>
-                      Phòng {phong.soPhong} - {phong.tenLoaiPhong}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hiển thị thông tin chi tiết phòng cũ */}
-              {selectedOldRoom && oldRoomDetails && (
-                <div className="doiphong-room-old">
-                  <div className="doiphong-room-header">
-                    <span>📍</span>
-                    <span>Thông tin phòng hiện tại</span>
-                  </div>
-                  <div className="doiphong-room-grid">
-                    <div className="doiphong-room-card">
-                      <div className="doiphong-room-card-content">
-                        <span>🏢</span>
-                        <div>
-                          <div className="doiphong-room-card-label">Tầng</div>
-                          <strong className="doiphong-room-card-value">
-                            {oldRoomDetails.tenTang || 'N/A'}
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="doiphong-room-card">
-                      <div className="doiphong-room-card-content">
-                        <span>💰</span>
-                        <div>
-                          <div className="doiphong-room-card-label">Giá/đêm</div>
-                          <strong className="doiphong-room-card-value price">
-                            {(oldRoomDetails.giaMoiDem || 0).toLocaleString('vi-VN')}đ
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Chọn phòng mới */}
-              {selectedOldRoom && (
-                <>
-                  <div className="doiphong-form-group">
-                    <label className="doiphong-label">
-                      <span>🆕</span>
-                      Chọn phòng mới
-                      <span className="required">*</span>
-                    </label>
-                    <select
-                      className="doiphong-select"
-                      value={selectedNewRoom}
-                      onChange={(e) => setSelectedNewRoom(e.target.value)}
-                      disabled={loading}
-                    >
-                      <option value="">— Chọn phòng trống —</option>
-                      {availableRooms.map(phong => (
-                        <option key={phong.maPhong} value={phong.maPhong}>
-                          Phòng {phong.soPhong} - {phong.tenLoaiPhong || 'N/A'}
-                        </option>
-                      ))}
-                    </select>
-                    {loading && (
-                      <div className="doiphong-loading">
-                        <span className="doiphong-spinner"></span>
-                        Đang tải danh sách phòng trống...
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Hiển thị thông tin chi tiết phòng mới */}
-                  {selectedNewRoom && availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)) && (
-                    <div className="doiphong-room-new">
-                      <div className="doiphong-room-header">
-                        <span>✨</span>
-                        <span>Thông tin phòng mới</span>
-                      </div>
-                      <div className="doiphong-room-grid">
-                        <div className="doiphong-room-card">
-                          <div className="doiphong-room-card-content">
-                            <span>🏢</span>
-                            <div>
-                              <div className="doiphong-room-card-label">Tầng</div>
-                              <strong className="doiphong-room-card-value">
-                                {availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).tenTang || 'N/A'}
-                              </strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="doiphong-room-card">
-                          <div className="doiphong-room-card-content">
-                            <span>💰</span>
-                            <div>
-                              <div className="doiphong-room-card-label">Giá/đêm</div>
-                              <strong className="doiphong-room-card-value price">
-                                {(availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).giaMoiDem || 0).toLocaleString('vi-VN')}đ
-                              </strong>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Lý do */}
-              <div className="doiphong-form-group" style={{ marginBottom: 0 }}>
-                <label className="doiphong-label">
-                  <span>📝</span>
-                  Lý do đổi phòng
-                  <span className="optional">(tùy chọn)</span>
-                </label>
-                <textarea
-                  className="doiphong-textarea"
-                  rows="3"
-                  placeholder="Ví dụ: Khách yêu cầu đổi phòng có view đẹp hơn..."
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Xác nhận đổi phòng */}
-              <div className="doiphong-confirm-card">
-                <div className="doiphong-confirm-header">
-                  <span>📋</span>
-                  <h4>Thông tin đổi phòng</h4>
-                </div>
-                
-                <div className="doiphong-confirm-list">
-                  <div className="doiphong-confirm-item">
-                    <span>🏨 Phòng hiện tại:</span>
-                    <strong>Phòng {calculatedFee.oldRoom.soPhong} - {calculatedFee.oldRoom.tenLoaiPhong}</strong>
-                  </div>
-                  <div className="doiphong-confirm-item">
-                    <span>💰 Giá phòng cũ:</span>
-                    <strong>{calculatedFee.giaPhongCu.toLocaleString('vi-VN')}đ/đêm</strong>
-                  </div>
-                  <div className="doiphong-confirm-item new-room">
-                    <span>🆕 Phòng mới:</span>
-                    <strong>Phòng {calculatedFee.newRoom.soPhong} - {calculatedFee.newRoom.tenLoaiPhong}</strong>
-                  </div>
-                  <div className="doiphong-confirm-item new-room">
-                    <span>💵 Giá phòng mới:</span>
-                    <strong>{calculatedFee.giaPhongMoi.toLocaleString('vi-VN')}đ/đêm</strong>
-                  </div>
-                  <div className="doiphong-confirm-item">
-                    <span>📅 Số ngày còn lại:</span>
-                    <strong>{calculatedFee.soNgayConLai} ngày</strong>
-                  </div>
-                </div>
-
-                <div className={`doiphong-fee-box ${
-                  calculatedFee.phiChenhLech === 0 ? 'zero' : 
-                  calculatedFee.phiChenhLech > 0 ? 'positive' : 'negative'
-                }`}>
-                  <div className="doiphong-fee-content">
-                    <span>💳 Phí chênh lệch:</span>
-                    <strong>
-                      {calculatedFee.phiChenhLech === 0 
-                        ? 'Không phụ thu' 
-                        : calculatedFee.phiChenhLech > 0
-                          ? `+${calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ`
-                          : `${calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ (hoàn trả)`
-                      }
-                    </strong>
-                  </div>
-                </div>
-
-                {calculatedFee.cungLoaiPhong && (
-                  <div className="doiphong-alert success">
-                    ✅ Đổi phòng cùng loại, không phụ thu
-                  </div>
-                )}
-                {!calculatedFee.cungLoaiPhong && calculatedFee.phiChenhLech > 0 && (
-                  <div className="doiphong-alert warning">
-                    ⚠️ Khách cần thanh toán thêm {calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ cho {calculatedFee.soNgayConLai} ngày còn lại
-                  </div>
-                )}
-                {!calculatedFee.cungLoaiPhong && calculatedFee.phiChenhLech < 0 && (
-                  <div className="doiphong-alert info">
-                    💰 Hoàn trả cho khách {Math.abs(calculatedFee.phiChenhLech).toLocaleString('vi-VN')}đ
-                  </div>
-                )}
-
-                {reason && (
-                  <div className="doiphong-alert note">
-                    <strong>Lý do:</strong> {reason}
-                  </div>
-                )}
-              </div>
-            </>
+            </div>
           )}
-        </div>
 
-        <div className="modal-footer doiphong-footer">
-          {!showConfirm ? (
-            <>
-              <button 
-                className="doiphong-btn doiphong-btn-cancel" 
-                onClick={onClose}
-              >
-                Hủy bỏ
-              </button>
-              <button
-                className="doiphong-btn doiphong-btn-primary"
-                onClick={calculateFee}
-                disabled={!selectedOldRoom || !selectedNewRoom || loading}
-              >
-                📊 Tính phí và xem chi tiết
-              </button>
-            </>
-          ) : (
-            <>
-              <button 
-                className="doiphong-btn doiphong-btn-cancel" 
-                onClick={() => setShowConfirm(false)}
-              >
-                ← Quay lại
-              </button>
-              <button
-                className="doiphong-btn doiphong-btn-primary"
-                onClick={handleChangeRoom}
+          {/* Chọn phòng mới */}
+          {selectedOldRoom && (
+            <div className="doiphong-form-group">
+              <label className="doiphong-label">Phòng mới <span className="required">*</span></label>
+              <select
+                className="doiphong-select"
+                value={selectedNewRoom}
+                onChange={e => setSelectedNewRoom(e.target.value)}
                 disabled={loading}
               >
-                {loading ? '⏳ Đang xử lý...' : '✓ Xác nhận đổi phòng'}
-              </button>
-            </>
+                <option value="">— Chọn phòng trống —</option>
+                {availableRooms.map(phong => (
+                  <option key={phong.maPhong} value={phong.maPhong}>
+                    Phòng {phong.soPhong} - {phong.tenLoaiPhong || 'N/A'}
+                  </option>
+                ))}
+              </select>
+              {loading && <div className="doiphong-loading"><span className="doiphong-spinner"></span> Đang tải danh sách phòng trống...</div>}
+            </div>
           )}
-        </div>
-      </div>
+
+          {/* Thông tin phòng mới */}
+          {selectedNewRoom && availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)) && (
+            <div className="doiphong-room-new" style={{ boxShadow: '0 4px 16px #6ee7b766', marginBottom: 28, padding: '28px 28px', borderRadius: 16, border: '2.5px solid #6ee7b7', background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
+                <span style={{ fontSize: 32, marginRight: 8, color: '#059669' }}>🆕</span>
+                <span style={{ fontWeight: 800, fontSize: 20, color: '#065f46', letterSpacing: 1 }}>Phòng mới</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #6ee7b7', boxShadow: '0 2px 8px #6ee7b733', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#065f46' }}>🔢</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#065f46' }}>Số phòng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#059669', marginLeft: 8 }}>{availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).soPhong}</span>
+                </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #6ee7b7', boxShadow: '0 2px 8px #6ee7b733', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#065f46' }}>🏷️</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#065f46' }}>Loại phòng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#059669', marginLeft: 8 }}>{availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).tenLoaiPhong}</span>
+                </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #6ee7b7', boxShadow: '0 2px 8px #6ee7b733', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#065f46' }}>🏢</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#065f46' }}>Tầng:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#059669', marginLeft: 8 }}>{availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).tenTang || 'N/A'}</span>
+                </div>
+                <div className="doiphong-room-card" style={{ background: '#fff', border: '1.5px solid #6ee7b7', boxShadow: '0 2px 8px #6ee7b733', padding: '18px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <span style={{ fontSize: 22, color: '#065f46' }}>💸</span>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: '#065f46' }}>Giá/đêm:</span>
+                  <span style={{ fontWeight: 700, fontSize: 18, color: '#059669', marginLeft: 8 }}>{(availableRooms.find(r => r.maPhong === parseInt(selectedNewRoom)).giaMoiDem || 0).toLocaleString('vi-VN')}đ</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Lý do đổi phòng */}
+          <div className="doiphong-form-group">
+            <label className="doiphong-label">Lý do đổi phòng <span className="optional">(tùy chọn)</span></label>
+            <textarea
+              className="doiphong-textarea"
+              rows={3}
+              placeholder="Ví dụ: Khách yêu cầu đổi phòng có view đẹp hơn..."
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+            />
+          </div>
+
+          {/* Nút */}
+          <div className="doiphong-footer">
+            <button onClick={onClose} className="doiphong-btn doiphong-btn-cancel">Hủy bỏ</button>
+            <button
+              onClick={calculateFee}
+              className="doiphong-btn doiphong-btn-primary"
+              disabled={!selectedOldRoom || !selectedNewRoom || loading}
+            >
+              📊 Tính phí và xem chi tiết
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Xác nhận đổi phòng */}
+          <div className="doiphong-confirm-card">
+            <div className="doiphong-confirm-header">
+              <span>✅</span>
+              <h4>Xác nhận đổi phòng</h4>
+            </div>
+            <div className="doiphong-confirm-list">
+              <div className="doiphong-confirm-item"><span>Phòng hiện tại:</span> <strong>{calculatedFee.oldRoom.soPhong} - {calculatedFee.oldRoom.tenLoaiPhong}</strong></div>
+              <div className="doiphong-confirm-item"><span>Giá phòng cũ:</span> <strong>{calculatedFee.giaPhongCu.toLocaleString('vi-VN')}đ/đêm</strong></div>
+              <div className="doiphong-confirm-item new-room"><span>Phòng mới:</span> <strong>{calculatedFee.newRoom.soPhong} - {calculatedFee.newRoom.tenLoaiPhong}</strong></div>
+              <div className="doiphong-confirm-item"><span>Giá phòng mới:</span> <strong>{calculatedFee.giaPhongMoi.toLocaleString('vi-VN')}đ/đêm</strong></div>
+              <div className="doiphong-confirm-item"><span>Số ngày còn lại:</span> <strong>{calculatedFee.soNgayConLai} ngày</strong></div>
+            </div>
+            <div className={`doiphong-fee-box ${calculatedFee.phiChenhLech === 0 ? 'zero' : calculatedFee.phiChenhLech > 0 ? 'positive' : 'negative'}`}> 
+              <div className="doiphong-fee-content">
+                <span>Phí chênh lệch:</span>
+                <strong>
+                  {calculatedFee.phiChenhLech === 0 ? 'Không phụ thu' : calculatedFee.phiChenhLech > 0 ? `+${calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ` : `${calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ (hoàn trả)`}
+                </strong>
+              </div>
+            </div>
+            {calculatedFee.cungLoaiPhong && (
+              <div className="doiphong-alert success">✅ Đổi phòng cùng loại, không phụ thu</div>
+            )}
+            {!calculatedFee.cungLoaiPhong && calculatedFee.phiChenhLech > 0 && (
+              <div className="doiphong-alert warning">⚠️ Khách cần thanh toán thêm {calculatedFee.phiChenhLech.toLocaleString('vi-VN')}đ cho {calculatedFee.soNgayConLai} ngày còn lại</div>
+            )}
+            {!calculatedFee.cungLoaiPhong && calculatedFee.phiChenhLech < 0 && (
+              <div className="doiphong-alert info">💰 Hoàn trả cho khách {Math.abs(calculatedFee.phiChenhLech).toLocaleString('vi-VN')}đ</div>
+            )}
+            {reason && (
+              <div className="doiphong-alert note"><strong>Lý do:</strong> {reason}</div>
+            )}
+          </div>
+          <div className="doiphong-footer">
+            <button onClick={() => setShowConfirm(false)} className="doiphong-btn doiphong-btn-cancel">← Quay lại</button>
+            <button
+              onClick={handleChangeRoom}
+              className="doiphong-btn doiphong-btn-primary"
+              disabled={loading}
+            >
+              {loading ? '⏳ Đang xử lý...' : '✓ Xác nhận đổi phòng'}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

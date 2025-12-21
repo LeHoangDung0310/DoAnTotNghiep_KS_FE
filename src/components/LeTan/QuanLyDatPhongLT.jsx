@@ -3,7 +3,7 @@ import Toast from '../Common/Toast';
 import TaoDatPhongTrucTiep from './TaoDatPhongTrucTiep';
 import ChiTietDatPhong from './ChiTietDatPhong';
 import ThanhToanModal from './ThanhToanModal';
-import DoiPhongStep from './Steps/DoiPhongStep';
+import DoiPhongHuyDP from './DoiPhongHuyDP';
 import api from '../../utils/api';
 
 // Import CSS
@@ -503,9 +503,9 @@ export default function QuanLyDatPhongLT() {
         />
       )}
 
-      {/* Modal Đổi Phòng */}
+      {/* Modal Đổi/Hủy Đặt Phòng */}
       {showDoiPhongModal && doiPhongBookingId && (
-        <DoiPhongStep
+        <DoiPhongHuyDP
           bookingId={doiPhongBookingId}
           onClose={() => {
             setShowDoiPhongModal(false);
