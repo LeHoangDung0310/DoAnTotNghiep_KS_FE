@@ -4,6 +4,7 @@ import QuanLyKhachHangLT from '../components/LeTan/QuanLyKhachHangLT';
 import QuanLyDatPhongLT from '../components/LeTan/QuanLyDatPhongLT';
 import QuanLyHuyDatPhong from '../components/LeTan/QuanLyHuyDatPhong';
 import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
+import LeTanDashboard from '../components/LeTan/LeTanDashboard';
 import api from '../utils/api';
 
 // Import CSS
@@ -11,7 +12,7 @@ import '../styles/admin.css';
 import '../styles/letan.css';
 
 export default function TrangLeTan() {
-  const [activeMenu, setActiveMenu] = useState('dat-phong');
+  const [activeMenu, setActiveMenu] = useState('dashboard');
   const [userInfo, setUserInfo] = useState(null);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const navigate = useNavigate();
@@ -69,6 +70,8 @@ export default function TrangLeTan() {
 
   const renderContent = () => {
     switch (activeMenu) {
+      case 'dashboard':
+        return <LeTanDashboard />;
       case 'dat-phong':
         return <QuanLyDatPhongLT />;
       case 'khach-hang':
@@ -77,8 +80,6 @@ export default function TrangLeTan() {
         return <QuanLyHuyDatPhong />;
       case 'account':
         return <QuanLyTaiKhoan />;
-      case 'dashboard':
-        return <div className="admin-card">Trang tổng quan (chưa triển khai).</div>;
       default:
         return <QuanLyDatPhongLT />;
     }
