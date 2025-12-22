@@ -18,6 +18,7 @@ export default function QuanLyDatPhongLT() {
   const [filterType, setFilterType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [toast, setToast] = useState({ show: false, type: '', message: '' });
@@ -30,7 +31,7 @@ export default function QuanLyDatPhongLT() {
 
   useEffect(() => {
     fetchBookings();
-  }, [currentPage, filterStatus, filterType]);
+  }, [currentPage, filterStatus, filterType, pageSize]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -61,7 +62,6 @@ export default function QuanLyDatPhongLT() {
       }
 
       // Pagination
-      const pageSize = 10;
       const total = Math.ceil(data.length / pageSize);
       setTotalPages(total || 1);
 
@@ -69,6 +69,7 @@ export default function QuanLyDatPhongLT() {
       const paginated = data.slice(start, start + pageSize);
 
       setBookings(paginated);
+      
     } catch (err) {
       console.error('Lỗi khi tải danh sách đặt phòng:', err);
       showToast('error', 'Không thể tải danh sách đặt phòng');
@@ -273,7 +274,7 @@ export default function QuanLyDatPhongLT() {
 
       {/* Filters - CẬP NHẬT */}
       <div className="letan-search-section">
-        <div className="letan-search-row">
+        <div className="letan-search-row" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Search Input */}
           <div className="letan-search-input-wrapper">
             <span className="letan-search-icon">🔍</span>
@@ -303,6 +304,23 @@ export default function QuanLyDatPhongLT() {
             <option value="HoanThanh">✔️ Hoàn thành</option>
             <option value="DaHuy">❌ Đã hủy</option>
             <option value="TuChoi">🚫 Từ chối</option>
+          </select>
+
+          {/* Page size select - Đặt cùng hàng bên phải filter trạng thái */}
+          {/* Page Size */}
+          <select
+            className="letan-select"
+            value={pageSize}
+            onChange={(e) => {
+              const newSize = Number(e.target.value);
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>📄 5 / trang</option>
+            <option value={10}>📄 10 / trang</option>
+            <option value={20}>📄 20 / trang</option>
+            <option value={50}>📄 50 / trang</option>
           </select>
 
           {/* Filter Type */}
@@ -441,22 +459,50 @@ export default function QuanLyDatPhongLT() {
             </table>
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="admin-pagination">
+          {/* Pagination - luôn hiển thị khi có dữ liệu */}
+          {bookings.length > 0 && (
+            <div
+              className="admin-pagination"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 16,
+                margin: '24px 0 0 0',
+                padding: '12px 0',
+                background: '#fff',
+                borderRadius: 8,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+              }}
+            >
               <button
                 className="btn-outline"
                 disabled={currentPage === 1}
+                style={{ minWidth: 80 }}
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
                 ← Trước
               </button>
-              <span className="admin-pagination-info">
+              <span className="admin-pagination-info" style={{ fontWeight: 500 }}>
                 Trang {currentPage} / {totalPages}
               </span>
+              <select
+                value={pageSize}
+                onChange={e => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                style={{ margin: '0 8px', padding: '4px 8px', borderRadius: 4 }}
+              >
+                <option value={5}>5 / trang</option>
+                <option value={10}>10 / trang</option>
+                <option value={20}>20 / trang</option>
+                <option value={50}>50 / trang</option>
+              </select>
               <button
                 className="btn-outline"
                 disabled={currentPage === totalPages}
+                style={{ minWidth: 80 }}
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }

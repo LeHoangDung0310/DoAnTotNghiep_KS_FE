@@ -1,22 +1,26 @@
 
+
 import { useState, useEffect } from 'react';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || '';
 import '../../../styles/doiphong.css';
 
 export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowToast, bookingInfo: propBookingInfo, customStyle }) {
   const [bookingInfo, setBookingInfo] = useState(propBookingInfo || null);
   const [loading, setLoading] = useState(false);
-  const [cancelReason, setCancelReason] = useState('');
-  const [refundInfo, setRefundInfo] = useState({ bank: '', account: '', owner: '' });
-  const [feeInfo, setFeeInfo] = useState(null); // { phiGiu, tienHoan, message }
-  const [calcLoading, setCalcLoading] = useState(false);
+  const [feeInfo, setFeeInfo] = useState(null); // { phiGiu, tienHoan, khachHang, phongList }
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+
   useEffect(() => {
     if (!bookingInfo && bookingId) {
       setLoading(true);
-      fetch(`/api/DatPhong/${bookingId}`, { credentials: 'include' })
+      const token = localStorage.getItem('access_token');
+      fetch(`${API_BASE}/api/DatPhong/${bookingId}`, {
+        credentials: 'include',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
         .then(res => res.json())
         .then(data => {
           setBookingInfo(data.data || null);
@@ -26,43 +30,50 @@ export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowT
     }
   }, [bookingId, bookingInfo]);
 
+
   useEffect(() => {
     if (bookingId) {
-      setCalcLoading(true);
-      fetch(`/api/HuyDatPhong/KiemTraDieuKien/${bookingId}`, { credentials: 'include' })
+      setLoading(true);
+      const token = localStorage.getItem('access_token');
+      fetch(`${API_BASE}/api/HuyDatPhong/KiemTraDieuKien/${bookingId}`, {
+        credentials: 'include',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
         .then(res => res.json())
         .then(data => {
           if (data.success) setFeeInfo(data.data);
           else setError(data.message || 'Không kiểm tra được điều kiện hủy');
         })
         .catch(() => setError('Không kiểm tra được điều kiện hủy'))
-        .finally(() => setCalcLoading(false));
+        .finally(() => setLoading(false));
     }
   }, [bookingId]);
 
+
   const isCheckedIn = bookingInfo?.trangThai === 'DangSuDung';
+
 
   const handleCancel = async () => {
     setSubmitLoading(true);
     setError('');
     setSuccessMsg('');
     try {
-      const res = await fetch(`/api/HuyDatPhong/YeuCauHuy/${bookingId}`, {
+      const apiUrl = `${API_BASE}/api/HuyDatPhong/HuySauCheckIn/${bookingId}`;
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          lyDo: cancelReason,
-          nganHang: refundInfo.bank,
-          soTaiKhoan: refundInfo.account,
-          tenChuTK: refundInfo.owner,
-        })
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        credentials: 'include'
       });
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg('Yêu cầu hủy đã được ghi nhận. Quản lý sẽ xác nhận hoàn tiền.');
-        onShowToast && onShowToast('Yêu cầu hủy đã được ghi nhận!', 'success');
+        setSuccessMsg(data.message || 'Hủy thành công!');
+        onShowToast && onShowToast('Hủy thành công!', 'success');
         onSuccess && onSuccess();
+        // Lưu lại thông tin trả về từ BE (bao gồm phí, khách, phòng)
+        if (data.data) setFeeInfo(data.data);
       } else {
         setError(data.message || 'Có lỗi xảy ra khi gửi yêu cầu hủy');
       }
@@ -81,7 +92,7 @@ export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowT
           Chỉ có thể hủy khi khách đã check-in.
         </div>
       )}
-      {(loading || calcLoading) ? (
+      {loading ? (
         <div style={{ textAlign: 'center', padding: 24, color: '#1976d2', fontWeight: 500 }}>Đang tải...</div>
       ) : (
         <>
@@ -98,48 +109,20 @@ export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowT
               <div>Khách sạn sẽ thu <b>100% tiền phòng ngày đầu tiên</b>. Các ngày còn lại sẽ được hoàn lại.</div>
               <div><b>Phí giữ lại:</b> {feeInfo.phiGiu?.toLocaleString()} VND</div>
               <div><b>Số tiền hoàn lại:</b> {feeInfo.tienHoan?.toLocaleString()} VND</div>
+              {feeInfo.khachHang && (
+                <div style={{ marginTop: 8 }}>
+                  <b>Khách hàng:</b> {feeInfo.khachHang.ten} ({feeInfo.khachHang.sdt})
+                </div>
+              )}
+              {feeInfo.phongList && Array.isArray(feeInfo.phongList) && feeInfo.phongList.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <b>Phòng:</b> {feeInfo.phongList.map((p, idx) => (
+                    <span key={idx}>{p.soPhong} ({p.loaiPhong}){idx < feeInfo.phongList.length - 1 ? ', ' : ''}</span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          <div className="doiphong-form-group">
-            <label className="doiphong-label">Lý do hủy phòng</label>
-            <textarea
-              value={cancelReason}
-              onChange={e => setCancelReason(e.target.value)}
-              rows={2}
-              className="doiphong-textarea"
-              disabled={!isCheckedIn}
-            />
-          </div>
-          <div className="doiphong-label" style={{ marginBottom: 8 }}>Thông tin tài khoản nhận hoàn tiền (nếu có):</div>
-          <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <input
-              type="text"
-              placeholder="Ngân hàng"
-              value={refundInfo.bank}
-              onChange={e => setRefundInfo({ ...refundInfo, bank: e.target.value })}
-              className="doiphong-select"
-              style={{ marginBottom: 4, fontSize: '1rem', padding: 10 }}
-              disabled={!isCheckedIn}
-            />
-            <input
-              type="text"
-              placeholder="Số tài khoản"
-              value={refundInfo.account}
-              onChange={e => setRefundInfo({ ...refundInfo, account: e.target.value })}
-              className="doiphong-select"
-              style={{ marginBottom: 4, fontSize: '1rem', padding: 10 }}
-              disabled={!isCheckedIn}
-            />
-            <input
-              type="text"
-              placeholder="Tên chủ tài khoản"
-              value={refundInfo.owner}
-              onChange={e => setRefundInfo({ ...refundInfo, owner: e.target.value })}
-              className="doiphong-select"
-              style={{ marginBottom: 4, fontSize: '1rem', padding: 10 }}
-              disabled={!isCheckedIn}
-            />
-          </div>
           {error && <div style={{ background: '#fff1f0', color: '#cf1322', padding: 12, borderRadius: 4, marginBottom: 8, border: '1px solid #ffa39e', fontSize: '1rem' }}>{error}</div>}
           {successMsg && <div style={{ background: '#f6ffed', color: '#389e0d', padding: 12, borderRadius: 4, marginBottom: 8, border: '1px solid #b7eb8f', fontSize: '1rem' }}>{successMsg}</div>}
           <div className="doiphong-footer" style={{ marginTop: 12, background: 'transparent', borderTop: 'none', padding: 0, gap: 8, justifyContent: 'flex-end' }}>
@@ -147,10 +130,10 @@ export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowT
             <button
               onClick={handleCancel}
               className="doiphong-btn doiphong-btn-primary"
-              disabled={!isCheckedIn || submitLoading}
-              style={{ opacity: !isCheckedIn || submitLoading ? 0.7 : 1 }}
+              disabled={submitLoading || !isCheckedIn}
+              style={{ opacity: submitLoading || !isCheckedIn ? 0.7 : 1 }}
             >
-              {submitLoading ? 'Đang gửi...' : 'Gửi yêu cầu hủy'}
+              {submitLoading ? 'Đang gửi...' : 'Hủy đặt phòng & hoàn tiền'}
             </button>
           </div>
         </>
