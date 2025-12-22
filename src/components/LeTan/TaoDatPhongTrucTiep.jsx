@@ -231,7 +231,8 @@ export default function TaoDatPhongTrucTiep({ onClose, onSuccess, onShowToast })
     setTotalAmount(total);
   };
 
-  const handleCustomerChange = (e) => {
+  // Auto-fill thông tin khách hàng khi nhập email
+  const handleCustomerChange = async (e) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
 
@@ -244,6 +245,38 @@ export default function TaoDatPhongTrucTiep({ onClose, onSuccess, onShowToast })
       setCustomerInfo((prev) => ({ ...prev, maPhuongXa: '' }));
       setWards([]);
       if (value) fetchWards(value);
+    }
+
+    // Khi blur ô email, gọi API lấy thông tin khách hàng
+    if (name === 'email' && value) {
+      try {
+        const res = await api.get(`/api/NguoiDung/ByEmail`, { params: { email: value } });
+        if (res.data && res.data.success && res.data.data) {
+          const nd = res.data.data;
+          setCustomerInfo((prev) => ({
+            ...prev,
+            hoTen: nd.hoTen || '',
+            soDienThoai: nd.soDienThoai || '',
+            soCCCD: nd.soCCCD || '',
+            ngayCapCCCD: nd.ngayCapCCCD ? nd.ngayCapCCCD.split('T')[0] : '',
+            noiCapCCCD: nd.noiCapCCCD || '',
+            ngaySinh: nd.ngaySinh ? nd.ngaySinh.split('T')[0] : '',
+            gioiTinh: nd.gioiTinh || '',
+            diaChiChiTiet: nd.diaChiChiTiet || '',
+            maTinh: nd.maTinh || '',
+            maHuyen: nd.maHuyen || '',
+            maPhuongXa: nd.maPhuongXa || '',
+            // email giữ nguyên
+          }));
+          // Nếu có tỉnh/huyện/xã thì load lại danh sách
+          if (nd.maTinh) fetchDistricts(nd.maTinh);
+          if (nd.maHuyen) fetchWards(nd.maHuyen);
+          onShowToast('success', 'Đã tự động điền thông tin khách hàng');
+        }
+      } catch (err) {
+        // Nếu không tìm thấy thì không làm gì, chỉ xóa các trường còn lại (nếu muốn)
+        // setCustomerInfo((prev) => ({ ...prev, hoTen: '', soDienThoai: '', ... }));
+      }
     }
   };
 
@@ -327,7 +360,30 @@ export default function TaoDatPhongTrucTiep({ onClose, onSuccess, onShowToast })
       onClose();
     } catch (err) {
       console.error('Lỗi khi tạo đặt phòng:', err);
-      onShowToast('error', err.response?.data?.message || 'Tạo đặt phòng thất bại');
+      const errorMsg = err.response?.data?.message || 'Tạo đặt phòng thất bại';
+      onShowToast('error', errorMsg);
+
+      // Nếu lỗi liên quan đến phòng không khả dụng hoặc đã bị đặt
+      if (
+        errorMsg.includes('không khả dụng') ||
+        errorMsg.includes('đã được đặt trong khoảng thời gian')
+      ) {
+        // Reload lại phòng trống
+        await fetchAvailableRooms();
+
+        // Xóa các phòng đã chọn không còn trong availableRooms
+        setSelectedRooms((prev) =>
+          prev.filter((r) =>
+            availableRooms.some((room) => room.maPhong === r.maPhong)
+          )
+        );
+
+        onShowToast(
+          'warning',
+          'Một số phòng bạn chọn đã bị đặt hoặc không còn khả dụng. Vui lòng chọn lại phòng.'
+        );
+        setStep(2); // Quay về bước chọn phòng
+      }
     } finally {
       setLoading(false);
     }

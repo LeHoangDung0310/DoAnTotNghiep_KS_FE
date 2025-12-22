@@ -51,6 +51,7 @@ export default function ThongTinKhachHangStep({
               placeholder="email@example.com"
               value={customerInfo.email}
               onChange={handleCustomerChange}
+              onBlur={handleCustomerChange}
             />
           </div>
 
