@@ -260,6 +260,7 @@ body{
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #f9fafb;
+  color: #222;
   transition: all 0.2s ease;
   outline: none;
 }

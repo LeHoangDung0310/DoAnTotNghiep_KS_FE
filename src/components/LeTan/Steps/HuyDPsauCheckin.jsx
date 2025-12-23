@@ -1,144 +1,153 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  Typography,
+  Space,
+  Divider,
+  Tag,
+  Alert,
+  Spin,
+  Button,
+  Row,
+  Col
+} from 'antd';
+import {
+  UserOutlined,
+  HomeOutlined,
+  DollarOutlined,
+  ExclamationCircleTwoTone
+} from '@ant-design/icons';
+import api from '../../../utils/api';
+import '../../../styles/HuyDPsauCheckin.css';
 
+const { Title, Text } = Typography;
 
-import { useState, useEffect } from 'react';
-const API_BASE = process.env.REACT_APP_API_BASE_URL || '';
-import '../../../styles/doiphong.css';
+const SectionTitle = ({ icon, title }) => (
+  <div className="huydp-section-header">
+    {icon}
+    <span>{title}</span>
+  </div>
+);
 
-export default function HuyDPsauCheckin({ bookingId, onClose, onSuccess, onShowToast, bookingInfo: propBookingInfo, customStyle }) {
-  const [bookingInfo, setBookingInfo] = useState(propBookingInfo || null);
+const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
   const [loading, setLoading] = useState(false);
-  const [feeInfo, setFeeInfo] = useState(null); // { phiGiu, tienHoan, khachHang, phongList }
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-
+  const [info, setInfo] = useState(null);
+  const [error, setError] = useState(null);
+  const [huyLoading, setHuyLoading] = useState(false);
 
   useEffect(() => {
-    if (!bookingInfo && bookingId) {
+    const fetchAll = async () => {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
-      fetch(`${API_BASE}/api/DatPhong/${bookingId}`, {
-        credentials: 'include',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      })
-        .then(res => res.json())
-        .then(data => {
-          setBookingInfo(data.data || null);
-        })
-        .catch(() => setError('Không lấy được thông tin đặt phòng'))
-        .finally(() => setLoading(false));
-    }
-  }, [bookingId, bookingInfo]);
-
-
-  useEffect(() => {
-    if (bookingId) {
-      setLoading(true);
-      const token = localStorage.getItem('access_token');
-      fetch(`${API_BASE}/api/HuyDatPhong/KiemTraDieuKien/${bookingId}`, {
-        credentials: 'include',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) setFeeInfo(data.data);
-          else setError(data.message || 'Không kiểm tra được điều kiện hủy');
-        })
-        .catch(() => setError('Không kiểm tra được điều kiện hủy'))
-        .finally(() => setLoading(false));
-    }
+      try {
+        const res = await api.get(`/api/HuyDatPhong/KiemTraDieuKien/${bookingId}`);
+        if (!res.data.success) throw new Error(res.data.message);
+        setInfo(res.data.data);
+      } catch (err) {
+        setError(err.message || 'Không lấy được thông tin');
+      } finally {
+        setLoading(false);
+      }
+    };
+    bookingId && fetchAll();
   }, [bookingId]);
 
-
-  const isCheckedIn = bookingInfo?.trangThai === 'DangSuDung';
-
-
-  const handleCancel = async () => {
-    setSubmitLoading(true);
-    setError('');
-    setSuccessMsg('');
+  const handleHuy = async () => {
+    setHuyLoading(true);
     try {
-      const apiUrl = `${API_BASE}/api/HuyDatPhong/HuySauCheckIn/${bookingId}`;
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        credentials: 'include'
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSuccessMsg(data.message || 'Hủy thành công!');
-        onShowToast && onShowToast('Hủy thành công!', 'success');
-        onSuccess && onSuccess();
-        // Lưu lại thông tin trả về từ BE (bao gồm phí, khách, phòng)
-        if (data.data) setFeeInfo(data.data);
-      } else {
-        setError(data.message || 'Có lỗi xảy ra khi gửi yêu cầu hủy');
-      }
-    } catch (e) {
-      setError('Có lỗi xảy ra khi gửi yêu cầu hủy');
+      const res = await api.post(`/api/HuyDatPhong/HuySauCheckIn/${bookingId}`);
+      if (res.data.success) {
+        onShowToast?.('success', res.data.message);
+        onSuccess?.();
+        onClose?.(); // Close modal and return to Quản lý đặt phòng
+      } else throw new Error(res.data.message);
+    } catch (err) {
+      onShowToast?.('error', err.message);
     } finally {
-      setSubmitLoading(false);
+      setHuyLoading(false);
     }
   };
 
   return (
-    <div className="doiphong-body" style={{ maxWidth: 500, margin: '0 auto', background: 'transparent', boxShadow: 'none', padding: 0 }}>
-      <h3 style={{ fontSize: '1.18rem', fontWeight: 700, marginBottom: 18, color: '#d32f2f' }}>Hủy đặt phòng sau check-in</h3>
-      {!isCheckedIn && (
-        <div style={{ background: '#fffbe6', color: '#ad8b00', padding: 12, borderRadius: 4, marginBottom: 16, border: '1px solid #ffe58f', fontSize: '1rem' }}>
-          Chỉ có thể hủy khi khách đã check-in.
-        </div>
-      )}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: 24, color: '#1976d2', fontWeight: 500 }}>Đang tải...</div>
-      ) : (
+    <div className="huydp-wrapper">
+      <div className="huydp-header">
+        <ExclamationCircleTwoTone twoToneColor="#faad14" />
+        <Title level={4}>Hủy đặt phòng sau Check-in</Title>
+      </div>
+
+      {loading && <Spin className="huydp-loading" />}
+      {error && <Alert type="error" message={error} showIcon />}
+
+      {info && (
         <>
-          {bookingInfo && (
-            <div style={{ marginBottom: 16, fontSize: '1rem', background: '#f8f9fa', borderRadius: 8, padding: 12, border: '1px solid #e3e3e3' }}>
-              <div><b>Khách hàng:</b> {bookingInfo.tenKhachHang || bookingInfo.khachHang?.hoTen}</div>
-              <div><b>Ngày nhận phòng:</b> {bookingInfo.ngayNhanPhong}</div>
-              <div><b>Ngày trả phòng:</b> {bookingInfo.ngayTraPhong}</div>
-              <div><b>Trạng thái:</b> {bookingInfo.trangThai}</div>
-            </div>
-          )}
-          {feeInfo && (
-            <div style={{ marginBottom: 16, background: '#e6f7ff', color: '#0050b3', padding: 12, borderRadius: 4, border: '1px solid #91d5ff', fontSize: '1rem' }}>
-              <div>Khách sạn sẽ thu <b>100% tiền phòng ngày đầu tiên</b>. Các ngày còn lại sẽ được hoàn lại.</div>
-              <div><b>Phí giữ lại:</b> {feeInfo.phiGiu?.toLocaleString()} VND</div>
-              <div><b>Số tiền hoàn lại:</b> {feeInfo.tienHoan?.toLocaleString()} VND</div>
-              {feeInfo.khachHang && (
-                <div style={{ marginTop: 8 }}>
-                  <b>Khách hàng:</b> {feeInfo.khachHang.ten} ({feeInfo.khachHang.sdt})
+          <Card className="huydp-card" bordered={false}>
+            {/* KHÁCH */}
+            <SectionTitle icon={<UserOutlined />} title="Khách hàng" />
+            <Row gutter={20}>
+              <Col span={12}>
+                <Text type="secondary">Họ tên</Text>
+                <div className="huydp-value">{info.khachHang?.hoTen || '--'}</div>
+              </Col>
+              <Col span={12}>
+                <Text type="secondary">Số điện thoại</Text>
+                <div className="huydp-value">{info.khachHang?.soDienThoai || '--'}</div>
+              </Col>
+            </Row>
+
+            <Divider />
+
+            {/* PHÒNG */}
+            <SectionTitle icon={<HomeOutlined />} title="Phòng đã nhận" />
+            <div className="huydp-room-list">
+              {info.phongList?.map((p, i) => (
+                <div key={i} className="huydp-room-item">
+                  🏨 Phòng <b>{p.soPhong}</b> – {p.tenLoaiPhong}
                 </div>
-              )}
-              {feeInfo.phongList && Array.isArray(feeInfo.phongList) && feeInfo.phongList.length > 0 && (
-                <div style={{ marginTop: 8 }}>
-                  <b>Phòng:</b> {feeInfo.phongList.map((p, idx) => (
-                    <span key={idx}>{p.soPhong} ({p.loaiPhong}){idx < feeInfo.phongList.length - 1 ? ', ' : ''}</span>
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
-          )}
-          {error && <div style={{ background: '#fff1f0', color: '#cf1322', padding: 12, borderRadius: 4, marginBottom: 8, border: '1px solid #ffa39e', fontSize: '1rem' }}>{error}</div>}
-          {successMsg && <div style={{ background: '#f6ffed', color: '#389e0d', padding: 12, borderRadius: 4, marginBottom: 8, border: '1px solid #b7eb8f', fontSize: '1rem' }}>{successMsg}</div>}
-          <div className="doiphong-footer" style={{ marginTop: 12, background: 'transparent', borderTop: 'none', padding: 0, gap: 8, justifyContent: 'flex-end' }}>
-            <button onClick={onClose} className="doiphong-btn doiphong-btn-cancel">Đóng</button>
-            <button
-              onClick={handleCancel}
-              className="doiphong-btn doiphong-btn-primary"
-              disabled={submitLoading || !isCheckedIn}
-              style={{ opacity: submitLoading || !isCheckedIn ? 0.7 : 1 }}
+
+            <Divider />
+
+            {/* TIỀN */}
+            <SectionTitle icon={<DollarOutlined />} title="Hoàn tiền & Phí giữ" />
+            <Row gutter={16}>
+              <Col span={12}>
+                <div className="money-box fee">
+                  <span>Phí giữ</span>
+                  <strong>{info.phiGiu?.toLocaleString()} đ</strong>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div className="money-box refund">
+                  <span>Tiền hoàn</span>
+                  <strong>{info.tienHoan?.toLocaleString()} đ</strong>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+
+          <Alert
+            className="huydp-warning"
+            type="warning"
+            showIcon
+            message="Chỉ được hủy trong ngày đầu tiên sau khi nhận phòng"
+          />
+
+          <div className="huydp-actions">
+            <Button onClick={onClose}>Đóng</Button>
+            <Button
+              type="primary"
+              danger
+              loading={huyLoading}
+              disabled={!info.canCancel}
+              onClick={handleHuy}
             >
-              {submitLoading ? 'Đang gửi...' : 'Hủy đặt phòng & hoàn tiền'}
-            </button>
+              Xác nhận hủy
+            </Button>
           </div>
         </>
       )}
     </div>
   );
-}
+};
 
+export default HuyDPsauCheckin;

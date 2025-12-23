@@ -1,0 +1,141 @@
+.huydp-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease;
+}
+
+/* Header */
+.huydp-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.huydp-header h4 {
+  margin: 0;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+/* Card */
+.huydp-card {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+}
+
+/* Section title */
+.huydp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #2563eb;
+  margin-bottom: 12px;
+}
+
+.huydp-section-header svg {
+  background: #e0e7ff;
+  border-radius: 50%;
+  padding: 6px;
+}
+
+/* Value */
+.huydp-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Room */
+.huydp-room-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.huydp-room-item {
+  background: #eef2ff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #3730a3;
+}
+
+/* Money */
+.money-box {
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 1rem;
+}
+
+.money-box strong {
+  font-size: 1.25rem;
+}
+
+.money-box.fee {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.money-box.refund {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Warning */
+.huydp-warning {
+  margin-top: 18px;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+/* Actions */
+.huydp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.huydp-actions button {
+  padding: 10px 26px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Loading */
+.huydp-loading {
+  display: block;
+  margin: 40px auto;
+}
+
+/* Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.huydp-wrapper {
+  background: linear-gradient(180deg, #f1f5f9, #e5e7eb);
+  padding: 30px;
+  border-radius: 22px;
+}
+
+.huydp-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.09);
+}
