@@ -7,160 +7,144 @@ import '../styles/chitietloaiphong.css';
 /**
  * Trang Chi Tiết Loại Phòng
  * - Hiển thị thông tin chi tiết loại phòng
- * - Hiển thị danh sách tất cả các phòng thuộc loại này
- * - Có thể đặt phòng trực tiếp
+ * - Hiển thị danh sách phòng
+ * - Có lọc theo ngày (PhongTrong)
  */
 export default function ChiTietLoaiPhong() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // ========== STATE ==========
+  // ================= STATE =================
   const [loaiPhong, setLoaiPhong] = useState(null);
   const [danhSachPhong, setDanhSachPhong] = useState([]);
   const [hinhAnhs, setHinhAnhs] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [loadingRooms, setLoadingRooms] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  
-  // Filter states
+
   const [ngayNhanPhong, setNgayNhanPhong] = useState('');
   const [ngayTraPhong, setNgayTraPhong] = useState('');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
 
-  // ========== LOAD DATA KHI COMPONENT MOUNT ==========
+  // ================= LOAD INITIAL =================
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadInitial = async () => {
       setLoading(true);
       await Promise.all([
         loadLoaiPhongDetail(),
         loadHinhAnhs()
       ]);
       setLoading(false);
-      // Load danh sách phòng sau khi load xong thông tin cơ bản
       loadDanhSachPhong();
     };
-    loadInitialData();
+    loadInitial();
   }, [id]);
 
-  // ========== GỌI API LẤY CHI TIẾT LOẠI PHÒNG ==========
+  // ================= API =================
   const loadLoaiPhongDetail = async () => {
     try {
-      const response = await api.get(`/api/LoaiPhong/${id}`);
-      const data = response.data?.data || response.data;
-      setLoaiPhong(data);
-    } catch (error) {
-      console.error('Lỗi khi tải chi tiết loại phòng:', error);
+      const res = await api.get(`/api/LoaiPhong/${id}`);
+      setLoaiPhong(res.data?.data || res.data);
+    } catch (err) {
+      console.error(err);
       setLoaiPhong(null);
     }
   };
 
-  // ========== GỌI API LẤY DANH SÁCH PHÒNG ==========
+  const loadHinhAnhs = async () => {
+    try {
+      const res = await api.get(`/api/HinhAnhLPhong/LoaiPhong/${id}`);
+      const data = res.data?.data || res.data || [];
+      setHinhAnhs(data);
+      if (data.length > 0) setSelectedImage(data[0]);
+    } catch (err) {
+      console.error(err);
+      setHinhAnhs([]);
+    }
+  };
+
+  // ================= LOAD ROOMS =================
   const loadDanhSachPhong = async () => {
     try {
       setLoadingRooms(true);
-      
-      // Nếu có filter theo ngày, gọi API PhongTrong
+
+      // ===== CÓ NGÀY → PHONGTRONG =====
       if (ngayNhanPhong && ngayTraPhong) {
-        const response = await api.get(`/api/Phong/PhongTrong`, {
-          params: {
-            ngayNhanPhong,
-            ngayTraPhong
-          }
+        const res = await api.get('/api/Phong/PhongTrong', {
+          params: { ngayNhanPhong, ngayTraPhong }
         });
-        const allAvailableRooms = response.data?.data || [];
-        // Lọc chỉ lấy phòng thuộc loại phòng này
-        const filtered = allAvailableRooms.filter(p => p.maLoaiPhong === parseInt(id));
-        setDanhSachPhong(filtered);
-      } else {
-        // Tìm kiếm phòng theo loại phòng (không filter theo ngày)
-        const response = await api.get(`/api/Phong/Search?MaLoaiPhong=${id}&PageSize=100`);
-        const data = response.data?.data || response.data || [];
-        
-        // Nếu chỉ muốn xem phòng trống (không có ngày cụ thể)
-        if (showOnlyAvailable) {
-          setDanhSachPhong(data.filter(p => p.trangThai === 'Trong'));
-        } else {
-          setDanhSachPhong(data);
-        }
+
+        const rooms = res.data?.data || [];
+
+        setDanhSachPhong(
+          rooms.filter(r => r.maLoaiPhong === Number(id))
+        );
+        return;
       }
-    } catch (error) {
-      console.error('Lỗi khi tải danh sách phòng:', error);
+
+      // ===== KHÔNG NGÀY → SEARCH =====
+      const res = await api.get('/api/Phong/Search', {
+        params: {
+          MaLoaiPhong: id,
+          PageSize: 100
+        }
+      });
+
+      const data = res.data?.data || [];
+
+      if (showOnlyAvailable) {
+        setDanhSachPhong(data.filter(p => p.trangThai === 'Trong'));
+      } else {
+        setDanhSachPhong(data);
+      }
+
+    } catch (err) {
+      console.error(err);
       setDanhSachPhong([]);
     } finally {
       setLoadingRooms(false);
     }
   };
 
-  // ========== XỬ LÝ TÌM KIẾM ==========
-  const handleSearch = () => {
-    loadDanhSachPhong();
-  };
+  // ================= HANDLER =================
+  const handleSearch = () => loadDanhSachPhong();
 
   const handleReset = () => {
     setNgayNhanPhong('');
     setNgayTraPhong('');
     setShowOnlyAvailable(false);
-    // Reload danh sách phòng sau khi reset
-    setTimeout(() => loadDanhSachPhong(), 0);
+    setTimeout(loadDanhSachPhong, 0);
   };
 
-  // Reload khi filter thay đổi
   useEffect(() => {
-    if (id) {
+    if (!ngayNhanPhong && !ngayTraPhong) {
       loadDanhSachPhong();
     }
   }, [showOnlyAvailable]);
 
-  // ========== GỌI API LẤY HÌNH ẢNH LOẠI PHÒNG ==========
-  const loadHinhAnhs = async () => {
-    try {
-      const response = await api.get(`/api/HinhAnhLPhong/LoaiPhong/${id}`);
-      const data = response.data?.data || response.data || [];
-      setHinhAnhs(data);
-      // Set ảnh đầu tiên làm ảnh được chọn
-      if (data.length > 0) {
-        setSelectedImage(data[0]);
-      }
-    } catch (error) {
-      console.error('Lỗi khi tải hình ảnh:', error);
-      setHinhAnhs([]);
-    }
-  };
+  // ================= UTIL =================
+  const formatPrice = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+      .format(price || 0);
 
-  // ========== XỬ LÝ KHI CLICK VÀO THUMBNAIL ==========
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
-  };
-
-  // ========== FORMAT GIÁ ==========
-  const formatPrice = (price) => {
-    if (!price) return '0 ₫';
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
-
-  // ========== RENDER TRẠNG THÁI PHÒNG ==========
   const renderTrangThai = (trangThai) => {
-    const statusMap = {
-      'Trong': { label: 'Còn trống', className: 'status-available', icon: '✓' },
-      'DaDat': { label: 'Đã đặt', className: 'status-booked', icon: '🔒' },
-      'DangSuDung': { label: 'Đang sử dụng', className: 'status-occupied', icon: '👥' },
-      'BaoTri': { label: 'Bảo trì', className: 'status-maintenance', icon: '🔧' },
+    const map = {
+      Trong: { label: 'Còn trống', className: 'status-available', icon: '✓' },
+      DaDat: { label: 'Đã đặt', className: 'status-booked', icon: '🔒' },
+      DangSuDung: { label: 'Đang sử dụng', className: 'status-occupied', icon: '👥' },
+      BaoTri: { label: 'Bảo trì', className: 'status-maintenance', icon: '🔧' }
     };
-
-    const status = statusMap[trangThai] || statusMap['Trong'];
-
+    const s = map[trangThai] || map.Trong;
     return (
-      <span className={`room-status ${status.className}`}>
-        <span>{status.icon}</span>
-        <span>{status.label}</span>
+      <span className={`room-status ${s.className}`}>
+        <span>{s.icon}</span>
+        <span>{s.label}</span>
       </span>
     );
   };
 
-  // ========== LOADING STATE ==========
+  // ================= LOADING =================
   if (loading || !loaiPhong) {
     return (
       <MainLayout>
