@@ -10,9 +10,18 @@ export default function TrangLichSuDP() {
     const [error, setError] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 5;
+
     useEffect(() => {
         loadBookings();
     }, []);
+
+    // Reset to page 1 when filter changes
+    const handleFilterChange = (status) => {
+        setFilterStatus(status);
+        setCurrentPage(1);
+    };
 
     const loadBookings = async () => {
         try {
@@ -64,6 +73,12 @@ export default function TrangLichSuDP() {
         ? bookings
         : bookings.filter(b => b.trangThai === filterStatus);
 
+    // Pagination logic
+    const totalPages = Math.ceil(filteredBookings.length / ITEMS_PER_PAGE);
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+    const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
+
     if (loading) {
         return (
             <div className="booking-history-container">
@@ -94,25 +109,25 @@ export default function TrangLichSuDP() {
             <div className="booking-filters">
                 <button
                     className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                    onClick={() => setFilterStatus('all')}
+                    onClick={() => handleFilterChange('all')}
                 >
                     Tất cả ({bookings.length})
                 </button>
                 <button
                     className={`filter-btn ${filterStatus === 'DangSuDung' ? 'active' : ''}`}
-                    onClick={() => setFilterStatus('DangSuDung')}
+                    onClick={() => handleFilterChange('DangSuDung')}
                 >
                     Đang sử dụng ({bookings.filter(b => b.trangThai === 'DangSuDung').length})
                 </button>
                 <button
                     className={`filter-btn ${filterStatus === 'HoanThanh' ? 'active' : ''}`}
-                    onClick={() => setFilterStatus('HoanThanh')}
+                    onClick={() => handleFilterChange('HoanThanh')}
                 >
                     Hoàn thành ({bookings.filter(b => b.trangThai === 'HoanThanh').length})
                 </button>
                 <button
                     className={`filter-btn ${filterStatus === 'DaHuy' ? 'active' : ''}`}
-                    onClick={() => setFilterStatus('DaHuy')}
+                    onClick={() => handleFilterChange('DaHuy')}
                 >
                     Đã hủy ({bookings.filter(b => b.trangThai === 'DaHuy').length})
                 </button>
@@ -129,7 +144,7 @@ export default function TrangLichSuDP() {
                 </div>
             ) : (
                 <div className="bookings-list">
-                    {filteredBookings.map((booking) => (
+                    {currentItems.map((booking) => (
                         <div key={booking.maDatPhong} className="booking-card">
                             <div className="booking-card-header">
                                 {getStatusBadge(booking.trangThai)}
@@ -158,7 +173,7 @@ export default function TrangLichSuDP() {
                                     </div>
 
                                     <div className="info-item">
-                                        <span className="info-icon">�</span>
+                                        <span className="info-icon">📅</span>
                                         <div className="info-content">
                                             <span className="info-label">Ngày đặt</span>
                                             <span className="info-value">{formatDate(booking.ngayDat)}</span>
@@ -185,7 +200,7 @@ export default function TrangLichSuDP() {
                                         <span className="info-icon">🌙</span>
                                         <div className="info-content">
                                             <span className="info-label">Số đêm</span>
-                                            <span className="info-value">{booking.soNgayO} đêm</span>
+                                            <span className="info-value">{booking.soNgayO || 0} đêm</span>
                                         </div>
                                     </div>
                                 </div>
@@ -218,6 +233,39 @@ export default function TrangLichSuDP() {
                             </div>
                         </div>
                     ))}
+
+                    {/* Pagination UI */}
+                    {totalPages > 1 && (
+                        <div className="pagination-container">
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                ⬅️ Trước
+                            </button>
+
+                            <div className="pagination-numbers">
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <button
+                                        key={index + 1}
+                                        className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
+                                        onClick={() => setCurrentPage(index + 1)}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Tiếp ➡️
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

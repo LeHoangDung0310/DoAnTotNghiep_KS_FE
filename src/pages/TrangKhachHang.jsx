@@ -93,14 +93,37 @@ export default function TrangKhachHang() {
     <div className="trang-khach-hang">
       {/* ========== HERO BANNER ========== */}
       <section className="hero-banner">
+        <div className="hero-accents">
+          <div className="accent-circle circle-1"></div>
+          <div className="accent-circle circle-2"></div>
+          <div className="accent-circle circle-3"></div>
+          <div className="accent-shape shape-1"></div>
+        </div>
         <div className="hero-content">
+          <div className="hero-label">✨ Luxury Experience</div>
           <h1 className="hero-title">
-            🏖️ Chào mừng đến với Da Nang Bay Hotel
+            Chào mừng đến với <span className="text-gradient">Da Nang Bay</span> Hotel
           </h1>
           <p className="hero-subtitle">
             Khám phá trải nghiệm nghỉ dưỡng đẳng cấp 3 sao với view biển tuyệt đẹp.
-            Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!
+            <br />Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!
           </p>
+          <div className="hero-stats">
+            <div className="stat-item">
+              <strong>4.9/5</strong>
+              <span>Đánh giá</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <strong>100+</strong>
+              <span>Phòng cao cấp</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <strong>24/7</strong>
+              <span>Hỗ trợ</span>
+            </div>
+          </div>
         </div>
       </section>
 
