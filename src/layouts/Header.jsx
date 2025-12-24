@@ -9,6 +9,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   // Detect scroll
   useEffect(() => {
@@ -19,16 +20,22 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close menus on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setUserMenuOpen(false);
+  }, [location.pathname]);
+
   // Load user info
   useEffect(() => {
     loadUserInfo();
-    
+
     // Listen for avatar update
     const handleAvatarUpdate = () => {
       loadUserInfo();
     };
     window.addEventListener('avatarUpdated', handleAvatarUpdate);
-    
+
     return () => {
       window.removeEventListener('avatarUpdated', handleAvatarUpdate);
     };
@@ -37,13 +44,22 @@ export default function Header() {
   const loadUserInfo = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      if (!token) return;
-      
+      if (!token) {
+        setIsLoadingUser(false);
+        setUserInfo(null);
+        return;
+      }
+
+      setIsLoadingUser(true);
       const resp = await api.get('/api/NguoiDung/Profile/Me');
       const data = resp.data?.data || resp.data;
       setUserInfo(data);
     } catch (err) {
       console.error('Load user info error:', err);
+      // If error (or 401), clear userInfo
+      setUserInfo(null);
+    } finally {
+      setIsLoadingUser(false);
     }
   };
 
@@ -57,7 +73,7 @@ export default function Header() {
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { path: '/', label: '🏠 Trang chủ', icon: '🏠' },
+    { path: '/customer', label: '🏠 Trang chủ', icon: '🏠' },
     { path: '/rooms', label: '🏨 Phòng', icon: '🛏️' },
     { path: '/services', label: '✨ Dịch vụ', icon: '✨' },
     { path: '/about', label: 'ℹ️ Giới thiệu', icon: 'ℹ️' },
@@ -68,7 +84,7 @@ export default function Header() {
     <header className={`header ${scrolled ? 'header-scrolled' : ''}`}>
       <div className="header-container">
         {/* Logo */}
-        <Link to="/" className="header-logo">
+        <Link to="/customer" className="header-logo">
           <div className="logo-icon">🏖️</div>
           <div className="logo-text">
             <h1>Da Nang Bay</h1>
@@ -92,7 +108,11 @@ export default function Header() {
 
         {/* User Menu */}
         <div className="header-actions">
-          {userInfo ? (
+          {isLoadingUser ? (
+            <div className="header-loader">
+              <div className="dot-pulse"></div>
+            </div>
+          ) : userInfo ? (
             <div className="user-menu">
               <button
                 className="user-menu-btn"

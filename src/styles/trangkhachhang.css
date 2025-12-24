@@ -3,11 +3,15 @@
 ======================================== */
 .hero-banner {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 80px 24px 60px;
+  padding: 100px 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: white;
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .hero-banner::before {
@@ -23,15 +27,26 @@
 }
 
 @keyframes wave {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(-50px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-50px);
+  }
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 .hero-title {
@@ -45,6 +60,7 @@
 .hero-subtitle {
   font-size: 18px;
   line-height: 1.8;
+  text-align: center;
   opacity: 0.95;
   animation: fadeInUp 0.8s ease 0.2s backwards;
 }
@@ -54,6 +70,7 @@
     opacity: 0;
     transform: translateY(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -65,6 +82,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -76,7 +94,7 @@
 ======================================== */
 .main-container {
   max-width: 1400px;
-  margin: -40px auto 0;
+  margin: -60px auto 0;
   padding: 0 24px 60px;
   position: relative;
   z-index: 10;
@@ -200,8 +218,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* ========================================
@@ -387,7 +410,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container p {

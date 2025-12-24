@@ -11,7 +11,10 @@ import TrangXacThucOTPQuenMK from './pages/TrangXacThucOTPQuenMK';
 import TrangDatLaiMatKhau from './pages/TrangDatLaiMatKhau';
 // ✅ IMPORT TRANG QUẢN LÝ TÀI KHOẢN
 import TrangQuanLyTaiKhoan from './pages/TrangQuanLyTaiKhoan';
+import TrangLichSuDP from './pages/TrangLichSuDP';
 import ChiTietLoaiPhong from './pages/ChiTietLoaiPhong';
+import Home from './pages/Home';
+import MainLayout from './layouts/MainLayout';
 import './styles/main.css';
 import './styles/admin.css';
 
@@ -19,30 +22,34 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ========== PUBLIC ROUTES ========== */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* ========== ROUTES WITH PERSISTENT LAYOUT ========== */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/customer" element={<TrangKhachHang />} />
+          <Route path="/loai-phong/:id" element={<ChiTietLoaiPhong />} />
+          <Route path="/account" element={<TrangQuanLyTaiKhoan />} />
+          <Route path="/bookings" element={<TrangLichSuDP />} />
+          <Route path="/rooms" element={<div>Trang Phòng</div>} />
+          <Route path="/services" element={<div>Trang Dịch vụ</div>} />
+          <Route path="/about" element={<div>Trang Giới thiệu</div>} />
+          <Route path="/contact" element={<div>Trang Liên hệ</div>} />
+        </Route>
+
+        {/* ========== AUTH/PUBLIC ROUTES (WITHOUT MAIN LAYOUT) ========== */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<TrangDangKy />} />
         <Route path="/quen-mat-khau" element={<TrangQuenMatKhau />} />
         <Route path="/quen-mat-khau/xac-thuc-otp" element={<TrangXacThucOTPQuenMK />} />
         <Route path="/quen-mat-khau/dat-lai" element={<TrangDatLaiMatKhau />} />
-        <Route path="/register" element={<TrangDangKy />} />
         <Route path="/xac-thuc-otp" element={<TrangXacThucOTP />} />
 
-        {/* ========== CUSTOMER ROUTES ========== */}
-        <Route path="/customer" element={<TrangKhachHang />} />
-        <Route path="/loai-phong/:id" element={<ChiTietLoaiPhong />} />
-        {/* ✅ ROUTE QUẢN LÝ TÀI KHOẢN */}
-        <Route path="/account" element={<TrangQuanLyTaiKhoan />} />
-        <Route path="/bookings" element={<div>Đặt phòng của tôi (Đang phát triển)</div>} />
-
-        {/* ========== ADMIN ROUTES ========== */}
+        {/* ========== ADMIN/RECEPTION ROUTES ========== */}
         <Route path="/admin" element={<TrangAdmin />} />
-        
-        {/* ========== RECEPTION ROUTES ========== */}
         <Route path="/reception" element={<TrangLeTan />} />
 
         {/* ========== 404 NOT FOUND ========== */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

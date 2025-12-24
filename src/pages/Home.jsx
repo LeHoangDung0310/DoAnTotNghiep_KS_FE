@@ -7,19 +7,19 @@ export default function Home() {
 
   return (
     <main className="home-page">
-      <header className="hero" onClick={() => navigate('/login')} role="button" tabIndex={0} aria-label="Mở trang đăng nhập">
+      <header className="hero">
         <div className="hero-content">
           <h1>Quản Lý Khách Sạn Đà Nẵng Bay</h1>
           <p>Giải pháp quản lý đặt phòng — nhanh, trực quan và chuyên nghiệp cho khách sạn của bạn.</p>
           <div className="actions">
-            <button className="btn primary" onClick={(e) => { e.stopPropagation(); navigate('/login'); }}>
-              Đăng nhập ngay
+            <button className="btn primary" onClick={() => navigate('/customer')}>
+              Xem phòng ngay
             </button>
-            <button className="btn ghost" onClick={(e) => { e.stopPropagation(); navigate('/login'); }}>
-              Dùng thử (demo)
+            <button className="btn ghost" onClick={() => navigate('/login')}>
+              Đăng nhập
             </button>
           </div>
-          <small className="hint">Nhấn vào bất kỳ vị trí trên khung để mở trang đăng nhập.</small>
+          <small className="hint">Khách vãng lai có thể xem phòng mà không cần đăng nhập.</small>
         </div>
         <div className="hero-visual" aria-hidden>
           <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="sky">

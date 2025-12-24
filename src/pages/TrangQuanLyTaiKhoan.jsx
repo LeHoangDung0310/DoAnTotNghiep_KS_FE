@@ -1,5 +1,4 @@
 import React from 'react';
-import MainLayout from '../layouts/MainLayout';
 import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
 
 /**
@@ -9,15 +8,13 @@ import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
  */
 export default function TrangQuanLyTaiKhoan() {
   return (
-    <MainLayout>
-      <div style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        padding: '40px 24px',
-        minHeight: 'calc(100vh - 80px - 400px)' // Đủ cao để không bị footer đè lên
-      }}>
-        <QuanLyTaiKhoan />
-      </div>
-    </MainLayout>
+    <div style={{
+      maxWidth: '1400px',
+      margin: '0 auto',
+      padding: '40px 24px',
+      minHeight: 'calc(100vh - 80px - 400px)' // Đủ cao để không bị footer đè lên
+    }}>
+      <QuanLyTaiKhoan />
+    </div>
   );
 }
