@@ -69,7 +69,7 @@ export default function QuanLyDatPhongLT() {
       const paginated = data.slice(start, start + pageSize);
 
       setBookings(paginated);
-      
+
     } catch (err) {
       console.error('Lỗi khi tải danh sách đặt phòng:', err);
       showToast('error', 'Không thể tải danh sách đặt phòng');
@@ -160,6 +160,9 @@ export default function QuanLyDatPhongLT() {
       HoanThanh: { label: 'Hoàn thành', class: 'tag-success' },
       DaHuy: { label: 'Đã hủy', class: 'tag-danger' },
       TuChoi: { label: 'Từ chối', class: 'tag-dark' },
+      // TRẠNG THÁI HIỂN THỊ MỚI
+      DenHan: { label: '⌛ Đến hạn trả', class: 'tag-warning' },
+      QuaHan: { label: '⚠️ Quá hạn trả', class: 'tag-danger' },
     };
     const s = statusMap[status] || { label: status, class: 'tag-secondary' };
     return <span className={`tag ${s.class}`}>{s.label}</span>;
@@ -256,7 +259,7 @@ export default function QuanLyDatPhongLT() {
         />
       )}
 
-       {/* Header */}
+      {/* Header */}
       <div className="letan-header-layout" >
         <div className="letan-header-left">
           <h3 className="admin-card-title">📅 Quản lý đặt phòng</h3>
@@ -264,7 +267,7 @@ export default function QuanLyDatPhongLT() {
             🔄 Đặt lại
           </button>
         </div>
-        
+
         <div className="letan-header-right">
           <button className="btn-success" onClick={() => setShowCreateModal(true)}>
             ➕ Đặt phòng trực tiếp
@@ -424,7 +427,7 @@ export default function QuanLyDatPhongLT() {
                       {booking.tongTien?.toLocaleString('vi-VN')}đ
                     </td>
                     <td>{getTypeTag(booking.loaiDatPhong)}</td>
-                    <td>{getStatusTag(booking.trangThai)}</td>
+                    <td>{getStatusTag(booking.trangThaiHienThi || booking.trangThai)}</td>
                     <td>{renderActions(booking)}</td>
                     <td>
                       <div style={{ fontSize: 12 }}>

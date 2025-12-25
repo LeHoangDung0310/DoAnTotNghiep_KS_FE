@@ -242,9 +242,11 @@ export default function QuanLyHuyDatPhong() {
                     {huy.lyDo || '—'}
                   </td>
                   <td style={{ fontSize: 13 }}>
-                    {huy.tenNguoiDuyet ? (
+                    {huy.tenNguoiDuyet || huy.maNguoiDuyet ? (
                       <div>
-                        <div style={{ fontWeight: 500 }}>{huy.tenNguoiDuyet}</div>
+                        <div style={{ fontWeight: 500 }}>
+                          {huy.tenNguoiDuyet || `ID #${huy.maNguoiDuyet}`}
+                        </div>
                         {huy.ngayXuLy && (
                           <div style={{ fontSize: 11, color: '#64748b' }}>
                             {new Date(huy.ngayXuLy).toLocaleString('vi-VN', {
@@ -438,8 +440,8 @@ function DuyetHuyModal({ huyId, type, onClose, onSuccess, onShowToast }) {
               {loading
                 ? 'Đang xử lý...'
                 : type === 'duyet'
-                ? 'Xác nhận duyệt'
-                : 'Xác nhận từ chối'}
+                  ? 'Xác nhận duyệt'
+                  : 'Xác nhận từ chối'}
             </button>
           </div>
         </form>
