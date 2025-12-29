@@ -16,6 +16,8 @@ import ChiTietLoaiPhong from './pages/ChiTietLoaiPhong';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout';
 import './styles/main.css';
+import PaymentResult from './pages/PaymentResult';
+import Cart from './pages/Cart';
 import './styles/admin.css';
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/vnpay-return" element={<PaymentResult />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/customer" element={<TrangKhachHang />} />
           <Route path="/loai-phong/:id" element={<ChiTietLoaiPhong />} />
           <Route path="/account" element={<TrangQuanLyTaiKhoan />} />

@@ -26,6 +26,11 @@ export default function ChiTietLoaiPhong() {
   const [ngayTraPhong, setNgayTraPhong] = useState('');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
 
+  // Booking Modal State
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedPhong, setSelectedPhong] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
   // ================= LOAD INITIAL =================
   useEffect(() => {
     const loadInitial = async () => {
@@ -36,6 +41,12 @@ export default function ChiTietLoaiPhong() {
       ]);
       setLoading(false);
       loadDanhSachPhong();
+      // Only load rooms if dates are already set, otherwise the UI will prompt user to select dates
+      if (ngayNhanPhong && ngayTraPhong) {
+        loadDanhSachPhong();
+      } else {
+        setDanhSachPhong([]); // Clear rooms if no dates selected initially
+      }
     };
     loadInitial();
   }, [id]);
@@ -144,6 +155,102 @@ export default function ChiTietLoaiPhong() {
   const getCurrentImageIndex = () => {
     if (!selectedImage || hinhAnhs.length === 0) return 0;
     return hinhAnhs.findIndex(img => img.maHinhAnh === selectedImage?.maHinhAnh) + 1;
+  };
+
+  // ================= BOOKING HANDLER =================
+  const handleOpenBooking = (phong) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      alert('Vui lòng đăng nhập để đặt phòng!');
+      navigate('/login');
+      return;
+    }
+
+    if (!ngayNhanPhong || !ngayTraPhong) {
+      alert('Vui lòng chọn ngày nhận và ngày trả phòng trước!');
+      return;
+    }
+
+    setSelectedPhong(phong);
+    setShowBookingModal(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    try {
+      setBookingLoading(true);
+
+      // 1. Tạo đặt phòng
+      const bookingData = {
+        ngayNhanPhong,
+        ngayTraPhong,
+        danhSachPhong: [
+          {
+            maPhong: selectedPhong.maPhong,
+            soNguoi: loaiPhong.soNguoiToiDa || 2
+          }
+        ]
+      };
+
+      const resBooking = await api.post('/api/DatPhong', bookingData);
+
+      if (resBooking.data?.success) {
+        const maDatPhong = resBooking.data.data.maDatPhong;
+
+        // 2. Tính tổng tiền (giả sử thanh toán hết 100%)
+        const soNgay = Math.max(1, (new Date(ngayTraPhong) - new Date(ngayNhanPhong)) / (1000 * 60 * 60 * 24));
+        const soTien = loaiPhong.giaMoiDem * soNgay;
+
+        // 3. Gọi API tạo URL VNPay
+        const resVNPay = await api.post('/api/ThanhToan/create-vnpay-url', {
+          maDatPhong,
+          soTien
+        });
+
+        if (resVNPay.data?.success) {
+          // Redirect đến VNPay
+          window.location.href = resVNPay.data.data;
+        } else {
+          alert('Không thể tạo liên kết thanh toán. Vui lòng thử lại sau!');
+        }
+      } else {
+        alert(resBooking.data?.message || 'Có lỗi xảy ra khi đặt phòng');
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Lỗi hệ thống khi đặt phòng');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleAddToCart = (phong) => {
+    if (!ngayNhanPhong || !ngayTraPhong) {
+      alert('Vui lòng chọn ngày nhận và ngày trả phòng trước khi thêm vào giỏ hàng!');
+      return;
+    }
+
+    const email = localStorage.getItem('userEmail');
+    const cartKey = email ? `cart_${email}` : 'cart_guest';
+    const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+    const newItem = {
+      cartId: Date.now(),
+      maLoaiPhong: loaiPhong.maLoaiPhong,
+      tenLoaiPhong: loaiPhong.tenLoaiPhong,
+      maPhong: phong.maPhong,
+      soPhong: phong.soPhong,
+      giaMoiDem: loaiPhong.giaMoiDem,
+      ngayNhanPhong,
+      ngayTraPhong,
+      hinhAnh: loaiPhong.hinhAnhDauTien
+    };
+
+    cart.push(newItem);
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+
+    // Trigger event for Header to update badge
+    window.dispatchEvent(new Event('cartUpdated'));
+
+    alert('Đã thêm phòng vào giỏ hàng thành công!');
   };
 
   // ================= UTIL =================
@@ -356,6 +463,12 @@ export default function ChiTietLoaiPhong() {
             <div className="spinner"></div>
             <p>Đang tìm kiếm phòng...</p>
           </div>
+        ) : (!ngayNhanPhong || !ngayTraPhong) ? (
+          <div className="empty-state">
+            <div className="empty-icon">📅</div>
+            <h3>Khám phá phòng trống</h3>
+            <p>Vui lòng chọn ngày nhận và ngày trả phòng để kiểm tra tính khả dụng</p>
+          </div>
         ) : danhSachPhong.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🏨</div>
@@ -389,15 +502,93 @@ export default function ChiTietLoaiPhong() {
                 {renderTrangThai(phong.trangThai)}
 
                 {phong.trangThai === 'Trong' && (
-                  <button className="btn-book-room">
-                    Đặt ngay
-                  </button>
+                  <div className="room-actions-row">
+                    <button
+                      className="btn-book-room"
+                      onClick={() => handleOpenBooking(phong)}
+                    >
+                      Đặt ngay
+                    </button>
+                    <button
+                      className="btn-add-cart"
+                      onClick={() => handleAddToCart(phong)}
+                    >
+                      🛒 Thêm giỏ hàng
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* ========== MODAL XÁC NHẬN ĐẶT PHÒNG (PREMIUM) ========== */}
+      {showBookingModal && (
+        <div className="booking-modal-overlay">
+          <div className="booking-modal">
+            <div className="modal-header-premium">
+              <h2>Xác nhận đặt phòng</h2>
+              <button className="close-btn" onClick={() => setShowBookingModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-receipt-body">
+              <div className="receipt-card">
+                <div className="receipt-item">
+                  <span className="label">🏨 Loại phòng</span>
+                  <span className="value">{loaiPhong.tenLoaiPhong}</span>
+                </div>
+                <div className="receipt-item">
+                  <span className="label">🚪 Số phòng</span>
+                  <span className="value">{selectedPhong?.soPhong}</span>
+                </div>
+                <div className="receipt-item">
+                  <span className="label">📅 Nhận phòng</span>
+                  <span className="value">{new Date(ngayNhanPhong).toLocaleDateString('vi-VN')}</span>
+                </div>
+                <div className="receipt-item">
+                  <span className="label">📅 Trả phòng</span>
+                  <span className="value">{new Date(ngayTraPhong).toLocaleDateString('vi-VN')}</span>
+                </div>
+                <div className="receipt-item">
+                  <span className="label">⏳ Khoảng thời gian</span>
+                  <span className="value">
+                    {Math.max(1, (new Date(ngayTraPhong) - new Date(ngayNhanPhong)) / (1000 * 60 * 60 * 24))} đêm
+                  </span>
+                </div>
+
+                <div className="receipt-divider"></div>
+
+                <div className="receipt-total">
+                  <span className="label">TỔNG CỘNG</span>
+                  <span className="value">
+                    {formatPrice(loaiPhong.giaMoiDem * Math.max(1, (new Date(ngayTraPhong) - new Date(ngayNhanPhong)) / (1000 * 60 * 60 * 24)))}
+                  </span>
+                </div>
+              </div>
+
+              <div className="payment-section">
+                <h3>Phương thức thanh toán</h3>
+                <div className="vnpay-selector">
+                  <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.png" alt="VNPay" />
+                  <span>Cổng thanh toán VNPay (Thành toán ngay)</span>
+                  <span style={{ marginLeft: 'auto', color: '#6366f1' }}>✅</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer-premium">
+              <button
+                className="btn-confirm-receipt"
+                onClick={handleConfirmBooking}
+                disabled={bookingLoading}
+              >
+                {bookingLoading ? <div className="spinner-white"></div> : 'Xác nhận & Thanh toán →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

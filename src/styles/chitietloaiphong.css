@@ -452,20 +452,61 @@
 }
 
 .phong-item {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
   padding: 24px;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: all 0.3s;
+  justify-content: space-between;
+  min-height: 250px;
 }
 
 .phong-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-  transform: translateY(-4px);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+  border-color: #6366f1;
+}
+
+.room-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.btn-book-room,
+.btn-add-cart {
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-book-room {
+  background: #6366f1;
+  color: white;
+}
+
+.btn-book-room:hover {
+  background: #4f46e5;
+}
+
+.btn-add-cart {
+  background: white;
+  color: #6366f1;
+  border: 1.5px solid #6366f1;
+}
+
+.btn-add-cart:hover {
+  background: #f5f3ff;
 }
 
 .phong-number {
@@ -574,5 +615,273 @@
 
   .danh-sach-phong-section {
     padding: 24px;
+  }
+}
+
+/* ========== PREMIUM BOOKING MODAL (RECEIPT STYLE) ========== */
+.booking-modal-overlay {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.booking-modal {
+  background: #ffffff !important;
+  width: 95% !important;
+  max-width: 550px !important;
+  border-radius: 32px !important;
+  overflow: hidden !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4) !important;
+  transform: scale(0.9);
+  animation: modalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@keyframes modalScaleUp {
+  to {
+    transform: scale(1);
+  }
+}
+
+.modal-header-premium {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+  padding: 32px !important;
+  text-align: center !important;
+  color: white !important;
+  position: relative !important;
+}
+
+.modal-header-premium h2 {
+  font-size: 1.8rem !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  letter-spacing: -0.5px !important;
+  color: #ffffff !important;
+  /* Force white color */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.modal-header-premium .close-btn {
+  position: absolute !important;
+  top: 24px !important;
+  right: 24px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: none !important;
+  color: white !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-size: 18px !important;
+}
+
+.modal-header-premium .close-btn:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+  transform: rotate(90deg) scale(1.1) !important;
+}
+
+.modal-receipt-body {
+  padding: 32px !important;
+  background-color: #f8fafc !important;
+  background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px) !important;
+  background-size: 24px 24px !important;
+  color: #1e293b !important;
+  /* Force dark text color */
+}
+
+.receipt-card {
+  background: white !important;
+  border-radius: 24px !important;
+  padding: 28px !important;
+  border: 2px solid #f1f5f9 !important;
+  position: relative !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Punch-hole effect for receipt */
+.receipt-card::before,
+.receipt-card::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: #f8fafc;
+  /* Match modal body bg */
+  border-radius: 50%;
+  top: 65%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.receipt-card::before {
+  left: -14px;
+  box-shadow: inset -5px 0 5px rgba(0, 0, 0, 0.02);
+}
+
+.receipt-card::after {
+  right: -14px;
+  box-shadow: inset 5px 0 5px rgba(0, 0, 0, 0.02);
+}
+
+.receipt-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  font-size: 1rem !important;
+}
+
+.receipt-item .label {
+  color: #64748b !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.receipt-item .value {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  text-align: right !important;
+}
+
+.receipt-divider {
+  border-top: 2px dashed #cbd5e1 !important;
+  margin: 24px 0 !important;
+  position: relative !important;
+}
+
+.receipt-total {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.receipt-total .label {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+.receipt-total .value {
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  color: #6366f1 !important;
+  text-shadow: 0 2px 8px rgba(99, 102, 241, 0.15) !important;
+}
+
+.payment-section {
+  margin-top: 32px !important;
+}
+
+.payment-section h3 {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  margin-bottom: 16px !important;
+}
+
+.vnpay-selector {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 20px !important;
+  border: 2px solid #6366f1 !important;
+  background: white !important;
+  border-radius: 20px !important;
+  cursor: pointer !important;
+  transition: all 0.3s !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08) !important;
+  position: relative !important;
+}
+
+.vnpay-selector img {
+  height: 28px !important;
+  object-fit: contain !important;
+}
+
+.vnpay-selector span {
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  font-size: 0.95rem !important;
+}
+
+.modal-footer-premium {
+  padding: 0 32px 40px 32px !important;
+  background-color: #f8fafc !important;
+}
+
+.btn-confirm-receipt {
+  width: 100% !important;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 20px !important;
+  border-radius: 20px !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.btn-confirm-receipt:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4) !important;
+}
+
+.spinner-white {
+  width: 24px !important;
+  height: 24px !important;
+  border: 4px solid rgba(255, 255, 255, 0.3) !important;
+  border-top-color: white !important;
+  border-radius: 50% !important;
+  animation: modalSpin 0.8s linear infinite !important;
+}
+
+@keyframes modalSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-modal {
+    border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
   }
 }

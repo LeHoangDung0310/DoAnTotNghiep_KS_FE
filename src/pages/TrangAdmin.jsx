@@ -8,7 +8,9 @@ import QuanLyTienNghi from '../components/Admin/QuanLyTienNghi';
 import QuanLyNguoiDung from '../components/Admin/QuanLyNguoiDung';
 import QuanLyTaiKhoan from '../components/Admin/QuanLyTaiKhoan';
 import QuanLyDsHoanTien from '../components/Admin/QuanLyDsHoanTien';
+import AdminDashboard from '../components/Admin/AdminDashboard';
 import api from '../utils/api';
+import '../styles/AdminDashboard.css';
 
 export default function TrangAdmin() {
   const navigate = useNavigate();
@@ -18,14 +20,14 @@ export default function TrangAdmin() {
 
   useEffect(() => {
     loadUserInfo();
-    
+
     const handleAvatarUpdate = () => {
       console.log('Avatar updated event received');
       loadUserInfo();
     };
-    
+
     window.addEventListener('avatarUpdated', handleAvatarUpdate);
-    
+
     return () => {
       window.removeEventListener('avatarUpdated', handleAvatarUpdate);
     };
@@ -36,7 +38,7 @@ export default function TrangAdmin() {
       const resp = await api.get('/api/NguoiDung/Profile/Me');
       const data = resp.data?.data || resp.data;
       setUserInfo(data);
-      
+
       if (data.email) localStorage.setItem('email', data.email);
       if (data.vaiTro) localStorage.setItem('userRole', data.vaiTro);
       if (data.hoTen) localStorage.setItem('hoTen', data.hoTen);
@@ -86,7 +88,7 @@ export default function TrangAdmin() {
       case 'account':
         return <QuanLyTaiKhoan />;
       case 'dashboard':
-        return <div className="admin-card">Trang tổng quan (chưa triển khai).</div>;
+        return <AdminDashboard />;
       default:
         return null;
     }
@@ -186,9 +188,9 @@ export default function TrangAdmin() {
           <div className="admin-user-info">
             <div className="admin-user-avatar">
               {anhDaiDien ? (
-                <img 
-                  src={`${api.defaults.baseURL}${anhDaiDien}`} 
-                  alt="Avatar" 
+                <img
+                  src={`${api.defaults.baseURL}${anhDaiDien}`}
+                  alt="Avatar"
                   style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
                     e.target.style.display = 'none';

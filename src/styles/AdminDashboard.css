@@ -1,0 +1,220 @@
+/* ========== ROYAL EMERALD ADMIN DASHBOARD THEME ========== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.admin-db-wrapper {
+    --emerald-deep: #064e3b;
+    --emerald-light: #10b981;
+    --royal-gold: #fbbf24;
+    --royal-gold-soft: #fef3c7;
+    --bg-admin: #f8fafc;
+    --glass-white: rgba(255, 255, 255, 0.9);
+    --gold-stroke: rgba(251, 191, 36, 0.2);
+    --shadow-royal: 0 20px 40px -15px rgba(6, 78, 59, 0.1);
+
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #1e293b;
+}
+
+.admin-db-container {
+    animation: royalEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes royalEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- STATS GRID --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stats-card {
+    background: var(--glass-white);
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid var(--gold-stroke);
+    box-shadow: var(--shadow-royal);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle at top right, var(--royal-gold-soft), transparent 70%);
+    opacity: 0.5;
+}
+
+.stats-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--royal-gold);
+}
+
+.stats-icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Themes for stats cards */
+.stats-card.revenue .stats-icon-box {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.stats-card.occupancy .stats-icon-box {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stats-card.users .stats-icon-box {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.stats-card.issues .stats-icon-box {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.stats-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+/* --- MAIN CONTENT LAYOUT --- */
+.admin-db-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+}
+
+.chart-panel,
+.activity-panel {
+    background: white;
+    padding: 32px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-royal);
+    border: 1px solid #f1f5f9;
+}
+
+.panel-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-title span {
+    color: var(--emerald-deep);
+}
+
+/* --- ACTIVITY LIST --- */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.activity-item:hover {
+    background: #f8fafc;
+}
+
+.activity-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--emerald-deep);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.activity-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.activity-text b {
+    color: var(--emerald-deep);
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* --- CHART WRAPPER --- */
+.admin-chart-wrapper {
+    height: 400px;
+    position: relative;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .admin-db-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

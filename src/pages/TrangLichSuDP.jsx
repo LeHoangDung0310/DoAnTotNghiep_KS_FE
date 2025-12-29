@@ -23,6 +23,27 @@ export default function TrangLichSuDP() {
         setCurrentPage(1);
     };
 
+    const handleResumePayment = async (booking) => {
+        try {
+            setLoading(true);
+            const resVNPay = await api.post('/api/ThanhToan/create-vnpay-url', {
+                maDatPhong: booking.maDatPhong,
+                soTien: booking.tongTien
+            });
+
+            if (resVNPay.data?.success) {
+                window.location.href = resVNPay.data.data;
+            } else {
+                alert('Không thể tạo liên kết thanh toán. Vui lòng thử lại sau!');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Lỗi khi khởi tạo thanh toán');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const loadBookings = async () => {
         try {
             setLoading(true);
@@ -46,7 +67,9 @@ export default function TrangLichSuDP() {
         const statusMap = {
             'DangSuDung': { label: 'Đang sử dụng', className: 'status-active' },
             'HoanThanh': { label: 'Hoàn thành', className: 'status-completed' },
-            'DaHuy': { label: 'Đã hủy', className: 'status-cancelled' }
+            'DaHuy': { label: 'Đã hủy', className: 'status-cancelled' },
+            'ChoThanhToan': { label: 'Chờ thanh toán', className: 'status-pending' },
+            'DaDuyet': { label: 'Đã xác nhận', className: 'status-active' }
         };
 
         const statusInfo = statusMap[status] || { label: status, className: 'status-default' };
@@ -124,6 +147,12 @@ export default function TrangLichSuDP() {
                     onClick={() => handleFilterChange('HoanThanh')}
                 >
                     Hoàn thành ({bookings.filter(b => b.trangThai === 'HoanThanh').length})
+                </button>
+                <button
+                    className={`filter-btn ${filterStatus === 'ChoThanhToan' ? 'active' : ''}`}
+                    onClick={() => handleFilterChange('ChoThanhToan')}
+                >
+                    Chờ thanh toán ({bookings.filter(b => b.trangThai === 'ChoThanhToan').length})
                 </button>
                 <button
                     className={`filter-btn ${filterStatus === 'DaHuy' ? 'active' : ''}`}
@@ -228,6 +257,16 @@ export default function TrangLichSuDP() {
                                         }}
                                     >
                                         Hủy đặt phòng
+                                    </button>
+                                )}
+
+                                {booking.trangThai === 'ChoThanhToan' && (
+                                    <button
+                                        className="btn-primary"
+                                        style={{ marginLeft: '10px' }}
+                                        onClick={() => handleResumePayment(booking)}
+                                    >
+                                        💳 Thanh toán ngay
                                     </button>
                                 )}
                             </div>

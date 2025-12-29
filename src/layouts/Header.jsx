@@ -10,6 +10,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [cartCount, setCartCount] = useState(0);
 
   // Detect scroll
   useEffect(() => {
@@ -41,6 +42,23 @@ export default function Header() {
     };
   }, []);
 
+  // Cart update listener
+  useEffect(() => {
+    updateCartCount();
+    window.addEventListener('cartUpdated', updateCartCount);
+    return () => window.removeEventListener('cartUpdated', updateCartCount);
+  }, []);
+
+  const getCartKey = () => {
+    const email = localStorage.getItem('userEmail');
+    return email ? `cart_${email}` : 'cart_guest';
+  };
+
+  const updateCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem(getCartKey()) || '[]');
+    setCartCount(cart.length);
+  };
+
   const loadUserInfo = async () => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -54,6 +72,11 @@ export default function Header() {
       const resp = await api.get('/api/NguoiDung/Profile/Me');
       const data = resp.data?.data || resp.data;
       setUserInfo(data);
+      if (data.email) {
+        localStorage.setItem('userEmail', data.email);
+        // Refresh cart count if user just logged in and switched to their personal cart
+        updateCartCount();
+      }
     } catch (err) {
       console.error('Load user info error:', err);
       // If error (or 401), clear userInfo
@@ -67,6 +90,9 @@ export default function Header() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    // Refresh cart count for guest
+    updateCartCount();
     navigate('/login');
   };
 
@@ -145,6 +171,10 @@ export default function Header() {
                   <Link to="/bookings" className="dropdown-item">
                     <span className="dropdown-icon">📋</span>
                     Đặt phòng của tôi
+                  </Link>
+                  <Link to="/cart" className="dropdown-item">
+                    <span className="dropdown-icon">🛒</span>
+                    Giỏ hàng {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                   </Link>
                   {userInfo.vaiTro === 'Admin' && (
                     <Link to="/admin" className="dropdown-item">
