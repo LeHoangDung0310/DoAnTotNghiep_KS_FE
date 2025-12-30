@@ -24,6 +24,9 @@ export default function QuanLyLoaiPhong() {
     giaMax: '',
   });
 
+  const [allTienNghis, setAllTienNghis] = useState([]);
+  const [selectedTienNghiIds, setSelectedTienNghiIds] = useState([]);
+
   const [formData, setFormData] = useState({
     tenLoaiPhong: '',
     moTa: '',
@@ -80,8 +83,26 @@ export default function QuanLyLoaiPhong() {
     }
   };
 
+  const fetchAllTienNghis = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/TienNghi?pageSize=1000`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAllTienNghis(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching amenities:', error);
+    }
+  };
+
   useEffect(() => {
     fetchLoaiPhongs(1);
+    fetchAllTienNghis();
   }, [filters, pagination.pageSize]);
 
   const handleSearch = () => fetchLoaiPhongs(1, pagination.pageSize);
@@ -106,6 +127,7 @@ export default function QuanLyLoaiPhong() {
       dienTich: '',
       giaMoiDem: '',
     });
+    setSelectedTienNghiIds([]);
     setShowModal(true);
   };
 
@@ -120,6 +142,7 @@ export default function QuanLyLoaiPhong() {
       dienTich: loaiPhong.dienTich || '',
       giaMoiDem: loaiPhong.giaMoiDem || '',
     });
+    setSelectedTienNghiIds(loaiPhong.tienNghis?.map(tn => tn.maTienNghi) || []);
     setShowModal(true);
   };
 
@@ -140,6 +163,7 @@ export default function QuanLyLoaiPhong() {
         soGiuong: formData.soGiuong ? parseInt(formData.soGiuong) : null,
         dienTich: formData.dienTich ? parseInt(formData.dienTich) : null,
         giaMoiDem: formData.giaMoiDem ? parseFloat(formData.giaMoiDem) : null,
+        maTienNghis: selectedTienNghiIds,
       };
 
       const url =
@@ -475,6 +499,39 @@ export default function QuanLyLoaiPhong() {
                     />
                   </div>
                 </div>
+
+                {/* Section 3: Tiện nghi */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <div className="form-section-icon">✨</div>
+                    <h4 className="form-section-title">Tiện nghi có sẵn</h4>
+                  </div>
+                  <div className="amenities-selection-grid">
+                    {allTienNghis.map((tn) => (
+                      <label key={tn.maTienNghi} className="amenity-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedTienNghiIds.includes(tn.maTienNghi)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTienNghiIds([...selectedTienNghiIds, tn.maTienNghi]);
+                            } else {
+                              setSelectedTienNghiIds(selectedTienNghiIds.filter(id => id !== tn.maTienNghi));
+                            }
+                          }}
+                        />
+                        <div className="amenity-checkbox-content">
+                          <span className="amenity-checkbox-icon">
+                            {tn.icon ? (
+                              <img src={tn.icon.startsWith('http') ? tn.icon : `http://localhost:5114${tn.icon}`} alt="" />
+                            ) : '🔹'}
+                          </span>
+                          <span className="amenity-checkbox-label">{tn.ten}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Footer */}
@@ -506,7 +563,7 @@ export default function QuanLyLoaiPhong() {
 
             <div className="modal-body">
               <p>
-                Bạn có chắc chắn muốn xóa loại phòng <strong>{deletingItem.tenLoaiPhong}</strong>? 
+                Bạn có chắc chắn muốn xóa loại phòng <strong>{deletingItem.tenLoaiPhong}</strong>?
                 Hành động này không thể hoàn tác.
               </p>
             </div>

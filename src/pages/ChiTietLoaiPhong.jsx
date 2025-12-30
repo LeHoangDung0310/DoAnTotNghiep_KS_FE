@@ -387,6 +387,31 @@ export default function ChiTietLoaiPhong() {
           <p className="loai-phong-description">
             {loaiPhong.moTa || 'Phòng được thiết kế sang trọng, hiện đại với đầy đủ tiện nghi cao cấp.'}
           </p>
+
+          {/* Tiện nghi phòng */}
+          {loaiPhong.tienNghis && loaiPhong.tienNghis.length > 0 && (
+            <div className="loai-phong-amenities">
+              <h3 className="amenities-title">✨ Tiện nghi phòng</h3>
+              <div className="amenities-list">
+                {loaiPhong.tienNghis.map((tn) => (
+                  <div key={tn.maTienNghi} className="amenity-item" title={tn.ten}>
+                    <span className="amenity-icon">
+                      {tn.icon ? (
+                        tn.icon.startsWith('http') || tn.icon.startsWith('/') ? (
+                          <img src={tn.icon.startsWith('/') ? `${api.defaults.baseURL}${tn.icon}` : tn.icon} alt={tn.ten} style={{ width: '20px', height: '20px' }} />
+                        ) : (
+                          tn.icon
+                        )
+                      ) : (
+                        '🔹'
+                      )}
+                    </span>
+                    <span className="amenity-name">{tn.ten}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

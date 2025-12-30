@@ -2404,3 +2404,66 @@
   font-size: 16px;
   font-weight: 700;
 }
+
+/* Amenities Selection Grid */
+.amenities-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.amenity-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.amenity-checkbox-item:hover {
+  background: #f8fafc;
+  border-color: #3b82f6;
+}
+
+.amenity-checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.amenity-checkbox-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amenity-checkbox-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amenity-checkbox-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.amenity-checkbox-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.amenity-checkbox-item input[type="checkbox"]:checked+.amenity-checkbox-content .amenity-checkbox-label {
+  color: #2563eb;
+  font-weight: 700;
+}

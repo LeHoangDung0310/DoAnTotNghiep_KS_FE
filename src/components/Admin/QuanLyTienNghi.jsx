@@ -345,7 +345,7 @@ export default function QuanLyTienNghi() {
                     {editingItem ? 'Chỉnh sửa tiện nghi' : 'Thêm tiện nghi mới'}
                   </h3>
                   <p className="modal-subtitle">
-                    {editingItem 
+                    {editingItem
                       ? `Cập nhật thông tin tiện nghi #${editingItem.maTienNghi}`
                       : 'Tạo tiện nghi mới cho khách sạn'}
                   </p>
@@ -447,7 +447,7 @@ export default function QuanLyTienNghi() {
               <p>
                 Bạn có chắc chắn muốn xóa tiện nghi <strong>{deletingItem.ten} (Mã: {deletingItem.maTienNghi})</strong>?
                 <br />
-                Nếu tiện nghi đang được gán cho phòng, bạn phải gỡ ra trước.
+                Nếu tiện nghi đang được gán cho loại phòng, bạn phải gỡ ra trước.
               </p>
             </div>
             <div className="modal-footer">
