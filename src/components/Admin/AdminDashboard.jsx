@@ -25,8 +25,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [stats, setStats] = useState({
         totalRevenue: 0,
+        totalRefunded: 0,
+        netRevenue: 0,
         roomOccupancy: 0,
         totalUsers: 0,
         pendingRefunds: 0
@@ -36,7 +39,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchDashboardData();
-    }, []);
+    }, [selectedYear]);
 
     const fetchDashboardData = async () => {
         setLoading(true);
@@ -49,37 +52,66 @@ export default function AdminDashboard() {
             ]);
 
             const userStats = resStats.data?.data || {};
-            const bookings = resDatPhong.data?.data || [];
+            const allBookings = resDatPhong.data?.data || [];
             const rooms = resPhong.data?.data || [];
-            const refunds = resHuy.data?.data || [];
+            const allRefunds = resHuy.data?.data || [];
 
-            // Calculate Revenue (Sum of all completed or checked-in bookings)
-            const revenue = bookings
+            // FILTER BY YEAR
+            const bookingsInYear = allBookings.filter(b => dayjs(b.ngayDat).year() === selectedYear);
+            const refundsInYear = allRefunds.filter(r => dayjs(r.ngayYeuCau).year() === selectedYear);
+
+            // LOGIC DOANH THU:
+            // 1. Doanh thu từ đơn đang hoạt động (Thành công, Đã check-in...)
+            const activeRevenue = bookingsInYear
                 .filter(b => ['HoanThanh', 'CheckedIn', 'DangSuDung'].includes(b.trangThai))
                 .reduce((sum, b) => sum + (b.tongTien || 0), 0);
+
+            // 2. Doanh thu từ "Phí giữ phòng" của các đơn đã hủy (Khách mất tiền phạt)
+            const penaltyRevenue = refundsInYear
+                .reduce((sum, r) => sum + (r.phiGiu || 0), 0);
+
+            // 3. Tổng tiền đã thực sự hoàn trả (Dòng tiền đi ra)
+            const totalRefunded = refundsInYear
+                .filter(r => r.trangThaiHoanTien === 'DaHoan')
+                .reduce((sum, r) => sum + (r.tienHoan || 0), 0);
+
+            const totalRevenue = activeRevenue + penaltyRevenue;
+            const netRevenue = totalRevenue - totalRefunded;
 
             // Calculate Occupancy
             const occupiedRooms = rooms.filter(r => r.trangThai === 'CoKhach').length;
             const occupancyRate = rooms.length > 0 ? Math.round((occupiedRooms / rooms.length) * 100) : 0;
 
             setStats({
-                totalRevenue: revenue,
+                totalRevenue: totalRevenue,
+                totalRefunded: totalRefunded,
+                netRevenue: netRevenue,
                 roomOccupancy: occupancyRate,
                 totalUsers: userStats.total || 0,
-                pendingRefunds: refunds.filter(r => r.trangThai === 'ChoDuyet').length
+                pendingRefunds: allRefunds.filter(r => r.trangThai === 'ChoDuyet').length
             });
 
             // Recent Activity (Latest 5 bookings)
-            setRecentBookings(bookings.slice(0, 5));
+            setRecentBookings(allBookings.slice(0, 5));
 
-            // Prepare Chart Data (Revenue by month for the current year)
+            // Prepare Chart Data (Revenue & Refunds by month)
             const months = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
             const monthlyRevenue = Array(12).fill(0);
+            const monthlyRefunds = Array(12).fill(0);
 
-            bookings.forEach(b => {
-                if (['HoanThanh', 'CheckedIn'].includes(b.trangThai)) {
-                    const month = dayjs(b.ngayDat).month();
-                    monthlyRevenue[month] += b.tongTien || 0;
+            // Cột Doanh thu (Active + Penalty)
+            bookingsInYear.forEach(b => {
+                if (['HoanThanh', 'CheckedIn', 'DangSuDung'].includes(b.trangThai)) {
+                    const m = dayjs(b.ngayDat).month();
+                    monthlyRevenue[m] += b.tongTien || 0;
+                }
+            });
+            refundsInYear.forEach(r => {
+                const m = dayjs(r.ngayYeuCau).month();
+                monthlyRevenue[m] += (r.phiGiu || 0);
+
+                if (r.trangThaiHoanTien === 'DaHoan') {
+                    monthlyRefunds[m] += (r.tienHoan || 0);
                 }
             });
 
@@ -90,8 +122,15 @@ export default function AdminDashboard() {
                         label: 'Doanh thu (VNĐ)',
                         data: monthlyRevenue,
                         backgroundColor: '#10b981',
-                        borderRadius: 8,
-                        barThickness: 20,
+                        borderRadius: 6,
+                        barThickness: 15,
+                    },
+                    {
+                        label: 'Hoàn tiền (VNĐ)',
+                        data: monthlyRefunds,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 6,
+                        barThickness: 15,
                     }
                 ]
             });
@@ -104,8 +143,8 @@ export default function AdminDashboard() {
 
     const kpis = [
         {
-            label: 'Tổng doanh thu',
-            value: `${stats.totalRevenue.toLocaleString('vi-VN')}₫`,
+            label: 'Doanh thu thực (Net)',
+            value: `${stats.netRevenue.toLocaleString('vi-VN')}₫`,
             icon: <FaMoneyBillWave />,
             theme: 'revenue'
         },
@@ -153,7 +192,21 @@ export default function AdminDashboard() {
 
                     {/* Revenue Chart */}
                     <div className="chart-panel">
-                        <h3 className="panel-title"><span><FaHistory /></span> Doanh Thu Theo Tháng</h3>
+                        <div className="panel-header-db">
+                            <h3 className="panel-title"><span><FaHistory /></span> Doanh Thu Theo Tháng - Năm {selectedYear}</h3>
+                            <div className="year-selector">
+                                <label>Chọn năm: </label>
+                                <select
+                                    value={selectedYear}
+                                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                    className="admin-select-year"
+                                >
+                                    {[2023, 2024, 2025, 2026].map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
                         <div className="admin-chart-wrapper">
                             {chartData && (
                                 <Bar
@@ -162,7 +215,15 @@ export default function AdminDashboard() {
                                         responsive: true,
                                         maintainAspectRatio: false,
                                         plugins: {
-                                            legend: { display: false },
+                                            legend: {
+                                                display: true,
+                                                position: 'top',
+                                                labels: {
+                                                    usePointStyle: true,
+                                                    padding: 20,
+                                                    font: { size: 12, weight: '600' }
+                                                }
+                                            },
                                             tooltip: {
                                                 backgroundColor: '#064e3b',
                                                 padding: 12,

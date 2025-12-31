@@ -96,8 +96,12 @@ export default function QuanLyNguoiDung() {
   };
 
   useEffect(() => {
-    fetchUsers(1, pagination.pageSize);
   }, []);
+
+  // ✅ Reset về trang 1 khi lọc hoặc thay đổi pageSize
+  useEffect(() => {
+    fetchUsers(1, pagination.pageSize);
+  }, [filters, pagination.pageSize]);
 
   const handleSearch = () => {
     fetchUsers(1, pagination.pageSize);
@@ -174,14 +178,14 @@ export default function QuanLyNguoiDung() {
 
   const getDiaChiRutGon = (user) => {
     const parts = [];
-    
+
     if (user.tenPhuongXa) {
-      const xa = user.tenPhuongXa.length > 6 
-        ? user.tenPhuongXa.substring(0, 6) + '..' 
+      const xa = user.tenPhuongXa.length > 6
+        ? user.tenPhuongXa.substring(0, 6) + '..'
         : user.tenPhuongXa;
       parts.push(xa);
     }
-    
+
     return parts.length > 0 ? parts.join(', ') : '-';
   };
 
@@ -327,8 +331,8 @@ export default function QuanLyNguoiDung() {
                       {u.vaiTro === 'KhachHang'
                         ? 'Khách hàng'
                         : u.vaiTro === 'LeTan'
-                        ? 'Lễ tân'
-                        : u.vaiTro}
+                          ? 'Lễ tân'
+                          : u.vaiTro}
                     </span>
                   </td>
                   <td>
@@ -337,8 +341,8 @@ export default function QuanLyNguoiDung() {
                   <td>
                     {u.ngayTao
                       ? new Date(u.ngayTao).toLocaleString('vi-VN', {
-                          hour12: false,
-                        })
+                        hour12: false,
+                      })
                       : '-'}
                   </td>
                   <td>{u.soDienThoai || '-'}</td>
@@ -384,32 +388,38 @@ export default function QuanLyNguoiDung() {
         </table>
       </div>
 
-      {/* Phân trang */}
+      {/* Pagination */}
       <div className="pagination">
-        <span>
-          Tổng: <strong>{totalItems}</strong> người dùng
-        </span>
-        <button
-          onClick={() => handleChangePage(pagination.currentPage - 1)}
-          disabled={pagination.currentPage === 1}
-        >
-          ‹
-        </button>
-        {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+        <div className="pagination-info">
+          Hiển thị <strong>{users.length}</strong> / <strong>{totalItems}</strong> người dùng
+        </div>
+        <div className="pag-actions">
           <button
-            key={p}
-            className={p === pagination.currentPage ? 'active' : ''}
-            onClick={() => handleChangePage(p)}
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
           >
-            {p}
+            Trước
           </button>
-        ))}
-        <button
-          onClick={() => handleChangePage(pagination.currentPage + 1)}
-          disabled={pagination.currentPage === pagination.totalPages}
-        >
-          ›
-        </button>
+
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              className={`pag-btn ${p === pagination.currentPage ? 'active' : ''}`}
+              onClick={() => handleChangePage(p)}
+            >
+              {p}
+            </button>
+          ))}
+
+          <button
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            Sau
+          </button>
+        </div>
       </div>
 
       {/* Modal Chi tiết người dùng */}

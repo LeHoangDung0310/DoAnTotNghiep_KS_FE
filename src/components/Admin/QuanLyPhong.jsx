@@ -144,9 +144,11 @@ export default function QuanLyPhong() {
     fetchTangs();
   }, []);
 
+  // ✅ Reset về trang 1 khi lọc hoặc thay đổi pageSize
   useEffect(() => {
-    fetchRooms(1);
+    fetchRooms(1, pagination.pageSize);
   }, [filters, pagination.pageSize]);
+
 
   const handleSearch = () => {
     fetchRooms(1, pagination.pageSize);
@@ -441,32 +443,38 @@ export default function QuanLyPhong() {
         </table>
       </div>
 
-      {/* Phân trang */}
+      {/* Pagination */}
       <div className="pagination">
-        <span>
-          Tổng: <strong>{totalItems}</strong> phòng
-        </span>
-        <button
-          onClick={() => handleChangePage(pagination.currentPage - 1)}
-          disabled={pagination.currentPage === 1}
-        >
-          ‹
-        </button>
-        {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+        <div className="pagination-info">
+          Hiển thị <strong>{rooms.length}</strong> / <strong>{totalItems}</strong> phòng
+        </div>
+        <div className="pag-actions">
           <button
-            key={page}
-            className={page === pagination.currentPage ? 'active' : ''}
-            onClick={() => handleChangePage(page)}
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
           >
-            {page}
+            Trước
           </button>
-        ))}
-        <button
-          onClick={() => handleChangePage(pagination.currentPage + 1)}
-          disabled={pagination.currentPage === pagination.totalPages}
-        >
-          ›
-        </button>
+
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`pag-btn ${page === pagination.currentPage ? 'active' : ''}`}
+              onClick={() => handleChangePage(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            Sau
+          </button>
+        </div>
       </div>
 
       {/* ✅ Modal mới - Đẹp hơn */}
@@ -484,7 +492,7 @@ export default function QuanLyPhong() {
                     {modalMode === 'create' ? 'Thêm phòng mới' : 'Chỉnh sửa phòng'}
                   </h3>
                   <p className="modal-subtitle">
-                    {modalMode === 'create' 
+                    {modalMode === 'create'
                       ? 'Điền thông tin để tạo phòng mới'
                       : `Cập nhật thông tin phòng ${currentRoom?.soPhong}`
                     }
@@ -563,7 +571,7 @@ export default function QuanLyPhong() {
                       </select>
                     </div>
 
-                    
+
                     {/* Trạng thái - chỉ khi edit */}
                     {modalMode === 'edit' && (
                       <div className="form-group full-width">

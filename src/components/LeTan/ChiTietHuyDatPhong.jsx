@@ -42,14 +42,31 @@ export default function ChiTietHuyDatPhong({ huyId, onClose, onShowToast, onUpda
     return null;
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (huy) => {
+    if (huy.trangThai === 'DaDuyet' && huy.trangThaiHoanTien === 'DaHoan') {
+      return (
+        <span
+          style={{
+            background: '#10b98120',
+            color: '#10b981',
+            padding: '6px 12px',
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          ✅ Đã thanh toán
+        </span>
+      );
+    }
+
     const map = {
       ChoDuyet: { label: '⏳ Chờ duyệt', color: '#f59e0b' },
       DaDuyet: { label: '✅ Đã duyệt', color: '#10b981' },
       TuChoi: { label: '❌ Từ chối', color: '#ef4444' },
     };
 
-    const s = map[status] || { label: status, color: '#6b7280' };
+    const s = map[huy.trangThai] || { label: huy.trangThai, color: '#6b7280' };
     return (
       <span
         style={{
@@ -100,7 +117,7 @@ export default function ChiTietHuyDatPhong({ huyId, onClose, onShowToast, onUpda
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {getStatusBadge(huyDatPhong.trangThai)}
+              {getStatusBadge(huyDatPhong)}
               <div style={{ fontSize: 13, color: '#64748b' }}>
                 Yêu cầu lúc:{' '}
                 {new Date(huyDatPhong.ngayYeuCau).toLocaleString('vi-VN', {
@@ -340,12 +357,12 @@ export default function ChiTietHuyDatPhong({ huyId, onClose, onShowToast, onUpda
                     value={
                       huyDatPhong.ngayXuLy
                         ? new Date(huyDatPhong.ngayXuLy).toLocaleString('vi-VN', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : '—'
                     }
                     disabled
@@ -383,9 +400,8 @@ export default function ChiTietHuyDatPhong({ huyId, onClose, onShowToast, onUpda
                       : 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                   padding: 20,
                   borderRadius: 12,
-                  border: `2px solid ${
-                    huyDatPhong.trangThaiHoanTien === 'DaHoan' ? '#6ee7b7' : '#fbbf24'
-                  }`,
+                  border: `2px solid ${huyDatPhong.trangThaiHoanTien === 'DaHoan' ? '#6ee7b7' : '#fbbf24'
+                    }`,
                 }}
               >
                 <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>

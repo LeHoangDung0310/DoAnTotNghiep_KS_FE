@@ -27,6 +27,7 @@ function formatDate(date) {
 }
 
 export default function LeTanDashboard() {
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [stats, setStats] = useState({
     phongTrong: 0,
     checkInNgay: 0,
@@ -40,13 +41,20 @@ export default function LeTanDashboard() {
   const [filter, setFilter] = useState('today');
   const [chartData, setChartData] = useState(null);
 
+  // Pagination states
+  const PAGE_SIZE = 5;
+  const [currentPageDP, setCurrentPageDP] = useState(1);
+  const [currentPageHuy, setCurrentPageHuy] = useState(1);
+
   useEffect(() => {
     fetchStatsAndTable();
-  }, [filter]);
+    setCurrentPageDP(1);
+    setCurrentPageHuy(1);
+  }, [filter, selectedYear]);
 
   useEffect(() => {
     fetchChartData();
-  }, []);
+  }, [selectedYear]);
 
   const fetchStatsAndTable = async () => {
     setLoading(true);
@@ -63,7 +71,7 @@ export default function LeTanDashboard() {
 
       const today = dayjs();
       const thisMonth = today.month();
-      const thisYear = today.year();
+      const thisYear = selectedYear; // Respect selected year
 
       let phongTrong = phongs.filter(p => p.trangThai === 'Trong').length;
       let checkInNgay = 0, checkOutNgay = 0, huyChoDuyetNgay = 0;
@@ -106,51 +114,60 @@ export default function LeTanDashboard() {
       ]);
       const datPhongs = resDatPhong.data?.data || [];
       const huyList = resHuy.data?.data || [];
-      const today = dayjs();
-      const days = [];
-      const checkinCounts = [];
-      const checkoutCounts = [];
-      const cancelCounts = [];
-      let hasData = false;
 
-      for (let i = 6; i >= 0; i--) {
-        const d = today.subtract(i, 'day');
-        days.push(d.format('DD/MM'));
-        const checkin = datPhongs.filter(dp => !!dp.thoiGianCheckIn && dayjs(dp.thoiGianCheckIn).isSame(d, 'day')).length;
-        const checkout = datPhongs.filter(dp => !!dp.thoiGianCheckOut && dayjs(dp.thoiGianCheckOut).isSame(d, 'day')).length;
-        const cancel = huyList.filter(h => !!h.ngayDuyet && dayjs(h.ngayDuyet).isSame(d, 'day')).length;
-        checkinCounts.push(checkin);
-        checkoutCounts.push(checkout);
-        cancelCounts.push(cancel);
-        if (checkin > 0 || checkout > 0 || cancel > 0) hasData = true;
-      }
+      const months = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
+      const checkinCounts = Array(12).fill(0);
+      const checkoutCounts = Array(12).fill(0);
+      const cancelCounts = Array(12).fill(0);
+
+      // Nhận phòng (CheckedIn/DangSuDung/HoanThanh) trong năm chọn
+      datPhongs.forEach(dp => {
+        if (dayjs(dp.ngayDat).year() === selectedYear) {
+          const m = dayjs(dp.ngayNhanPhong).month();
+          if (['CheckedIn', 'DangSuDung', 'HoanThanh'].includes(dp.trangThai)) {
+            checkinCounts[m]++;
+          }
+          if (dp.trangThai === 'HoanThanh') {
+            checkoutCounts[m]++;
+          }
+        }
+      });
+
+      // Hủy đặt (Đã hủy)
+      huyList.forEach(h => {
+        if (dayjs(h.ngayYeuCau).year() === selectedYear) {
+          const m = dayjs(h.ngayYeuCau).month();
+          if (h.trangThai === 'DaDuyet' || h.trangThai === 'DaHuy') {
+            cancelCounts[m]++;
+          }
+        }
+      });
 
       setChartData({
-        labels: days,
+        labels: months,
         datasets: [
           {
             label: 'Nhận phòng',
             data: checkinCounts,
             backgroundColor: '#10b981',
-            borderRadius: 8,
-            barThickness: 15,
+            borderRadius: 6,
+            barThickness: 12,
           },
           {
             label: 'Trả phòng',
             data: checkoutCounts,
             backgroundColor: '#6366f1',
-            borderRadius: 8,
-            barThickness: 15,
+            borderRadius: 6,
+            barThickness: 12,
           },
           {
             label: 'Hủy đặt',
             data: cancelCounts,
             backgroundColor: '#ef4444',
-            borderRadius: 8,
-            barThickness: 15,
+            borderRadius: 6,
+            barThickness: 12,
           },
         ],
-        hasData,
       });
     } catch (err) {
       console.error(err);
@@ -174,6 +191,44 @@ export default function LeTanDashboard() {
     }
   };
 
+  const Pagination = ({ current, total, pageSize, onChange }) => {
+    const totalPages = Math.ceil(total / pageSize);
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="custom-pagination">
+        <button
+          disabled={current === 1}
+          onClick={() => onChange(current - 1)}
+          className="pag-btn"
+        >
+          Trước
+        </button>
+        <div className="pag-numbers">
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i + 1}
+              className={`pag-num ${current === i + 1 ? 'active' : ''}`}
+              onClick={() => onChange(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          disabled={current === totalPages}
+          onClick={() => onChange(current + 1)}
+          className="pag-btn"
+        >
+          Sau
+        </button>
+      </div>
+    );
+  };
+
+  const paginatedDP = dsDatPhong.slice((currentPageDP - 1) * PAGE_SIZE, currentPageDP * PAGE_SIZE);
+  const paginatedHuy = dsHuy.slice((currentPageHuy - 1) * PAGE_SIZE, currentPageHuy * PAGE_SIZE);
+
   const tabItems = [
     {
       key: 'incoming',
@@ -191,7 +246,7 @@ export default function LeTanDashboard() {
               </tr>
             </thead>
             <tbody>
-              {dsDatPhong.map(dp => (
+              {paginatedDP.map(dp => (
                 <tr key={dp.maDatPhong}>
                   <td><span className="id-badge">#{dp.maDatPhong}</span></td>
                   <td>
@@ -216,6 +271,12 @@ export default function LeTanDashboard() {
               {dsDatPhong.length === 0 && <tr><td colSpan={6} className="empty-row">Không có lịch đặt nào trong thời gian này</td></tr>}
             </tbody>
           </table>
+          <Pagination
+            current={currentPageDP}
+            total={dsDatPhong.length}
+            pageSize={PAGE_SIZE}
+            onChange={setCurrentPageDP}
+          />
         </div>
       )
     },
@@ -235,7 +296,7 @@ export default function LeTanDashboard() {
               </tr>
             </thead>
             <tbody>
-              {dsHuy.map(h => (
+              {paginatedHuy.map(h => (
                 <tr key={h.maHuyDatPhong}>
                   <td><span className="id-badge danger">#{h.maHuyDatPhong}</span></td>
                   <td><span className="guest-name">{h.tenKhachHang}</span></td>
@@ -247,6 +308,12 @@ export default function LeTanDashboard() {
               {dsHuy.length === 0 && <tr><td colSpan={6} className="empty-row">Hiện không có yêu cầu hủy nào cần xử lý</td></tr>}
             </tbody>
           </table>
+          <Pagination
+            current={currentPageHuy}
+            total={dsHuy.length}
+            pageSize={PAGE_SIZE}
+            onChange={setCurrentPageHuy}
+          />
         </div>
       )
     }
@@ -265,6 +332,18 @@ export default function LeTanDashboard() {
             </div>
           </div>
           <div className="filter-controls">
+            <div className="year-selector-lt">
+              <label>Năm: </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="lt-select-year"
+              >
+                {[2023, 2024, 2025, 2026].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
             <div className="toggle-group">
               <button className={filter === 'today' ? 'toggle-btn active' : 'toggle-btn'} onClick={() => setFilter('today')}>HÀNG NGÀY</button>
               <button className={filter === 'month' ? 'toggle-btn active' : 'toggle-btn'} onClick={() => setFilter('month')}>HÀNG THÁNG</button>
@@ -296,9 +375,11 @@ export default function LeTanDashboard() {
           </div>
 
           <div className="analytics-panel">
-            <div className="panel-header">
-              <h3>Mật Độ Lưu Trú</h3>
-              <p>Phân tích dữ liệu trong 7 ngày vừa qua</p>
+            <div className="panel-header-lt">
+              <div>
+                <h3>Mật Độ Lưu Trú - Năm {selectedYear}</h3>
+                <p>Thống kê trạng thái đặt phòng theo từng tháng</p>
+              </div>
             </div>
             <div className="chart-wrapper">
               {chartData ? (

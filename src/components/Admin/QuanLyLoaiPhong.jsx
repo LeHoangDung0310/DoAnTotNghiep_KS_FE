@@ -24,6 +24,11 @@ export default function QuanLyLoaiPhong() {
     giaMax: '',
   });
 
+  // ✅ Reset về trang 1 khi lọc hoặc thay đổi pageSize
+  useEffect(() => {
+    fetchLoaiPhongs(1, pagination.pageSize);
+  }, [filters, pagination.pageSize]);
+
   const [allTienNghis, setAllTienNghis] = useState([]);
   const [selectedTienNghiIds, setSelectedTienNghiIds] = useState([]);
 
@@ -101,9 +106,8 @@ export default function QuanLyLoaiPhong() {
   };
 
   useEffect(() => {
-    fetchLoaiPhongs(1);
     fetchAllTienNghis();
-  }, [filters, pagination.pageSize]);
+  }, []);
 
   const handleSearch = () => fetchLoaiPhongs(1, pagination.pageSize);
   const handleReset = () => {
@@ -353,18 +357,36 @@ export default function QuanLyLoaiPhong() {
 
       {/* Pagination */}
       <div className="pagination">
-        <span>Tổng: <strong>{totalItems}</strong> loại phòng</span>
-        <button onClick={() => handleChangePage(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>‹</button>
-        {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+        <div className="pagination-info">
+          Hiển thị <strong>{loaiPhongs.length}</strong> / <strong>{totalItems}</strong> loại phòng
+        </div>
+        <div className="pag-actions">
           <button
-            key={page}
-            className={page === pagination.currentPage ? 'active' : ''}
-            onClick={() => handleChangePage(page)}
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
           >
-            {page}
+            Trước
           </button>
-        ))}
-        <button onClick={() => handleChangePage(pagination.currentPage + 1)} disabled={pagination.currentPage === pagination.totalPages}>›</button>
+
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`pag-btn ${page === pagination.currentPage ? 'active' : ''}`}
+              onClick={() => handleChangePage(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            className="pag-btn nav-btn"
+            onClick={() => handleChangePage(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            Sau
+          </button>
+        </div>
       </div>
 
       {/* ✅ MODAL MỚI - GRADIENT HEADER */}

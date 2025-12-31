@@ -11,12 +11,12 @@ export default function PaymentResult() {
     const [countdown, setCountdown] = useState(5);
 
     useEffect(() => {
-        const status = query.get('status');
-        const maDatPhong = query.get('maDatPhong');
+        const paymentStatus = searchParams.get('status');
+        const maDatPhong = searchParams.get('maDatPhong');
         const pendingMaDatPhong = localStorage.getItem('pendingMaDatPhong');
         const pendingCartId = localStorage.getItem('pendingCartId');
 
-        if (status === 'success') {
+        if (paymentStatus === 'success') {
             // Clean up cart if this was a cart checkout
             if (pendingMaDatPhong === maDatPhong && pendingCartId) {
                 const email = localStorage.getItem('userEmail');
@@ -33,7 +33,9 @@ export default function PaymentResult() {
                 window.dispatchEvent(new Event('cartUpdated'));
             }
         }
+    }, [searchParams]);
 
+    useEffect(() => {
         const timer = setInterval(() => {
             setCountdown((prev) => prev - 1);
         }, 1000);

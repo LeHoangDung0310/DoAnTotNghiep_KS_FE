@@ -10,6 +10,10 @@ export default function QuanLyDsHoanTien() {
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // ✅ PHÂN TRANG
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [selectedHoanTien, setSelectedHoanTien] = useState(null);
   const [showXacNhanModal, setShowXacNhanModal] = useState(null);
 
@@ -18,6 +22,11 @@ export default function QuanLyDsHoanTien() {
   useEffect(() => {
     fetchHoanTiens();
   }, []);
+
+  // ✅ Reset về trang 1 khi lọc hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, searchTerm, pageSize]);
 
   const fetchHoanTiens = async () => {
     setLoading(true);
@@ -53,6 +62,19 @@ export default function QuanLyDsHoanTien() {
 
     return matchStatus && matchSearch;
   });
+
+  // ✅ PHÂN TRANG LOGIC
+  const totalPages = Math.ceil(filteredList.length / pageSize);
+  const paginatedList = filteredList.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const handleChangePage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   // ✅ THỐNG KÊ
   const tongChoXuLy = hoanTiens.filter((h) => h.trangThaiHoanTien === 'ChoXuLy').length;
@@ -196,6 +218,21 @@ export default function QuanLyDsHoanTien() {
               <option value="ChoXuLy">⏳ Chờ xử lý</option>
               <option value="DaHoan">✅ Đã hoàn</option>
             </select>
+
+            {/* Số bản ghi / trang */}
+            <div className="admin-search-wrapper" style={{ width: 'auto' }}>
+              <select
+                className="admin-select"
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                style={{ minWidth: 140 }}
+              >
+                <option value={5}>📄 Hiện 5 bản ghi</option>
+                <option value={10}>📄 Hiện 10 bản ghi</option>
+                <option value={20}>📄 Hiện 20 bản ghi</option>
+                <option value={50}>📄 Hiện 50 bản ghi</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -227,8 +264,9 @@ export default function QuanLyDsHoanTien() {
                 </tr>
               </thead>
               <tbody>
-                {filteredList.map((hoanTien) => (
+                {paginatedList.map((hoanTien) => (
                   <tr key={hoanTien.maHoanTien}>
+                    {/* ... (td content) */}
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div
@@ -305,12 +343,12 @@ export default function QuanLyDsHoanTien() {
                     <td style={{ fontSize: 13 }}>
                       {hoanTien.ngayYeuCau
                         ? new Date(hoanTien.ngayYeuCau).toLocaleString('vi-VN', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : '—'}
                     </td>
                     <td>{renderActions(hoanTien)}</td>
@@ -320,31 +358,71 @@ export default function QuanLyDsHoanTien() {
             </table>
           </div>
         )}
+
+        {/* ✅ Pagination Footer */}
+        {filteredList.length > 0 && (
+          <div className="pagination">
+            <div className="pagination-info">
+              Hiển thị <strong>{paginatedList.length}</strong> / <strong>{filteredList.length}</strong> yêu cầu
+            </div>
+            <div className="pag-actions">
+              <button
+                className="pag-btn nav-btn"
+                onClick={() => handleChangePage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Trước
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  className={`pag-btn ${p === currentPage ? 'active' : ''}`}
+                  onClick={() => handleChangePage(p)}
+                >
+                  {p}
+                </button>
+              ))}
+
+              <button
+                className="pag-btn nav-btn"
+                onClick={() => handleChangePage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Chi tiết */}
-      {selectedHoanTien && (
-        <ChiTietHoanTien
-          hoanTien={selectedHoanTien}
-          onClose={() => setSelectedHoanTien(null)}
-          onShowToast={showToast}
-          onUpdate={fetchHoanTiens}
-        />
-      )}
+      {
+        selectedHoanTien && (
+          <ChiTietHoanTien
+            hoanTien={selectedHoanTien}
+            onClose={() => setSelectedHoanTien(null)}
+            onShowToast={showToast}
+            onUpdate={fetchHoanTiens}
+          />
+        )
+      }
 
       {/* Modal Xác nhận hoàn tiền */}
-      {showXacNhanModal && (
-        <XacNhanHoanTienModal
-          hoanTien={showXacNhanModal}
-          onClose={() => setShowXacNhanModal(null)}
-          onSuccess={() => {
-            setShowXacNhanModal(null);
-            fetchHoanTiens();
-          }}
-          onShowToast={showToast}
-        />
-      )}
-    </div>
+      {
+        showXacNhanModal && (
+          <XacNhanHoanTienModal
+            hoanTien={showXacNhanModal}
+            onClose={() => setShowXacNhanModal(null)}
+            onSuccess={() => {
+              setShowXacNhanModal(null);
+              fetchHoanTiens();
+            }}
+            onShowToast={showToast}
+          />
+        )
+      }
+    </div >
   );
 }
 

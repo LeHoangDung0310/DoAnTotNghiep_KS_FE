@@ -130,10 +130,41 @@
 }
 
 .toggle-btn.active {
-	background: #1e293b;
+	background: var(--primary);
 	color: white;
 	transform: scale(1.05);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* --- YEAR SELECTOR --- */
+.year-selector-lt {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-right: 20px;
+}
+
+.year-selector-lt label {
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #64748b;
+}
+
+.lt-select-year {
+	padding: 8px 16px;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	background: white;
+	font-weight: 700;
+	color: var(--primary);
+	cursor: pointer;
+	outline: none;
+	transition: all 0.2s;
+}
+
+.lt-select-year:hover {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 /* --- KPI GRID --- */
@@ -163,7 +194,7 @@
 .kpi-card:hover {
 	transform: translateY(-10px);
 	border-color: var(--primary);
-	box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 30px 60px -12px rgba(99, 102, 241, 0.15);
 }
 
 .kpi-icon-wrapper {
@@ -362,22 +393,94 @@
 }
 
 /* Analytics Section */
-.panel-header h3 {
+.panel-header-lt {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 32px;
+}
+
+.panel-header-lt h3 {
 	font-size: 1.6rem;
 	font-weight: 900;
 	margin-bottom: 6px;
 	color: #1e293b;
 }
 
-.panel-header p {
+.panel-header-lt p {
 	color: #64748b;
 	font-weight: 600;
-	margin-bottom: 32px;
+	margin: 0;
 	font-size: 1rem;
 }
 
 .chart-wrapper {
 	height: 400px;
+}
+
+/* Pagination */
+.custom-pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	margin-top: 24px;
+	padding-top: 12px;
+}
+
+.pag-btn {
+	padding: 8px 16px;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	background: white;
+	font-weight: 700;
+	color: #64748b;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-size: 0.85rem;
+}
+
+.pag-btn:hover:not(:disabled) {
+	border-color: var(--primary);
+	color: var(--primary);
+	background: #f5f3ff;
+}
+
+.pag-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.pag-numbers {
+	display: flex;
+	gap: 6px;
+}
+
+.pag-num {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	border: 1px solid #e2e8f0;
+	background: white;
+	font-weight: 700;
+	color: #64748b;
+	cursor: pointer;
+	transition: all 0.2s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.pag-num:hover:not(.active) {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.pag-num.active {
+	background: var(--primary);
+	color: white;
+	border-color: var(--primary);
+	box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
 }
 
 @media (max-width: 1400px) {

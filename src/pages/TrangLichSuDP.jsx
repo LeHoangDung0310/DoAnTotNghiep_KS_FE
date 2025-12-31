@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import Toast from '../components/Common/Toast';
 import '../styles/lichsudatphong.css';
 
 export default function TrangLichSuDP() {
@@ -12,6 +13,70 @@ export default function TrangLichSuDP() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 5;
+
+    // cancellation state
+    const [cancelModal, setCancelModal] = useState({ show: false, loading: false, booking: null, checkResult: null });
+    const [cancelForm, setCancelForm] = useState({ lyDo: '', nganHang: '', soTaiKhoan: '', tenChuTK: '' });
+
+    // Toast state
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const showToast = (type, message) => {
+        setToast({ show: true, type, message });
+    };
+
+    const openCancelModal = async (booking) => {
+        setCancelModal({ show: true, loading: true, booking, checkResult: null });
+        try {
+            const res = await api.get(`/api/HuyDatPhong/KiemTraDieuKien/${booking.maDatPhong}`);
+            console.log('Cancel check result:', res.data); // Debug log
+            setCancelModal(prev => ({ ...prev, loading: false, checkResult: res.data }));
+
+            // Pre-fill bank info if available
+            const bankData = res.data.data?.taiKhoanNH || res.data.data?.TaiKhoanNH;
+            console.log('Bank data fetched:', bankData);
+
+            if (res.data.success && bankData) {
+                setCancelForm(prev => ({
+                    ...prev,
+                    nganHang: bankData.nganHang || bankData.NganHang || '',
+                    soTaiKhoan: bankData.soTaiKhoan || bankData.SoTaiKhoan || '',
+                    tenChuTK: bankData.tenChuTK || bankData.TenChuTK || ''
+                }));
+            }
+        } catch (err) {
+            console.error('Error checking cancel conditions:', err);
+            setCancelModal(prev => ({ ...prev, loading: false, checkResult: null }));
+            showToast('error', 'Lỗi khi kiểm tra điều kiện hủy');
+        }
+    };
+
+    const closeCancelModal = () => {
+        setCancelModal({ show: false, loading: false, booking: null, checkResult: null });
+        setCancelForm({ lyDo: '', nganHang: '', soTaiKhoan: '', tenChuTK: '' });
+    };
+
+    const handleRequestCancel = async () => {
+        try {
+            const res = await api.post(`/api/HuyDatPhong/YeuCauHuy/${cancelModal.booking.maDatPhong}`, {
+                lyDo: cancelForm.lyDo,
+                nganHang: cancelForm.nganHang || null,
+                soTaiKhoan: cancelForm.soTaiKhoan || null,
+                tenChuTK: cancelForm.tenChuTK || null
+            });
+
+            if (res.data.success) {
+                showToast('success', 'Gửi yêu cầu hủy thành công. Vui lòng chờ lễ tân duyệt.');
+                closeCancelModal();
+                loadBookings();
+            } else {
+                showToast('error', res.data.message || 'Gửi yêu cầu thất bại');
+            }
+        } catch (err) {
+            console.error('Error requesting cancel:', err);
+            showToast('error', err.response?.data?.message || 'Có lỗi xảy ra');
+        }
+    };
 
     useEffect(() => {
         loadBookings();
@@ -34,11 +99,11 @@ export default function TrangLichSuDP() {
             if (resVNPay.data?.success) {
                 window.location.href = resVNPay.data.data;
             } else {
-                alert('Không thể tạo liên kết thanh toán. Vui lòng thử lại sau!');
+                showToast('error', 'Không thể tạo liên kết thanh toán. Vui lòng thử lại sau!');
             }
         } catch (err) {
             console.error(err);
-            alert('Lỗi khi khởi tạo thanh toán');
+            showToast('error', 'Lỗi khi khởi tạo thanh toán');
         } finally {
             setLoading(false);
         }
@@ -248,15 +313,22 @@ export default function TrangLichSuDP() {
                                     Xem chi tiết
                                 </button>
 
-                                {booking.trangThai === 'ChoDuyet' && (
+                                {booking.coYeuCauHuy ? (
+                                    <span className="status-badge status-pending" style={{ marginLeft: '10px' }}>
+                                        ⏳ Đang xử lý hủy
+                                    </span>
+                                ) : (
                                     <button
                                         className="btn-cancel"
-                                        onClick={() => {
-                                            // TODO: Implement cancel booking
-                                            console.log('Cancel booking:', booking.maDatPhong);
+                                        style={{
+                                            marginLeft: '10px',
+                                            opacity: booking.canCancel ? 1 : 0.5,
+                                            cursor: booking.canCancel ? 'pointer' : 'not-allowed'
                                         }}
+                                        onClick={() => booking.canCancel && openCancelModal(booking)}
+                                        title={booking.canCancel ? "" : booking.cancellationMessage}
                                     >
-                                        Hủy đặt phòng
+                                        🚫 Hủy đặt phòng
                                     </button>
                                 )}
 
@@ -307,6 +379,138 @@ export default function TrangLichSuDP() {
                     )}
                 </div>
             )}
-        </div>
+
+            {/* Modal Hủy đặt phòng */}
+            {cancelModal.show && (
+                <div className="modal-backdrop" onClick={closeCancelModal}>
+                    <div className="modal modal-booking" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header-gradient">
+                            <div className="modal-header-content">
+                                <div className="modal-icon">🚫</div>
+                                <div>
+                                    <h3 className="modal-title-large">Yêu cầu hủy đặt phòng</h3>
+                                    <p className="modal-subtitle">Mã đặt phòng: <strong>#{cancelModal.booking?.maDatPhong}</strong></p>
+                                </div>
+                            </div>
+                            <button className="modal-close-btn-gradient" onClick={closeCancelModal}>✕</button>
+                        </div>
+
+                        <div className="modal-body" style={{ padding: '2rem' }}>
+                            {cancelModal.loading ? (
+                                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                                    <div className="spinner"></div>
+                                    <p style={{ marginTop: '1rem', color: '#64748b' }}>Đang kiểm tra điều kiện hủy...</p>
+                                </div>
+                            ) : !cancelModal.checkResult ? (
+                                <div className="error-message">Không thể kiểm tra điều kiện hủy. Vui lòng thử lại!</div>
+                            ) : !cancelModal.checkResult.success ? (
+                                <div className="cancellation-policy-error">
+                                    <div className="policy-icon">⚠️</div>
+                                    <h4 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '1rem' }}>Không thể hủy đặt phòng</h4>
+                                    <p style={{ color: '#64748b' }}>{cancelModal.checkResult.message}</p>
+                                    <div className="policy-rules">
+                                        <strong style={{ color: '#92400e', display: 'block', marginBottom: '0.5rem' }}>Chính sách hủy phòng:</strong>
+                                        <ul>
+                                            <li>Hủy trước 15 ngày: Hoàn tiền 100%</li>
+                                            <li>Hủy từ 8 - 14 ngày: Hoàn tiền 50% (Phí giữ 50%)</li>
+                                            <li>Hủy dưới 7 ngày: Không được hoàn tiền</li>
+                                        </ul>
+                                    </div>
+                                    <button className="btn-detail" onClick={closeCancelModal} style={{ width: '100%', marginTop: '2rem' }}>Đóng</button>
+                                </div>
+                            ) : (
+                                <div className="cancellation-form">
+                                    <div className="refund-summary-card">
+                                        <div className="summary-item">
+                                            <span>Tổng số tiền đã thanh toán</span>
+                                            <span className="value">{formatCurrency(cancelModal.booking.tongTien)}</span>
+                                        </div>
+                                        <div className="summary-item">
+                                            <span>Phí giữ phòng (Phạt)</span>
+                                            <span className="value penalty">-{formatCurrency(cancelModal.checkResult.data.phiGiu)}</span>
+                                        </div>
+                                        <div className="summary-total">
+                                            <span>Số tiền thực tế hoàn trả</span>
+                                            <span className="value refund">{formatCurrency(cancelModal.checkResult.data.tienHoan)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                        <label className="form-label">Lý do hủy phòng <span style={{ color: '#ef4444' }}>*</span></label>
+                                        <textarea
+                                            className="form-input-modern"
+                                            rows="3"
+                                            placeholder="Vui lòng cho chúng tôi biết lý do bạn muốn hủy phòng..."
+                                            value={cancelForm.lyDo}
+                                            onChange={e => setCancelForm({ ...cancelForm, lyDo: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+
+                                    {cancelModal.checkResult.data.tienHoan > 0 && (
+                                        <div className="bank-info-card">
+                                            <div className="bank-info-header">
+                                                <span>🏦 Thông tin nhận hoàn tiền</span>
+                                            </div>
+                                            <div className="bank-grid">
+                                                <div className="form-group">
+                                                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Ngân hàng</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-input-modern"
+                                                        placeholder="Vidu: MB Bank"
+                                                        value={cancelForm.nganHang}
+                                                        onChange={e => setCancelForm({ ...cancelForm, nganHang: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Số tài khoản</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-input-modern"
+                                                        placeholder="Số tài khoản của bạn"
+                                                        value={cancelForm.soTaiKhoan}
+                                                        onChange={e => setCancelForm({ ...cancelForm, soTaiKhoan: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="form-group" style={{ marginTop: '1rem' }}>
+                                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Tên chủ tài khoản</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-input-modern"
+                                                    placeholder="VIET CHU HOA KHONG DAU (VD: NGUYEN VAN A)"
+                                                    value={cancelForm.tenChuTK}
+                                                    onChange={e => setCancelForm({ ...cancelForm, tenChuTK: e.target.value.toUpperCase() })}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="modal-actions">
+                                        <button className="btn-cancel-modern" onClick={closeCancelModal}>Hủy bỏ</button>
+                                        <button
+                                            className="btn-submit-modern"
+                                            onClick={handleRequestCancel}
+                                            disabled={!cancelForm.lyDo || (cancelModal.checkResult.data.tienHoan > 0 && (!cancelForm.nganHang || !cancelForm.soTaiKhoan || !cancelForm.tenChuTK))}
+                                        >
+                                            Gửi yêu cầu hủy
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {toast.show && (
+                <Toast
+                    type={toast.type}
+                    message={toast.message}
+                    onClose={() => setToast({ ...toast, show: false })}
+                />
+            )}
+        </div >
     );
 }

@@ -11,6 +11,10 @@ export default function QuanLyHuyDatPhong() {
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // ✅ PHÂN TRANG
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [selectedHuyId, setSelectedHuyId] = useState(null);
   const [showDuyetModal, setShowDuyetModal] = useState(null);
 
@@ -58,18 +62,32 @@ export default function QuanLyHuyDatPhong() {
   const handleReset = () => {
     setFilterStatus('');
     setSearchTerm('');
+    setCurrentPage(1);
+    setPageSize(10);
     showToast('info', '🔄 Đã đặt lại bộ lọc');
   };
 
+  // ✅ TÍNH TOÁN PHÂN TRANG
+  const totalItems = filteredList.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const paginatedList = filteredList.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   // ✅ TAG TRẠNG THÁI
-  const getStatusTag = (status) => {
+  const getStatusTag = (huy) => {
+    if (huy.trangThai === 'DaDuyet' && huy.trangThaiHoanTien === 'DaHoan') {
+      return <span className="tag tag-success">✅ Đã thanh toán</span>;
+    }
+
     const statusMap = {
       ChoDuyet: { label: '⏳ Chờ duyệt', class: 'tag-warning' },
       DaDuyet: { label: '✅ Đã duyệt', class: 'tag-success' },
       TuChoi: { label: '❌ Từ chối', class: 'tag-danger' },
     };
 
-    const s = statusMap[status] || { label: status, class: 'tag-secondary' };
+    const s = statusMap[huy.trangThai] || { label: huy.trangThai, class: 'tag-secondary' };
     return <span className={`tag ${s.class}`}>{s.label}</span>;
   };
 
@@ -140,7 +158,10 @@ export default function QuanLyHuyDatPhong() {
               className="letan-search-input"
               placeholder="Tìm theo tên, email, SĐT, mã đặt phòng..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
 
@@ -148,12 +169,30 @@ export default function QuanLyHuyDatPhong() {
           <select
             className="letan-select"
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="">📋 Tất cả trạng thái</option>
             <option value="ChoDuyet">⏳ Chờ duyệt</option>
             <option value="DaDuyet">✅ Đã duyệt</option>
             <option value="TuChoi">❌ Từ chối</option>
+          </select>
+
+          {/* Page Size Selector */}
+          <select
+            className="letan-select"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>📄 5 / trang</option>
+            <option value={10}>📄 10 / trang</option>
+            <option value={20}>📄 20 / trang</option>
+            <option value={50}>📄 50 / trang</option>
           </select>
         </div>
       </div>
@@ -161,114 +200,144 @@ export default function QuanLyHuyDatPhong() {
       {/* Table */}
       {loading ? (
         <div className="admin-loading">Đang tải...</div>
-      ) : filteredList.length === 0 ? (
+      ) : paginatedList.length === 0 ? (
         <div className="admin-empty">
           <p>😕 Không có yêu cầu hủy nào</p>
         </div>
       ) : (
-        <div className="admin-table-container">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th style={{ minWidth: 180 }}>Khách hàng</th>
-                <th style={{ minWidth: 100 }}>Mã ĐP</th>
-                <th style={{ minWidth: 120 }}>Ngày yêu cầu</th>
-                <th style={{ minWidth: 120 }}>Ngày nhận phòng</th>
-                <th style={{ minWidth: 100 }}>Tổng tiền</th>
-                <th style={{ minWidth: 100 }}>Phí giữ</th>
-                <th style={{ minWidth: 100 }}>Tiền hoàn</th>
-                <th style={{ minWidth: 120 }}>Trạng thái</th>
-                <th style={{ minWidth: 250 }}>Lý do</th>
-                <th style={{ minWidth: 180 }}>Người duyệt</th>
-                <th style={{ minWidth: 150 }}>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredList.map((huy) => (
-                <tr key={huy.maHuyDatPhong}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div
-                        className="admin-user-avatar"
-                        style={{
-                          width: 40,
-                          height: 40,
-                          fontSize: 16,
-                          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        }}
-                      >
-                        {(huy.tenKhachHang || '?').charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>
-                          {huy.tenKhachHang || '—'}
-                        </div>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>
-                          {huy.emailKhachHang || '—'}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="tag tag-primary">#{huy.maDatPhong}</span>
-                  </td>
-                  <td style={{ fontSize: 13 }}>
-                    {new Date(huy.ngayYeuCau).toLocaleDateString('vi-VN')}
-                  </td>
-                  <td style={{ fontSize: 13 }}>
-                    {huy.ngayNhanPhong
-                      ? new Date(huy.ngayNhanPhong).toLocaleDateString('vi-VN')
-                      : '—'}
-                  </td>
-                  <td style={{ fontWeight: 600, fontSize: 14, color: '#64748b' }}>
-                    {huy.tongTien?.toLocaleString('vi-VN')}đ
-                  </td>
-                  <td style={{ fontWeight: 600, fontSize: 14, color: '#e74c3c' }}>
-                    {huy.phiGiu?.toLocaleString('vi-VN') || 0}đ
-                  </td>
-                  <td style={{ fontWeight: 600, fontSize: 14, color: '#2ecc71' }}>
-                    {huy.tienHoan?.toLocaleString('vi-VN')}đ
-                  </td>
-                  <td>{getStatusTag(huy.trangThai)}</td>
-                  <td
-                    style={{
-                      fontSize: 13,
-                      color: '#475569',
-                      maxWidth: 250,
-                      whiteSpace: 'normal',
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {huy.lyDo || '—'}
-                  </td>
-                  <td style={{ fontSize: 13 }}>
-                    {huy.tenNguoiDuyet || huy.maNguoiDuyet ? (
-                      <div>
-                        <div style={{ fontWeight: 500 }}>
-                          {huy.tenNguoiDuyet || `ID #${huy.maNguoiDuyet}`}
-                        </div>
-                        {huy.ngayXuLy && (
-                          <div style={{ fontSize: 11, color: '#64748b' }}>
-                            {new Date(huy.ngayXuLy).toLocaleString('vi-VN', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td>{renderActions(huy)}</td>
+        <>
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th style={{ minWidth: 180 }}>Khách hàng</th>
+                  <th style={{ minWidth: 100 }}>Mã ĐP</th>
+                  <th style={{ minWidth: 120 }}>Ngày yêu cầu</th>
+                  <th style={{ minWidth: 120 }}>Ngày nhận phòng</th>
+                  <th style={{ minWidth: 100 }}>Tổng tiền</th>
+                  <th style={{ minWidth: 100 }}>Phí giữ</th>
+                  <th style={{ minWidth: 100 }}>Tiền hoàn</th>
+                  <th style={{ minWidth: 120 }}>Trạng thái</th>
+                  <th style={{ minWidth: 250 }}>Lý do</th>
+                  <th style={{ minWidth: 180 }}>Người duyệt</th>
+                  <th style={{ minWidth: 150 }}>Hành động</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {paginatedList.map((huy) => (
+                  <tr key={huy.maHuyDatPhong}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div
+                          className="admin-user-avatar"
+                          style={{
+                            width: 40,
+                            height: 40,
+                            fontSize: 16,
+                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          }}
+                        >
+                          {(huy.tenKhachHang || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>
+                            {huy.tenKhachHang || '—'}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#64748b' }}>
+                            {huy.emailKhachHang || '—'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="tag tag-primary">#{huy.maDatPhong}</span>
+                    </td>
+                    <td style={{ fontSize: 13 }}>
+                      {new Date(huy.ngayYeuCau).toLocaleDateString('vi-VN')}
+                    </td>
+                    <td style={{ fontSize: 13 }}>
+                      {huy.ngayNhanPhong
+                        ? new Date(huy.ngayNhanPhong).toLocaleDateString('vi-VN')
+                        : '—'}
+                    </td>
+                    <td style={{ fontWeight: 600, fontSize: 14, color: '#64748b' }}>
+                      {huy.tongTien?.toLocaleString('vi-VN')}đ
+                    </td>
+                    <td style={{ fontWeight: 600, fontSize: 14, color: '#e74c3c' }}>
+                      {huy.phiGiu?.toLocaleString('vi-VN') || 0}đ
+                    </td>
+                    <td style={{ fontWeight: 600, fontSize: 14, color: '#2ecc71' }}>
+                      {huy.tienHoan?.toLocaleString('vi-VN')}đ
+                    </td>
+                    <td>{getStatusTag(huy)}</td>
+                    <td
+                      style={{
+                        fontSize: 13,
+                        color: '#475569',
+                        maxWidth: 250,
+                        whiteSpace: 'normal',
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {huy.lyDo || '—'}
+                    </td>
+                    <td style={{ fontSize: 13 }}>
+                      {huy.tenNguoiDuyet || huy.maNguoiDuyet ? (
+                        <div>
+                          <div style={{ fontWeight: 500 }}>
+                            {huy.tenNguoiDuyet || `ID #${huy.maNguoiDuyet}`}
+                          </div>
+                          {huy.ngayXuLy && (
+                            <div style={{ fontSize: 11, color: '#64748b' }}>
+                              {new Date(huy.ngayXuLy).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td>{renderActions(huy)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="admin-pagination">
+              <button
+                className="btn-outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                ← Trước
+              </button>
+              <span className="admin-pagination-info">
+                Trang {currentPage} / {totalPages}
+                <span style={{ marginLeft: 12, color: '#64748b' }}>
+                  (Tổng: {totalItems} yêu cầu)
+                </span>
+              </span>
+              <button
+                className="btn-outline"
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                Sau →
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal Chi tiết */}
