@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../styles/login.css';
 import api from '../utils/api';
 import { useNavigate, Link } from 'react-router-dom';
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash, FaArrowRight, FaHotel } from 'react-icons/fa';
 
 export default function TrangDangKy() {
   const navigate = useNavigate();
@@ -53,8 +54,10 @@ export default function TrangDangKy() {
       const success = data?.Success ?? data?.success ?? false;
 
       if (success) {
-        setMessage({ type: 'success', text: data?.Message ?? 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.' });
-        navigate('/xac-thuc-otp', { state: { email } });
+        setMessage({ type: 'success', text: data?.Message ?? 'Đăng ký thành công. Vui lòng kiểm tra email để lấy số OTP.' });
+        setTimeout(() => {
+          navigate('/xac-thuc-otp', { state: { email } });
+        }, 1500);
       } else {
         setMessage({ type: 'error', text: data?.Message ?? 'Đăng ký không thành công.' });
       }
@@ -62,139 +65,155 @@ export default function TrangDangKy() {
       console.error('Register error:', err);
       const resp = err?.response;
       const serverMsg = resp?.data?.Message ?? resp?.data?.message ?? (resp?.data ? JSON.stringify(resp.data) : null);
-      if (resp?.status === 400) {
-        setMessage({ type: 'error', text: serverMsg ?? 'Dữ liệu không hợp lệ hoặc email đã tồn tại.' });
-      } else {
-        setMessage({ type: 'error', text: serverMsg ?? 'Lỗi khi gọi API. Vui lòng thử lại.' });
-      }
+      setMessage({ type: 'error', text: serverMsg ?? 'Lỗi khi gọi API. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box register-box">
-        <h1 className="login-title">Đăng Ký</h1>
+    <div className="auth-v2-container">
+      <div className="auth-v2-overlay"></div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label className="form-label">Họ và tên</label>
-            <input
-              type="text"
-              className={`form-input ${errors.hoTen ? 'error' : ''}`}
-              value={hoTen}
-              onChange={(e) => setHoTen(e.target.value)}
-              placeholder="Nguyễn Văn A"
-              autoComplete="name"
-            />
-            {errors.hoTen && <span className="error-text">{errors.hoTen}</span>}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className={`form-input ${errors.email ? 'error' : ''}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
-            {errors.email && <span className="error-text">{errors.email}</span>}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Số điện thoại</label>
-            <input
-              type="tel"
-              className="form-input"
-              value={soDienThoai}
-              onChange={(e) => setSoDienThoai(e.target.value)}
-              placeholder="0909123456"
-              autoComplete="tel"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Mật khẩu</label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                className={`form-input ${errors.password ? 'error' : ''}`}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Ít nhất 6 ký tự"
-                autoComplete="new-password"
-                style={{ paddingRight: '40px' }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  color: '#666'
-                }}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
+      <div className="auth-v2-card wide-form">
+        <div className="auth-v2-left">
+          <div className="brand-zone">
+            <div className="brand-logo-large">
+              <FaHotel />
             </div>
-            {errors.password && <span className="error-text">{errors.password}</span>}
+            <h1>Luxurious Hotel</h1>
+            <p>Gia nhập cộng đồng thành viên để nhận những ưu đãi đặc quyền và trải nghiệm dịch vụ cá nhân hóa.</p>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Xác nhận mật khẩu</label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                className={`form-input ${errors.confirm ? 'error' : ''}`}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Nhập lại mật khẩu"
-                autoComplete="new-password"
-                style={{ paddingRight: '40px' }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  color: '#666'
-                }}
-              >
-                {showConfirm ? '👁️' : '👁️‍🗨️'}
-              </button>
+          <div className="auth-v2-info">
+            <div className="info-item">
+              <span className="dot"></span>
+              <span>Đăng ký nhanh chóng, bảo mật</span>
             </div>
-            {errors.confirm && <span className="error-text">{errors.confirm}</span>}
+            <div className="info-item">
+              <span className="dot"></span>
+              <span>Tích lũy điểm thưởng cho mỗi kỳ nghỉ</span>
+            </div>
           </div>
+        </div>
 
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Đang xử lý...' : 'Đăng Ký'}
-          </button>
-        </form>
+        <div className="auth-v2-right">
+          <div className="auth-v2-form-box">
+            <h2 className="auth-v2-title">Tạo tài khoản</h2>
+            <p className="auth-v2-subtitle">Khởi đầu hành trình nghỉ dưỡng của bạn</p>
 
-        <div className="signup-link">
-          Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="form-v2-group">
+                <label className="form-v2-label">Họ và tên</label>
+                <div className={`input-v2-wrapper ${errors.hoTen ? 'has-error' : ''}`}>
+                  <FaUser className="input-icon" />
+                  <input
+                    type="text"
+                    value={hoTen}
+                    onChange={(e) => setHoTen(e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                  />
+                </div>
+                {errors.hoTen && <span className="error-v2-text">{errors.hoTen}</span>}
+              </div>
+
+              <div className="form-v2-group">
+                <label className="form-v2-label">Địa chỉ Email</label>
+                <div className={`input-v2-wrapper ${errors.email ? 'has-error' : ''}`}>
+                  <FaEnvelope className="input-icon" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="example@gmail.com"
+                  />
+                </div>
+                {errors.email && <span className="error-v2-text">{errors.email}</span>}
+              </div>
+
+              <div className="form-v2-group">
+                <label className="form-v2-label">Số điện thoại</label>
+                <div className="input-v2-wrapper">
+                  <FaPhone className="input-icon" />
+                  <input
+                    type="tel"
+                    value={soDienThoai}
+                    onChange={(e) => setSoDienThoai(e.target.value)}
+                    placeholder="0909xxxxxx"
+                  />
+                </div>
+              </div>
+
+              <div className="form-v2-group">
+                <label className="form-v2-label">Mật khẩu</label>
+                <div className={`input-v2-wrapper ${errors.password ? 'has-error' : ''}`}>
+                  <FaLock className="input-icon" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    className="btn-toggle-pw"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.password && <span className="error-v2-text">{errors.password}</span>}
+              </div>
+
+              <div className="form-v2-group">
+                <label className="form-v2-label">Xác nhận mật khẩu</label>
+                <div className={`input-v2-wrapper ${errors.confirm ? 'has-error' : ''}`}>
+                  <FaLock className="input-icon" />
+                  <input
+                    type={showConfirm ? 'text' : 'password'}
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    className="btn-toggle-pw"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                  >
+                    {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.confirm && <span className="error-v2-text">{errors.confirm}</span>}
+              </div>
+
+              <button type="submit" className="btn-v2-submit" disabled={loading} style={{ marginTop: '10px' }}>
+                {loading ? (
+                  <span className="loading-spinner-small"></span>
+                ) : (
+                  <>
+                    <span>Đăng Ký Ngay</span>
+                    <FaArrowRight />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="auth-v2-footer">
+              <p>Bạn đã có tài khoản?</p>
+              <Link to="/login" className="link-v2-signup">Đăng nhập ngay</Link>
+            </div>
+          </div>
         </div>
       </div>
 
       {message && (
-        <div className={`toast-message ${message.type}`}>
-          {message.text}
+        <div className={`toast-v2 ${message.type}`}>
+          <div className="toast-v2-content">
+            <span className="toast-v2-icon">
+              {message.type === 'success' ? '✅' : '❌'}
+            </span>
+            <span className="toast-v2-text">{message.text}</span>
+          </div>
+          <div className="toast-v2-progress"></div>
         </div>
       )}
     </div>

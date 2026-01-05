@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
+import TrangDangNhap from './pages/TrangDangNhap';
 import TrangKhachHang from './pages/TrangKhachHang';
 import TrangAdmin from './pages/TrangAdmin';
 import TrangLeTan from './pages/TrangLeTan';
@@ -13,6 +13,7 @@ import TrangDatLaiMatKhau from './pages/TrangDatLaiMatKhau';
 import TrangQuanLyTaiKhoan from './pages/TrangQuanLyTaiKhoan';
 import TrangLichSuDP from './pages/TrangLichSuDP';
 import ChiTietLoaiPhong from './pages/ChiTietLoaiPhong';
+import ChiTietDatPhong from './pages/ChiTietDatPhong';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout';
 import './styles/main.css';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/loai-phong/:id" element={<ChiTietLoaiPhong />} />
           <Route path="/account" element={<TrangQuanLyTaiKhoan />} />
           <Route path="/bookings" element={<TrangLichSuDP />} />
+          <Route path="/booking/:id" element={<ChiTietDatPhong />} />
           <Route path="/rooms" element={<div>Trang Phòng</div>} />
           <Route path="/services" element={<div>Trang Dịch vụ</div>} />
           <Route path="/about" element={<div>Trang Giới thiệu</div>} />
@@ -41,7 +43,7 @@ function App() {
         </Route>
 
         {/* ========== AUTH/PUBLIC ROUTES (WITHOUT MAIN LAYOUT) ========== */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<TrangDangNhap />} />
         <Route path="/register" element={<TrangDangKy />} />
         <Route path="/quen-mat-khau" element={<TrangQuenMatKhau />} />
         <Route path="/quen-mat-khau/xac-thuc-otp" element={<TrangXacThucOTPQuenMK />} />

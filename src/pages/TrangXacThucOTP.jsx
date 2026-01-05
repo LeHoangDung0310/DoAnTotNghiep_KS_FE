@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../utils/api';
 import '../styles/login.css';
+import { FaEnvelope, FaKey, FaHotel, FaArrowRight, FaRedo } from 'react-icons/fa';
 
 export default function TrangXacThucOTP() {
   const navigate = useNavigate();
@@ -44,20 +45,16 @@ export default function TrangXacThucOTP() {
       const success = data?.Success ?? data?.success ?? (resp.status >= 200 && resp.status < 300);
 
       if (success) {
-        setMessage({ type: 'success', text: data?.Message ?? 'Xác thực thành công. Chuyển đến đăng nhập...' });
-        setTimeout(() => navigate('/login'), 1200);
+        setMessage({ type: 'success', text: data?.Message ?? 'Xác thực thành công! Đang chuyển hướng...' });
+        setTimeout(() => navigate('/login'), 1500);
       } else {
-        setMessage({ type: 'error', text: data?.Message ?? 'Xác thực thất bại.' });
+        setMessage({ type: 'error', text: data?.Message ?? 'Mã OTP không chính xác.' });
       }
     } catch (err) {
       console.error('OTP verify error:', err);
       const resp = err?.response;
-      const serverMsg = resp?.data?.Message ?? resp?.data?.message ?? (resp?.data ? JSON.stringify(resp.data) : null);
-      if (resp?.status === 400 || resp?.status === 401) {
-        setMessage({ type: 'error', text: serverMsg ?? 'Mã OTP không đúng hoặc đã hết hạn.' });
-      } else {
-        setMessage({ type: 'error', text: serverMsg ?? 'Lỗi khi gọi API. Vui lòng thử lại.' });
-      }
+      const serverMsg = resp?.data?.Message ?? resp?.data?.message ?? 'Lỗi khi gọi API.';
+      setMessage({ type: 'error', text: serverMsg });
     } finally {
       setLoading(false);
     }
@@ -72,9 +69,9 @@ export default function TrangXacThucOTP() {
     try {
       const resp = await api.post('/api/DangKy/gui-lai-otp', { Email: email });
       const data = resp.data;
-      setMessage({ 
-        type: data?.Success ? 'success' : 'error', 
-        text: data?.Message ?? (data?.Success ? 'Đã gửi lại OTP.' : 'Không thể gửi lại OTP.') 
+      setMessage({
+        type: data?.Success ? 'success' : 'error',
+        text: data?.Message ?? 'Đã gửi lại mã OTP mới.'
       });
     } catch (err) {
       console.error('Resend OTP error:', err);
@@ -85,67 +82,101 @@ export default function TrangXacThucOTP() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1 className="login-title">Xác thực tài khoản</h1>
-        <p className="login-subtitle">Nhập mã OTP được gửi tới email của bạn để kích hoạt tài khoản.</p>
+    <div className="auth-v2-container">
+      <div className="auth-v2-overlay"></div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
+      <div className="auth-v2-card centered-card">
+        <div className="auth-v2-right">
+          <div className="auth-v2-form-box">
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{
+                width: '48px', height: '48px', background: 'var(--primary-v2)',
+                borderRadius: '12px', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', margin: '0 auto 16px', color: 'white', fontSize: '24px'
+              }}>
+                <FaHotel />
+              </div>
+              <h2 className="auth-v2-title">Xác thực OTP</h2>
+              <p className="auth-v2-subtitle">Kích hoạt tài khoản để bắt đầu trải nghiệm</p>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="form-v2-group">
+                <label className="form-v2-label">Địa chỉ Email</label>
+                <div className="input-v2-wrapper">
+                  <FaEnvelope className="input-icon" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="example@gmail.com"
+                  />
+                </div>
+              </div>
+
+              <div className="form-v2-group">
+                <label className="form-v2-label">Mã OTP (6 chữ số)</label>
+                <div className="input-v2-wrapper">
+                  <FaKey className="input-icon" />
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value)}
+                    placeholder="123456"
+                    maxLength="6"
+                    style={{ letterSpacing: '8px', fontSize: '20px', fontWeight: 'bold' }}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-v2-submit" disabled={loading}>
+                {loading ? (
+                  <span className="loading-spinner-small"></span>
+                ) : (
+                  <>
+                    <span>Xác Thực Ngay</span>
+                    <FaArrowRight />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="btn-v2-secondary"
+                onClick={handleResend}
+                disabled={loading}
+                style={{
+                  width: '100%', padding: '12px', background: 'transparent',
+                  border: '1px solid var(--glass-border-v2)', borderRadius: '12px',
+                  color: 'var(--text-v2)', marginTop: '12px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}
+              >
+                <FaRedo style={{ fontSize: '14px' }} />
+                <span>Gửi lại mã OTP</span>
+              </button>
+            </form>
+
+            <div className="auth-v2-footer">
+              <Link to="/login" className="link-v2-signup"> Quay về đăng nhập</Link>
+              <p style={{ marginTop: '24px', fontSize: '12px' }}>
+                Mã OTP có hiệu lực trong 5 phút. Vui lòng kiểm tra kỹ email bạn đã cung cấp.
+              </p>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Mã OTP</label>
-            <input
-              type="text"
-              className="form-input otp-input"
-              value={otp}
-              onChange={e => setOtp(e.target.value)}
-              placeholder="123456"
-              maxLength="6"
-              inputMode="numeric"
-              pattern="\d*"
-              autoFocus
-            />
-          </div>
-
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Đang xử lý...' : 'Xác thực'}
-          </button>
-
-          <button 
-            type="button" 
-            className="btn-secondary" 
-            onClick={handleResend} 
-            disabled={loading}
-          >
-            Gửi lại OTP
-          </button>
-        </form>
-
-        <div className="signup-link">
-          <Link to="/login">Quay về đăng nhập</Link>
-        </div>
-
-        <div className="form-footer">
-          <small className="footer-text">
-            Mã OTP có hiệu lực trong 5 phút. Kiểm tra cả thư mục Spam nếu không thấy email.
-          </small>
         </div>
       </div>
 
       {message && (
-        <div className={`toast-message ${message.type}`}>
-          {message.text}
+        <div className={`toast-v2 ${message.type}`}>
+          <div className="toast-v2-content">
+            <span className="toast-v2-icon">
+              {message.type === 'success' ? '✅' : '❌'}
+            </span>
+            <span className="toast-v2-text">{message.text}</span>
+          </div>
+          <div className="toast-v2-progress"></div>
         </div>
       )}
     </div>

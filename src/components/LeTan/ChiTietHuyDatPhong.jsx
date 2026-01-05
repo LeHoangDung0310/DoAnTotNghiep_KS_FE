@@ -206,6 +206,44 @@ export default function ChiTietHuyDatPhong({ huyId, onClose, onShowToast, onUpda
                   disabled
                 />
               </div>
+
+              {/* ✅ THÊM MỚI: Danh sách phòng trong yêu cầu hủy */}
+              <div className="form-group full-width" style={{ marginTop: '1rem' }}>
+                <label className="form-label">Danh sách phòng & Giá phòng</label>
+                <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                  <table className="premium-table" style={{ margin: 0 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '100px', padding: '12px' }}>Phòng</th>
+                        <th style={{ padding: '12px' }}>Loại phòng</th>
+                        <th style={{ width: '120px', padding: '12px', textAlign: 'right' }}>Giá/đêm</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {huyDatPhong.danhSachPhong?.map((room, idx) => (
+                        <tr key={idx}>
+                          <td style={{ padding: '12px' }}>
+                            <span className="room-number">
+                              {room.soPhong || room.maPhong || (room.MaPhong ? `ID:${room.MaPhong}` : '—')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', fontWeight: 600 }}>{room.tenLoaiPhong}</td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontWeight: 700, color: '#4f46e5' }}>
+                            {room.giaPhong?.toLocaleString('vi-VN')}đ
+                          </td>
+                        </tr>
+                      ))}
+                      {!huyDatPhong.danhSachPhong?.length && (
+                        <tr>
+                          <td colSpan="3" style={{ textAlign: 'center', padding: '12px', color: '#94a3b8' }}>
+                            Chưa có thông tin phòng
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
 
