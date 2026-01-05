@@ -18,6 +18,7 @@ export default function QuanLyDatPhongLT() {
   const [filterType, setFilterType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
@@ -62,6 +63,7 @@ export default function QuanLyDatPhongLT() {
       }
 
       // Pagination
+      setTotalItems(data.length);
       const total = Math.ceil(data.length / pageSize);
       setTotalPages(total || 1);
 
@@ -464,48 +466,48 @@ export default function QuanLyDatPhongLT() {
 
           {/* Pagination - luôn hiển thị khi có dữ liệu */}
           {bookings.length > 0 && (
-            <div
-              className="admin-pagination"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 16,
-                margin: '24px 0 0 0',
-                padding: '12px 0',
-                background: '#fff',
-                borderRadius: 8,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-              }}
-            >
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 20,
+              paddingTop: 20,
+              borderTop: '1px solid #eef2f6'
+            }}>
               <button
                 className="btn-outline"
                 disabled={currentPage === 1}
-                style={{ minWidth: 80 }}
+                style={{
+                  minWidth: 100,
+                  borderRadius: 12, // More rounded as requested previously
+                  padding: '8px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
                 ← Trước
               </button>
-              <span className="admin-pagination-info" style={{ fontWeight: 500 }}>
-                Trang {currentPage} / {totalPages}
-              </span>
-              <select
-                value={pageSize}
-                onChange={e => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                style={{ margin: '0 8px', padding: '4px 8px', borderRadius: 4 }}
-              >
-                <option value={5}>5 / trang</option>
-                <option value={10}>10 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={50}>50 / trang</option>
-              </select>
+
+              <div style={{ color: '#475569', fontSize: 14 }}>
+                <span style={{ fontWeight: 600, color: '#1e293b' }}>Trang {currentPage} / {totalPages}</span>
+                <span style={{ marginLeft: 8, color: '#64748b' }}>(Tổng: {totalItems} yêu cầu)</span>
+              </div>
+
               <button
                 className="btn-outline"
                 disabled={currentPage === totalPages}
-                style={{ minWidth: 80 }}
+                style={{
+                  minWidth: 100,
+                  borderRadius: 12,
+                  padding: '8px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }

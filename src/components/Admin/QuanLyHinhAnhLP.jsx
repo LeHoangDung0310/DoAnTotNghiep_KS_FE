@@ -202,6 +202,7 @@ export default function QuanLyHinhAnhLP() {
               minWidth: '250px',
               padding: '8px 12px',
               borderRadius: '8px',
+              color: '#000000',
               border: '1px solid #d1d5db',
               fontSize: '14px',
             }}
@@ -347,8 +348,8 @@ export default function QuanLyHinhAnhLP() {
                   </p>
                 </div>
               </div>
-              <button 
-                className="modal-close-btn-gradient" 
+              <button
+                className="modal-close-btn-gradient"
                 onClick={() => setShowUploadModal(false)}
               >
                 ✕
@@ -530,7 +531,7 @@ export default function QuanLyHinhAnhLP() {
                 {deletingItem.isMultiple
                   ? `Bạn có chắc chắn muốn xóa ${deletingItem.count} hình ảnh đã chọn?`
                   : 'Bạn có chắc chắn muốn xóa hình ảnh này?'}{' '}
-                <br/>
+                <br />
                 <strong style={{ color: '#dc2626' }}>Hành động này không thể hoàn tác.</strong>
               </p>
             </div>
@@ -544,9 +545,9 @@ export default function QuanLyHinhAnhLP() {
                 >
                   Hủy
                 </button>
-                <button 
-                  type="button" 
-                  className="btn-primary btn-danger" 
+                <button
+                  type="button"
+                  className="btn-primary btn-danger"
                   onClick={handleDelete}
                   disabled={loading}
                 >

@@ -249,6 +249,11 @@
 }
 
 /* Letan Table */
+.letan-layout .admin-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .letan-layout .admin-table thead {
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
@@ -260,6 +265,14 @@
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 0.5px;
+}
+
+.letan-layout .admin-table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.letan-layout .admin-table thead th:last-child {
+  border-top-right-radius: 12px;
 }
 
 /* Letan Button Icons */
@@ -410,6 +423,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -1105,7 +1119,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .booking-loading p {
