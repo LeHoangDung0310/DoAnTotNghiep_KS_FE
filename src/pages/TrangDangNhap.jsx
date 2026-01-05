@@ -127,8 +127,8 @@ export default function TrangDangNhap() {
                         <div className="brand-logo-large">
                             <FaHotel />
                         </div>
-                        <h1>Luxurious Hotel</h1>
-                        <p>Trải nghiệm nghỉ dưỡng đẳng cấp và sang trọng bậc nhất. Hành trình của bạn bắt đầu từ đây.</p>
+                        <h1>Da Nang Bay</h1>
+                        <p>Thiên đường nghỉ dưỡng đẳng cấp sạng trọng bậc nhất. Hành trình của bạn bắt đầu từ đây.</p>
                     </div>
                     <div className="auth-v2-info">
                         <div className="info-item">

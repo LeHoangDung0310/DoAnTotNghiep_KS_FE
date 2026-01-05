@@ -81,7 +81,7 @@ export default function TrangDangKy() {
             <div className="brand-logo-large">
               <FaHotel />
             </div>
-            <h1>Luxurious Hotel</h1>
+            <h1>Da Nang Bay</h1>
             <p>Gia nhập cộng đồng thành viên để nhận những ưu đãi đặc quyền và trải nghiệm dịch vụ cá nhân hóa.</p>
           </div>
           <div className="auth-v2-info">

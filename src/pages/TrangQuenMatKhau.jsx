@@ -63,19 +63,15 @@ export default function TrangQuenMatKhau() {
       <div className="auth-v2-card centered-card">
         <div className="auth-v2-right">
           <div className="auth-v2-form-box">
-            <div className="brand-logo-small" style={{ marginBottom: '24px', textAlign: 'center' }}>
-              <div style={{
-                width: '48px', height: '48px', background: 'var(--primary-v2)',
-                borderRadius: '12px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', margin: '0 auto 16px', color: 'white', fontSize: '24px'
-              }}>
+            <div className="auth-header-centered">
+              <div className="brand-logo-small">
                 <FaHotel />
               </div>
+              <h2 className="auth-v2-title">Quên mật khẩu</h2>
+              <p className="auth-v2-subtitle">
+                Nhập email để nhận mã OTP đặt lại mật khẩu của bạn.
+              </p>
             </div>
-            <h2 className="auth-v2-title" style={{ textAlign: 'center' }}>Quên mật khẩu</h2>
-            <p className="auth-v2-subtitle" style={{ textAlign: 'center' }}>
-              Nhập email để nhận mã OTP đặt lại mật khẩu của bạn.
-            </p>
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="form-v2-group">
@@ -104,14 +100,11 @@ export default function TrangQuenMatKhau() {
             </form>
 
             <div className="auth-v2-footer">
-              <Link to="/login" className="link-v2-back" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                color: 'var(--text-muted-v2)', textDecoration: 'none', fontSize: '14px'
-              }}>
+              <Link to="/login" className="link-v2-back">
                 <FaArrowLeft />
                 <span>Quay lại đăng nhập</span>
               </Link>
-              <p style={{ marginTop: '24px', fontSize: '12px', fontStyle: 'italic' }}>
+              <p className="footer-note">
                 Không nhận được email? Vui lòng kiểm tra mục Spam.
               </p>
             </div>

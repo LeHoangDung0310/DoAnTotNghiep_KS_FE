@@ -87,12 +87,8 @@ export default function TrangXacThucOTPQuenMK() {
       <div className="auth-v2-card centered-card">
         <div className="auth-v2-right">
           <div className="auth-v2-form-box">
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <div style={{
-                width: '48px', height: '48px', background: 'var(--primary-v2)',
-                borderRadius: '12px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', margin: '0 auto 16px', color: 'white', fontSize: '24px'
-              }}>
+            <div className="auth-header-centered">
+              <div className="brand-logo-small">
                 <FaHotel />
               </div>
               <h2 className="auth-v2-title">Xác thực OTP</h2>
@@ -123,7 +119,7 @@ export default function TrangXacThucOTPQuenMK() {
                     onChange={e => setOtp(e.target.value)}
                     placeholder="123456"
                     maxLength="6"
-                    style={{ letterSpacing: '8px', fontSize: '20px', fontWeight: 'bold' }}
+                    className="input-otp"
                     autoFocus
                   />
                 </div>
@@ -145,14 +141,8 @@ export default function TrangXacThucOTPQuenMK() {
                 className="btn-v2-secondary"
                 onClick={handleResend}
                 disabled={loading}
-                style={{
-                  width: '100%', padding: '12px', background: 'transparent',
-                  border: '1px solid var(--glass-border-v2)', borderRadius: '12px',
-                  color: 'var(--text-v2)', marginTop: '12px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                }}
               >
-                <FaRedo style={{ fontSize: '14px' }} />
+                <FaRedo />
                 <span>Gửi lại mã OTP</span>
               </button>
             </form>
