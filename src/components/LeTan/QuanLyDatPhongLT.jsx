@@ -91,9 +91,10 @@ export default function QuanLyDatPhongLT() {
   const handleReset = () => {
     setSearchTerm('');
     setFilterStatus('');
+    setFilterType('');
     setCurrentPage(1);
     setPageSize(10);
-    fetchUsers();
+    fetchBookings();
   };
 
   const handleSearch = () => {

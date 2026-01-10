@@ -18,6 +18,21 @@ function getStatusTagClass(status) {
   }
 }
 
+function getStatusLabel(status) {
+  switch (status) {
+    case 'Trong':
+      return 'Trống';
+    case 'DaDat':
+      return 'Đã đặt';
+    case 'DangSuDung':
+      return 'Đang sử dụng';
+    case 'BaoTri':
+      return 'Bảo trì';
+    default:
+      return status;
+  }
+}
+
 export default function QuanLyPhong() {
   const [rooms, setRooms] = useState([]);
   const [loaiPhongs, setLoaiPhongs] = useState([]);
@@ -415,7 +430,7 @@ export default function QuanLyPhong() {
                   </td>
                   <td>
                     <span className={getStatusTagClass(room.trangThai)}>
-                      {room.trangThai}
+                      {getStatusLabel(room.trangThai)}
                     </span>
                   </td>
                   <td>
