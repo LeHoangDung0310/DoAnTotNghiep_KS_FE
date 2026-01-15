@@ -34,6 +34,9 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
   const [info, setInfo] = useState(null);
   const [error, setError] = useState(null);
   const [huyLoading, setHuyLoading] = useState(false);
+  const [selectedRooms, setSelectedRooms] = useState([]); // List of MaPhong
+  const [phiGiu, setPhiGiu] = useState(0);
+  const [tienHoan, setTienHoan] = useState(0);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -41,7 +44,14 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
       try {
         const res = await api.get(`/api/HuyDatPhong/KiemTraDieuKien/${bookingId}`);
         if (!res.data.success) throw new Error(res.data.message);
-        setInfo(res.data.data);
+        const data = res.data.data;
+        setInfo(data);
+
+        // Mặc định chọn tất cả các phòng
+        const allMaPhongs = data.phongList?.map(p => p.maPhong) || [];
+        setSelectedRooms(allMaPhongs);
+        setPhiGiu(data.phiGiu);
+        setTienHoan(data.tienHoan);
       } catch (err) {
         setError(err.message || 'Không lấy được thông tin');
       } finally {
@@ -54,7 +64,7 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
   const handleHuy = async () => {
     setHuyLoading(true);
     try {
-      const res = await api.post(`/api/HuyDatPhong/HuySauCheckIn/${bookingId}`);
+      const res = await api.post(`/api/HuyDatPhong/HuySauCheckIn/${bookingId}`, selectedRooms);
       if (res.data.success) {
         onShowToast?.('success', res.data.message);
         onSuccess?.();
@@ -65,6 +75,34 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
     } finally {
       setHuyLoading(false);
     }
+  };
+
+  // Tính lại tiền khi thay đổi danh sách phòng chọn
+  useEffect(() => {
+    if (!info || !info.phongList) return;
+
+    // Lấy danh sách các phòng được chọn từ info.phongList
+    const selectedList = info.phongList.filter(p => selectedRooms.includes(p.maPhong));
+
+    // Tính số ngày ở
+    const ngayNhan = new Date(info.ngayNhanPhong || new Date());
+    const ngayTra = new Date(info.ngayTraPhong || new Date());
+    const soNgayO = Math.max(1, Math.ceil((ngayTra - ngayNhan) / (1000 * 60 * 60 * 24)));
+
+    const tongGiaMoiDemSelected = selectedList.reduce((sum, p) => sum + (p.giaPhong || 0), 0);
+    const newPhiGiu = tongGiaMoiDemSelected; // 1 đêm đầu
+    const newTienHoan = Math.max(0, tongGiaMoiDemSelected * soNgayO - newPhiGiu);
+
+    setPhiGiu(newPhiGiu);
+    setTienHoan(newTienHoan);
+  }, [selectedRooms, info]);
+
+  const toggleRoom = (maPhong) => {
+    setSelectedRooms(prev =>
+      prev.includes(maPhong)
+        ? prev.filter(id => id !== maPhong)
+        : [...prev, maPhong]
+    );
   };
 
   return (
@@ -96,11 +134,17 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
             <Divider />
 
             {/* PHÒNG */}
-            <SectionTitle icon={<HomeOutlined />} title="Phòng đã nhận" />
-            <div className="huydp-room-list">
-              {info.phongList?.map((p, i) => (
-                <div key={i} className="huydp-room-item">
-                  🏨 Phòng <b>{p.soPhong}</b> – {p.tenLoaiPhong}
+            <SectionTitle icon={<HomeOutlined />} title="Chọn phòng muốn hủy" />
+            <div className="dp-room-selector" style={{ marginBottom: 20 }}>
+              {info.phongList?.map((p) => (
+                <div
+                  key={p.maPhong}
+                  className={`dp-room-option ${selectedRooms.includes(p.maPhong) ? 'active' : ''}`}
+                  onClick={() => toggleRoom(p.maPhong)}
+                  style={{ minWidth: 200 }}
+                >
+                  <div className="dp-room-number">Phòng {p.soPhong}</div>
+                  <div className="dp-room-type">{p.tenLoaiPhong}</div>
                 </div>
               ))}
             </div>
@@ -113,13 +157,13 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
               <Col span={12}>
                 <div className="money-box fee">
                   <span>Phí giữ</span>
-                  <strong>{info.phiGiu?.toLocaleString()} đ</strong>
+                  <strong>{phiGiu?.toLocaleString()} đ</strong>
                 </div>
               </Col>
               <Col span={12}>
                 <div className="money-box refund">
                   <span>Tiền hoàn</span>
-                  <strong>{info.tienHoan?.toLocaleString()} đ</strong>
+                  <strong>{tienHoan?.toLocaleString()} đ</strong>
                 </div>
               </Col>
             </Row>
@@ -133,15 +177,16 @@ const HuyDPsauCheckin = ({ bookingId, onClose, onSuccess, onShowToast }) => {
           />
 
           <div className="huydp-actions">
-            <Button onClick={onClose}>Đóng</Button>
+            <Button onClick={onClose} size="large">Đóng</Button>
             <Button
               type="primary"
               danger
+              size="large"
               loading={huyLoading}
-              disabled={!info.canCancel}
+              disabled={!info.canCancel || selectedRooms.length === 0}
               onClick={handleHuy}
             >
-              Xác nhận hủy
+              Xác nhận hủy {selectedRooms.length > 0 && `(${selectedRooms.length} phòng)`}
             </Button>
           </div>
         </>
